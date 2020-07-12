@@ -27,7 +27,6 @@ class Reversi(Game):
 
         flips = self.flips(state, pieces, owner_id, x, y)
 
-        print(flips)
         for pos in flips:
             state.place_piece(self.ReversiPiece(), owner_id, pos[0], pos[1])
 
@@ -45,8 +44,8 @@ class Reversi(Game):
         return None, 0
 
     def background(self, x, y):
-        if (x + y) % 2 == 0: return '#056608'   # Dark Green
-        else: return '#08b40e'                  # Light Green
+        if (x + y) % 2 == 0: return '#88CA5E'   # Dark Green
+        else: return '#D2FBA4'                  # Light Green
 
     def flips(self, state, pieces, owner_id, x, y):
         directions = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, -1], [-1, 1]]
@@ -67,3 +66,20 @@ class Reversi(Game):
                     break
 
         return flips
+
+    def count_pieces(self, state, pieces, owner_id):
+        pass
+
+    def adjacents(self, state, pieces, owner_id):
+        ''' Find all positions that are enemy to owner'''
+        adjacents = []
+
+        for x in range(self.width):
+            for y in range(self.height):
+                if not self.exists(pieces, x, y):
+                    for i in range(-1, 2):
+                        for j in range(-1, 2):
+                            if i != 0 and j != 0:
+                                state.turn
+
+        return adjacents
