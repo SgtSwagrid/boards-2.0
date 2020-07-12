@@ -26,7 +26,6 @@ class Reversi(Game):
 
     def place_valid(self, state, pieces, type, owner_id, x, y):
         return self.in_bounds(x, y) and \
-               owner_id == 0 and \
                type.place_valid(state, pieces, owner_id, x, y)
 
     def initial(self, x, y):
