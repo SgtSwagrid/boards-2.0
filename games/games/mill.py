@@ -21,7 +21,7 @@ class Mill(Game):
         #  a piece of the active player can be placed iff not all pieces have been placed yet = before turn 18
         def place_valid(self, state, pieces, owner_id, x, y):
             if state.ply < 18 and state.stage == 0:
-                if (x, y) in self.validPoint and not pieces[x][y]:
+                if (x, y) in Mill.validPoint and not pieces[x][y]:
                     return True
             else:
                 return False
@@ -29,7 +29,7 @@ class Mill(Game):
         #  a piece owned by the active player can be moved iff all pieces have already been placed = after turn 17
         def move_valid(self, state, pieces, x_from, y_from, x_to, y_to):
             if state.ply >= 18 and state.stage == 0:
-                if (x_to, y_to) in self.validPoint and not pieces[x_to][y_to]:
+                if (x_to, y_to) in Mill.validPoint and not pieces[x_to][y_to]:
                     return True
             else:
                 return False
@@ -42,7 +42,7 @@ class Mill(Game):
 
         #  a piece may only removed IFF a mill has been formed before(state.stage == 1) and it's an opponent's
         def remove_valid(self, state, pieces, x, y):
-            return state.stage == 1 and super().enemy(self, state, pieces, x, y)
+            return state.stage == 1 and Game.enemy(state, pieces, x, y)
             #  credit to Alec / Sgt. Swagrid for optimization
 
         def texture(self, owner_id):
