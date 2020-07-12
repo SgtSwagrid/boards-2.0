@@ -31,6 +31,8 @@ class Reversi(Game):
         for pos in flips:
             state.place_piece(self.ReversiPiece(), owner_id, pos[0], pos[1])
 
+        self.legal_next(state, pieces, owner_id)
+
         state.end_turn()
 
     def initial(self, x, y):
@@ -68,14 +70,32 @@ class Reversi(Game):
 
         return flips
 
+    def legal_next(self, state, pieces, owner_id):
+        adjs = self.adjacents(state, pieces, owner_id)
+
+        for adj in adjs:
+
+
+
+        print("Checking legality", adjs)
+        return adjs > 0
+
     def count_pieces(self, state, pieces, owner_id):
         pass
+
+    def mine(self, state, pieces, x, y):
+        return self.exists(pieces, x, y) and \
+               pieces[x][y].owner_id == state.turn
+
+    def enemy(self, state, pieces, x, y):
+        return self.exists(pieces, x, y) and \
+               pieces[x][y].owner_id != state.turn
 
     def adjacents(self, state, pieces, owner_id):
         ''' Find all positions that are enemy to owner'''
         adjacents = []
 
-        next_player = (state.turn + 1) % state.players
+        next_player = (state.turn + 1) % self.players
 
         for x in range(self.width):
             for y in range(self.height):
@@ -84,12 +104,11 @@ class Reversi(Game):
 
                     for i in range(-1, 2):
                         for j in range(-1, 2):
-                            if i != 0 and j != 0 and not adj:
-                                x_k = x + i
-                                y_k = y + j
+                            x_k = x + i
+                            y_k = y + j
+                            if i != 0 and j != 0 and self.exists(pieces, x_k, y_k) and not adj:
                                 if pieces[x_k][y_k].owner_id != next_player:
                                     adjacents.append([x, y])
                                     adj = True
-
 
         return adjacents
