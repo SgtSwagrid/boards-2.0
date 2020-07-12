@@ -68,5 +68,3 @@ class Mill(Game):
             return '#55EAFF'
         else:
             return '#FFEAA7'
-
-#  pull me
