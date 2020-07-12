@@ -36,19 +36,8 @@ def game_view(request, board_code):
 
     board = Board.boards.get(code=board_code)
 
-    if board.stage == 0: setup(request, board)
-
-    if 'message' in request.POST and request.user.is_authenticated:
-        Message.objects.create(
-            user=request.user,
-            message=request.POST['message'],
-            board=board)
-
     return render(request, 'games/game.html', {
-        'board': board.to_dictionary(),
-        'state': board.state,
-        'users': board.users(),
-        'this_player': board.player(request.user)
+        'board': board.to_dictionary()
     })
 
 def board_view(request, board_code):
@@ -93,6 +82,25 @@ def board_view(request, board_code):
          range(game.height-1, -1, -1)),
         'selected': {'x': sx, 'y': sy},
         'turn': board.current(player)
+    })
+
+def sidebar_view(request, board_code):
+
+    board = Board.boards.get(code=board_code)
+
+    if board.stage == 0: setup(request, board)
+
+    if 'message' in request.GET and request.user.is_authenticated:
+        Message.objects.create(
+            user=request.user,
+            message=request.GET['message'],
+            board=board)
+
+    return render(request, 'games/sidebar.html', {
+        'board': board.to_dictionary(),
+        'state': board.state,
+        'users': board.users(),
+        'this_player': board.player(request.user)
     })
 
 def setup(request, board):
