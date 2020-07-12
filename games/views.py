@@ -84,8 +84,8 @@ def board_view(request, board_code):
                 'y': y,
                 'width': game.scale(x, y)[0],
                 'height': game.scale(x, y)[1],
-                'background': game.background(x, y)
-                    if x != sx or y != sy else game.highlight,
+                'background': game.colour(board.state,
+                    pieces, x, y, x == sx and y == sy),
                 'piece': pieces[x][y].to_dictionary()
                     if pieces[x][y] else None,
                 'selected': x == sx and y == sy
