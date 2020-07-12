@@ -114,8 +114,11 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-Scripts
 pyvenv.cfg
+
+# ignoring whacky VENV folders
+Scripts
+Lib
 
 # Spyder project settings
 .spyderproject
