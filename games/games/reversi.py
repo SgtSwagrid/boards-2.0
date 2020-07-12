@@ -24,6 +24,9 @@ class Reversi(Game):
 
     types = [ReversiPiece()]
 
+    def place_valid(self, state, pieces, type, owner_id, x, y):
+        return super().place_valid(self, state, pieces, type, owner_id, x, y)
+
     def initial(self, x, y):
 
         midX = self.width // 2 - 1
@@ -34,6 +37,6 @@ class Reversi(Game):
 
         return None, 0
 
-    def colour(self, x, y):
+    def background(self, x, y):
         if (x + y) % 2 == 0: return '#056608'   # Dark Green
         else: return '#08b40e'                  # Light Green
