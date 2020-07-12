@@ -65,7 +65,7 @@ def board_view(request, board_code):
     if cx != -1 and board.stage == 1 and board.current(player):
         if sx != -1 and board.move_piece(sx, sy, cx, cy):
             sx, sy = -1, -1
-        elif board.place_piece(0, player.order, cx, cy):
+        elif board.place_piece(player.order, cx, cy):
             sx, sy = -1, -1
         elif board.remove_piece(cx, cy):
             sx, sy = -1, -1
