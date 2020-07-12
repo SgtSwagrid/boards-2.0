@@ -28,8 +28,8 @@ class Reversi(Game):
         return self.mine(state, pieces, x, y)
 
     def initial(self, x, y):
-        midX = width // 2
-        midY = height // 2
+        midX = self.width // 2
+        midY = self.height // 2
 
         if (x == midX and y == midY) or (x == midX + 1 and y == midY + 1): return self.ReversiPiece(), 1
         if (x == midX and y == midY + 1) or (x == midX + 1 and y == midY): return self.ReversiPiece(), 2
