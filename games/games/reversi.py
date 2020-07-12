@@ -18,7 +18,7 @@ class Reversi(Game):
         def place_valid(self, state, pieces, owner_id, x, y):
             return not pieces[x][y]
 
-        def place_piece(self, state, pieces, type, owner_id, x, y):
+        def place_piece(self, state, pieces, owner_id, x, y):
             state.place_piece(self, owner_id, x, y)
             state.end_turn()
 
