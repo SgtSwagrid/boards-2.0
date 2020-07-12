@@ -1,6 +1,3 @@
-# Virtual Environments
-pyvenv.cfg
-
 /.idea/
 /.vs/
 */__pycache__/
@@ -117,6 +114,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+pyvenv.cfg
 
 # Spyder project settings
 .spyderproject
