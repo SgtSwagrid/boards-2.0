@@ -52,14 +52,17 @@ class Game:
     def scale(self, x, y):
         return 1, 1
 
-    def colour(self, state, pieces, x, y):
-        return self.background(x, y)
+    def colour(self, state, pieces, x, y, selected):
+        if selected: return self.selected
+        if state.modified(x, y): return self.modified
+        else: return self.background(x, y)
 
     def background(self, x, y):
         if (x + y) % 2 == 0: return '#FDCB6E'
         else: return '#FFEAA7'
 
-    highlight = '#6A89CC'
+    selected = '#6A89CC'
+    modified = '#74B9FF'
 
 class Piece:
 
