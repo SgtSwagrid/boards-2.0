@@ -1,0 +1,60 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block header %}
+<script src="{% static 'games/js/browse.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="fixed-action-btn">
+        <a class="btn-floating btn-large teal waves-effect" href="/games/create">
+            <i class="large material-icons">add</i>
+        </a>
+    </div>
+    <br><br>
+    <div class="row">
+        <div class="input-field col m3 push-m3 s6">
+            <input type="text" class="validate teal-text" id="board_code">
+            <label for="board_code">Board Code</label>
+        </div>
+        <div class="col m3 push-m3 s6">
+            <br>
+            <a class="waves-effect waves-light btn block" id="goto_board">Go
+                <i class="material-icons right">send</i>
+            </a>
+        </div>
+    </div>
+    {% for board in boards %}
+    <br>
+    <a href="/games/{{ board.code }}">
+        <div class="card-panel block z-depth-3 indigo darken-2 waves-effect waves-teal">
+            <div class="row">
+                <div class="col s2">
+                    <i class="material-icons large white-text">play_circle_outline</i>
+                </div>
+                <div class="col s7">
+                    <h6 class="white-text large-text">{{ board.game.name }} &#x2022 {{ board.code }}</h6>
+                    <h6 class="white-text small-text">
+                        {{ board.players.0.user }}
+                        {% for player in board.players|slice:"1:" %}
+                        &#x2022 {{ player.user }}
+                        {% endfor %}
+                    </h6>
+                </div>
+                <div class="col s3">
+                    {% if not state or state.outcome == -1 %}
+                    <h6 class="white-text medium-text right-align">In Progress</h6>
+                    {% elif state == 0 %}
+                    <br><h6 class="white-text medium-text right-align">Draw</h6>
+                    {% else %}
+                    <br><h6 class="white-text medium-text right-align">Winner ...</h6>
+                    {% endif %}
+                    <h6 class="white-text small-text right-align">{{ board.time|date:"j/n/y" }}</h6>
+                </div>
+            </div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

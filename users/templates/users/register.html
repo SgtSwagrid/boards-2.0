@@ -1,0 +1,48 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block header %}
+<title>Register</title>
+{% endblock %}
+
+{% block content %}
+<br><br>
+<div class="small-form">
+    <div class="card-panel indigo z-depth-3">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="center-align">
+                <h6 class="medium-text white-text">Create Account</h6>
+                <br>
+                <div class="input-field">
+                    {{ form.username }}
+                    <label for="id_username" class="white-text">Username</label>
+                </div>
+                <div class="input-field">
+                    {{ form.email }}
+                    <label for="id_email" class="white-text">Email</label>
+                </div>
+                <div class="input-field">
+                    {{ form.password }}
+                    <label for="id_password" class="white-text">Password</label>
+                </div>
+                {% if form.errors %}
+                {% for field in form %}
+                {% for error in field.errors %}
+                <p class="small-text red-text">{{ error|escape }}</p>
+                {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                <p class="small-text red-text">{{ error|escape }}</p>
+                {% endfor %}
+                {% endif %}
+                <br>
+                <button class="btn btn-block indigo lighten-2 waves-effect waves-light" type="submit">Register</button>
+                <br><br>
+                <a class="white-text" href="/users/login?next={{ next }}">Login</a>
+                <br>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

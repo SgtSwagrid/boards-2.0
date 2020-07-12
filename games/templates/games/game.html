@@ -1,0 +1,109 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block header %}
+<script src="{% static 'games/js/game.js' %}"></script>
+<script type="text/javascript">
+    const CODE = '{{ board.code }}';
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="row teal lighten-4">
+    <div class="col m9 push-m3">
+        <br>
+        <div id="board"></div>
+    </div>
+    <div class="col m3 pull-m9 teal sidebar">
+        <div class="container">
+            <br>
+            <h6 class="large-text white-text">{{ board.game.name }}</h6>
+            <a class="btn waves-effect" id="copy_code">{{ board.code }}</a>
+            <br><br>
+            <hr>
+            {% for player in board.players %}
+            <h6 class="medium-text white-text">
+                <i class="material-icons small white-text left">person</i>
+                {{ player.user }}
+            </h6>
+            <h6 class="small-text white-text">
+                {{ player.score }} pts &#x2022 {{ player.time|time:"i:s" }}
+                {% if game.state and game.state.turn == player %}
+                &#x2022 Playing
+                {% endif %}
+            </h6>
+            {% if this_player and this_player.leader and board.stage == 0 %}
+            {% if not player == board.players.first %}
+            <a class="btn-floating btn-small indigo lighten-2 waves-effect" href="?promote&user={{ player.user.id }}">
+                <i class="material-icons small white-text">keyboard_arrow_up</i>
+            </a>
+            {% endif %}
+            {% if not player == board.players.last %}
+            <a class="btn-floating btn-small indigo lighten-2 waves-effect" href="?demote&user={{ player.user.id }}">
+                <i class="material-icons small white-text">keyboard_arrow_down</i>
+            </a>
+            {% endif %}
+            <a class="btn-floating btn-small red lighten-2 waves-effect" href="?leave&user={{ player.user.id }}">
+                <i class="material-icons small white-text">close</i>
+            </a>
+            {% if not player.leader %}
+            <a class="btn-floating btn-small orange lighten-3 waves-effect" href="?transfer&user={{ player.user.id }}">
+                <i class="material-icons small white-text">star</i>
+            </a>
+            {% endif %}
+            {% endif %}
+            <hr>
+            {% endfor %}
+            {% if board.stage == 0 %}
+            <br>
+            {% if user in users %}
+            <a class="btn waves-effect block" href="?leave&user={{ user.id }}">
+                Leave Game
+                <i class="material-icons small white-text right">close</i>
+            </a>
+            {% else %}
+            <a class="btn waves-effect block" href="?join&user={{ user.id }}">
+                Join Game
+                <i class="material-icons small white-text right">done</i>
+            </a>
+            {% endif %}
+            <br><br>
+            {% if this_player and this_player.leader %}
+            <a class="btn waves-effect block red lighten-2" href="?cancel">
+                Cancel Game
+                <i class="material-icons small white-text right">close</i>
+            </a>
+            <br><br>
+            <a class="btn btn-large green lighten-2 block waves-effect" href="?start">
+                Start Game
+                <i class="material-icons medium white-text right">play_arrow</i>
+            </a>
+            <br><br>
+            {% else %}
+            <h6 class="medium-text white-text">
+                Waiting
+                <i class="material-icons small white-text right">more_horiz</i>
+            </h6>
+            {% endif %}
+            {% endif %}
+            <br>
+        </div>
+        <div class="teal lighten-4" id="messages" style="height: 250px; overflow-y: scroll; padding: 10px;">
+            {% for message in board.messages.reverse %}
+            <h6 class="small-text blue-grey-text text-darken-3">&lt{{ message.user }}&gt {{ message.message }}</h6>
+            {% endfor %}
+        </div>
+        <form method="POST" class="right-align" style="padding-right: 20px;">
+            {% csrf_token %}
+            <div class="input-field">
+                <input type="text" class="validate teal lighten-4 blue-grey-text text-darken-3"
+                       id="message" name="message" style="width: 100%; height: 20px; padding: 10px;">
+            </div>
+            <button class="btn-floating waves-effect" type="submit">
+                <i class="material-icons small white-text">send</i>
+            </button>
+            <br><br>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block header %}
+<script src="{% static 'games/js/create.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <br><br>
+    {% for game in games %}
+    {% if not forloop.counter|divisibleby:2 %}
+    <div class="row">
+    {% endif %}
+    <div class="col s6">
+        <a class="card-panel block z-depth-3 teal waves-effect center-align" href="?game={{ game.id }}">
+            <i class="material-icons medium white-text left">golf_course</i>
+            <h6 class="large-text white-text">{{ game.name }}</h6>
+        </a>
+    </div>
+    {% if forloop.counter|divisibleby:2 %}
+    </div>
+    {% endif %}
+    {% endfor %}
+    {% if not games.size|divisibleby:2 %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
