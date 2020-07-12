@@ -11,9 +11,6 @@ class Reversi(Game):
     def initial(self, x, y):
         return 0, 0
 
-    def scale(self, x, y):
-        return 1, 1
-
     def colour(self, x, y):
-        if (x + y) % 2 == 0: return '#ffeaa7'
-        else: return '#fdcb6e'
+        if (x + y) % 2 == 0: return '#00ff00'
+        else: return '#00aa00'

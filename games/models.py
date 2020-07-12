@@ -48,6 +48,7 @@ class Board(models.Model):
             self.state = self.state.next()
             self.game().place_piece(self.state, self.state.pieces(),
                                     type, player_id, x, y)
+            if self.state.outcome != -1: self.stage = 2
             self.state.save()
             self.save()
             return True
@@ -60,6 +61,7 @@ class Board(models.Model):
             self.state = self.state.next()
             self.game().move_piece(self.state, self.state.pieces(),
                                    x_from, y_from, x_to, y_to)
+            if self.state.outcome != -1: self.stage = 2
             self.state.save()
             self.save()
             return True
@@ -70,6 +72,7 @@ class Board(models.Model):
         if self.game().remove_valid(self.state, self.state.pieces(), x, y):
             self.state = self.state.next()
             self.game().remove_piece(self.state, self.state.pieces(), x, y)
+            if self.state.outcome != -1: self.stage = 2
             self.state.save()
             self.save()
             return True
@@ -100,6 +103,10 @@ class Board(models.Model):
     def join(self, user):
         Player.objects.create(user=user, board=self,
                 order=self.players().count()+1)
+
+    def start(self):
+        self.stage = 1
+        self.save()
 
     def to_dictionary(self):
         return {

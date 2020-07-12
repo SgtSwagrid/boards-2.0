@@ -62,7 +62,7 @@ def board_view(request, board_code):
     sx, sy = (int(request.GET['sx']), int(request.GET['sy']))\
         if 'sx' in request.GET else (-1, -1)
 
-    if cx != -1 and board.current(player):
+    if cx != -1 and board.stage == 1 and board.current(player):
         if sx != -1 and board.move_piece(sx, sy, cx, cy):
             sx, sy = -1, -1
         elif board.place_piece(0, player.order, cx, cy):
@@ -101,7 +101,9 @@ def setup(request, board):
     this_player = board.players().filter(user=this_user).first()
     leader = this_player and this_player.leader
 
-    if 'cancel' in request.GET and leader:
+    if 'start' in request.GET and leader:
+        board.start()
+    elif 'cancel' in request.GET and leader:
         board.delete()
 
     if 'user' in request.GET:
