@@ -16,6 +16,7 @@ class Reversi(Game):
             else: return 'games/img/misc/black_dot.png'                 # Player 2 is Black
 
     types = [ReversiPiece()]
+    modified = '#16a085'
 
     def place_valid(self, state, pieces, type, owner_id, x, y):
         return self.in_bounds(x, y) and \
@@ -44,8 +45,8 @@ class Reversi(Game):
         return None, 0
 
     def background(self, x, y):
-        if (x + y) % 2 == 0: return '#88CA5E'   # Dark Green
-        else: return '#D2FBA4'                  # Light Green
+        if (x + y) % 2 == 0: return '#27ae60'   # Dark Green
+        else: return '#2ecc71'                  # Light Green
 
     def flips(self, state, pieces, owner_id, x, y):
         directions = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, -1], [-1, 1]]

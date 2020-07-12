@@ -13,6 +13,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+*python.exe
 build/
 develop-eggs/
 dist/
@@ -21,6 +22,7 @@ eggs/
 .eggs/
 lib/
 lib64/
+*/Lib/
 parts/
 sdist/
 var/
@@ -115,6 +117,10 @@ ENV/
 env.bak/
 venv.bak/
 pyvenv.cfg
+
+# ignoring whacky VENV folders
+Scripts
+Lib
 
 # Spyder project settings
 .spyderproject
