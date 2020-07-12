@@ -23,12 +23,13 @@ class Reversi(Game):
                 len(self.flips(state, pieces, owner_id, x, y)) > 0
 
     def place_piece(self, state, pieces, type, owner_id, x, y):
-        state.place_piece(ReversePiece(), owner_id, x, y)
+        state.place_piece(self.ReversiPiece(), owner_id, x, y)
 
         flips = self.flips(state, pieces, owner_id, x, y)
 
+        print(flips)
         for pos in flips:
-            state.place_piece(ReversePiece(), owner_id, pos[0], pos[1])
+            state.place_piece(self.ReversiPiece(), owner_id, pos[0], pos[1])
 
         state.end_turn()
 
@@ -58,7 +59,7 @@ class Reversi(Game):
                 x_next = x + i * dir[0]
                 y_next = y + i * dir[1]
                 if self.enemy(state, pieces, x_next, y_next):
-                    sub_flips.append(next)
+                    sub_flips.append([x_next, y_next])
                 elif self.mine(state, pieces, x_next, y_next):
                     flips.extend(sub_flips)
                     break

@@ -233,7 +233,7 @@ class State(models.Model):
             owner_id=owner_id
         )
 
-        Change.objects.add(state=self, x=x, y=y)
+        Change.objects.create(state=self, x=x, y=y)
 
     def place_piece(self, type, owner_id, x, y):
         self.set_piece(type.id, owner_id, x, y)
