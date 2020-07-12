@@ -47,9 +47,9 @@ class Mill(Game):
 
         def texture(self, owner_id):
             if owner_id == 1:
-                return 'games/img/chess/white_dot.png'
+                return 'games/img/misc/white_dot.png'
             else:
-                return 'games/img/chess/black_dot.png'
+                return 'games/img/misc/black_dot.png'
 
     types = [MillPiece()]
 
