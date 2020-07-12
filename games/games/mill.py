@@ -2,6 +2,7 @@ from .game import Game, Piece
 
 #  note to self: phase 1 through 3 are hardcoded conditionals rather than actual variables
 
+
 class Mill(Game):
 
     name = "Mill"
@@ -37,8 +38,28 @@ class Mill(Game):
         #  after moving a piece a NEW mill might have been formed iff that is the case remove one opponents piece
         def move_piece(self, state, pieces, x_from, y_from, x_to, y_to):
             state.move_piece(x_from, y_from, x_to, y_to)
-            #  TODO add end_stage after if conditions for when a mill was formed
-            state.end_turn()
+            #  I am sorry
+            if y_to != y_from:
+                if y_to in [n*2 for n in range(0, 5)]:
+                    foo = True
+                    for x in [x for (x, y_to) in Mill.validPoint]:
+                        foo = foo * Game.mine(state, pieces, x, y_to)
+                    if foo:
+                        state.end_stage()
+                    else:
+                        state.end_turn()
+                elif y_to == 5:
+                    foo = True
+                    bar = True
+                    for x in [x for (x, y_to) in Mill.validPoint]:
+                        if x < 5:
+                            foo = foo * Game.mine(state, pieces, x, y_to)
+                        elif x > 5:
+                            bar = bar * Game.mine(state, pieces, x, y_to)
+                    if foo or bar:
+                        state.end_stage()
+                    else:
+                        state.end_turn()
 
         #  a piece may only removed IFF a mill has been formed before(state.stage == 1) and it's an opponent's
         def remove_valid(self, state, pieces, x, y):
@@ -68,3 +89,15 @@ class Mill(Game):
             return '#55EAFF'
         else:
             return '#FFEAA7'
+
+    # def find_mills(self, state, pieces, x, y):
+    #     next_x = 0
+    #     next_y = 0
+    #     for possible_x in range(x, 10):
+    #         if (possible_x, y) in self.validPoint:
+    #             next_x = possible_x
+    #     if next_x == 0:
+    #         return self.mine(state, pieces, x, y)
+    #     if self.mine(state, pieces, x, y) and self.find_mills(state, pieces, next_x, y):
+    #         pass
+    #     return False
