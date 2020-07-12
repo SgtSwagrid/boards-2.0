@@ -188,7 +188,7 @@ class State(models.Model):
     ply = models.IntegerField(default=0)
 
     previous = models.ForeignKey('State',
-        on_delete=models.SET_NULL, null=True)
+        on_delete=models.CASCADE, null=True)
 
     outcome = models.IntegerField(default=-1)
 
@@ -233,6 +233,8 @@ class State(models.Model):
             owner_id=owner_id
         )
 
+        Change.objects.add(state=self, x=x, y=y)
+
     def place_piece(self, type, owner_id, x, y):
         self.set_piece(type.id, owner_id, x, y)
 
@@ -261,6 +263,9 @@ class State(models.Model):
             pieces.append(col)
         return pieces
 
+    def changes(self):
+        return Change.objects.filter(state=self, state__ply=self.ply)
+
     def to_dictionary(self):
         return {
             'game': self.game(),
@@ -271,6 +276,14 @@ class State(models.Model):
             'outcome': self.outcome,
             'pieces': self.pieces()
         }
+
+class Change(models.Model):
+
+    state = models.ForeignKey(State, on_delete=models.CASCADE)
+
+    x = models.IntegerField()
+
+    y = models.IntegerField()
 
 class Piece(models.Model):
 
@@ -317,14 +330,6 @@ class Piece(models.Model):
             'y': self.y,
             'texture': self.texture()
         }
-
-#class Action(models.Model):
-#
-#    old_state = models.ForeignKey(State,
-#        on_delete=models.CASCADE)
-#
-#    new_state = models.ForeignKey(State,
-#                                  on_delete=models.CASCADE)
 
 class Message(models.Model):
 
