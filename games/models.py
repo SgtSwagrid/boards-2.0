@@ -266,6 +266,9 @@ class State(models.Model):
     def changes(self):
         return Change.objects.filter(state=self, state__ply=self.ply)
 
+    def modified(self, x, y):
+        return any(map(lambda c: c.x == x and c.y == y, self.changes()))
+
     def to_dictionary(self):
         return {
             'game': self.game(),
