@@ -52,6 +52,9 @@ class Game:
     def scale(self, x, y):
         return 1, 1
 
+    def colour(self, state, pieces, x, y):
+        return self.background(x, y)
+
     def background(self, x, y):
         if (x + y) % 2 == 0: return '#FDCB6E'
         else: return '#FFEAA7'
