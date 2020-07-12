@@ -215,6 +215,7 @@ class State(models.Model):
     def end_turn(self, skip=1):
         self.turn = self.turn % self.game().players + skip
         self.ply = self.ply + 1
+        self.stage = 0
         self.save()
 
     def end_game(self, winner=0):

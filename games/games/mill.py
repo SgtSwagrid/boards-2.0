@@ -36,7 +36,7 @@ class Mill(Game):
         return self.mine(state, pieces, x, y)
 
     def background(self, x, y):
-        if (x, y) in super().validPoint:
+        if (x, y) in self.validPoint:
             return '#FDCB6E'
         else:
             return '#FFEAA7'
