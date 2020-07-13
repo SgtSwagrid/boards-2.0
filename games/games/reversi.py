@@ -74,8 +74,8 @@ class Reversi(Game):
         adjs = self.adjacents(state, pieces, owner_id)
 
         for adj in adjs:
-
-
+            pass
+ 
 
         print("Checking legality", adjs)
         return adjs > 0
