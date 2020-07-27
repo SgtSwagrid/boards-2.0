@@ -1,13 +1,14 @@
 class State:
 
-    def __init__(self, game=None, players=None, pieces=None,
-            turn=None, outcome=None, previous=None, state=None):
+    def __init__(self, game=None, players=None, pieces=None, turn=None,
+            outcome=None, previous=None, changes=-1, state=None):
 
         self.game = game if game else state.game
         self.players = players if players else state.players
         self.pieces = pieces if pieces else state.pieces
         self.turn = turn if turn else state.turn
         self.outcome = outcome if outcome else state.outcome
+        self.changes = changes if changes != -1 else state.changes if state else set()
         self.previous = previous if previous else\
             (state.previous if state else None)
 
@@ -39,7 +40,8 @@ class State:
         return State(state=self,
             pieces=[[piece if x == xx and y == yy else self.pieces[xx][yy]
                 for yy in range(0, self.game.height)]
-                    for xx in range(0, self.game.width)])
+                    for xx in range(0, self.game.width)])\
+            .set_changed(x, y)
 
     def place_piece(self, piece):
         return self.set_piece(piece, piece.x, piece.y)\
@@ -70,6 +72,15 @@ class State:
 
     def add_score(self, player, score):
         return self.set_score(player, player.score + score)
+
+    def set_changed(self, x, y):
+        return State(state=self, changes=self.changes | {(x, y)})
+
+    def clear_changes(self):
+        return State(state=self, changes=set())
+
+    def changed(self, x, y):
+        return any(c == (x, y) for c in self.changes)
 
 class PlayerState:
 

@@ -16,7 +16,7 @@ class Controller:
         return Controller(selected=self.selected - {(x, y)})
 
     def clear(self):
-        return Controller(selected={})
+        return Controller(selected=set())
 
     def num_selected(self):
         return len(self.selected)

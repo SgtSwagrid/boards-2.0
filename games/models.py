@@ -161,6 +161,9 @@ class StateManager(models.Manager):
             for piece in col:
                 if piece: PieceModel.pieces.from_piece(piece, state_model)
 
+        for x, y in state.changes:
+            ChangeModel.objects.create(state=state_model, x=x, y=y)
+
         return state_model
 
 class StateModel(models.Model):
@@ -203,12 +206,16 @@ class StateModel(models.Model):
             winner=players[self.outcome] if self.outcome > -1 else None,
             draw=self.outcome == -1)
 
+        changes = {(change.x, change.y)
+            for change in ChangeModel.objects.filter(state=self)}
+
         return State(
             game=games[self.game_id],
             players=players,
             pieces=pieces,
             turn=turn,
             outcome=outcome,
+            changes=changes,
             previous=self.previous_state)
 
     def previous_state(self):

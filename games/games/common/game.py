@@ -77,8 +77,7 @@ class Game:
 
     def colour(self, state, x, y, contr):
         if contr.is_selected(x, y): return self.selected_colour
-        #if state.modified(x, y): return self.modified
-        #else: return self.background(x, y)
+        elif state.changed(x, y): return self.modified_colour
         else: return self.background(x, y)
 
     def background(self, x, y):

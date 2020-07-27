@@ -13,7 +13,7 @@ class PlaceAction:
         clicked = Piece(self.type, state.turn.current, input.x, input.y)
 
         if state.game.place_valid(state, clicked):
-            result = state.game.place_piece(state, clicked)
+            result = state.game.place_piece(state.clear_changes(), clicked)
             return result, contr
 
         return None, contr
@@ -32,7 +32,8 @@ class MoveAction:
             selected = state.pieces[selected_pos[0]][selected_pos[1]]
 
             if state.game.move_valid(state, selected, input.x, input.y):
-                result = state.game.move_piece(state, selected, input.x, input.y)
+                result = state.game.move_piece(
+                    state.clear_changes(), selected, input.x, input.y)
                 return result, contr.clear()
 
         if state.game.moveable(state, clicked):
@@ -49,7 +50,7 @@ class RemoveAction:
         clicked = state.pieces[input.x][input.y]
 
         if state.game.remove_valid(state, clicked):
-            result = state.game.remove_piece(state, clicked)
+            result = state.game.remove_piece(state.clear_changes(), clicked)
             return result, contr
 
         return None, contr
