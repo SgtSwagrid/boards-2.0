@@ -1,4 +1,5 @@
-from .game import Game, Piece
+from .common.game import *
+from .common.action import *
 
 class Chess(Game):
 
@@ -8,120 +9,117 @@ class Chess(Game):
     height = 8
     players = 2
 
-    class Pawn(Piece):
+    class Pawn(PieceType):
         id = 0
 
-        def texture(self, owner_id):
-            if owner_id == 1: return 'games/img/chess/white_pawn.png'
+        def texture(self, owner):
+            if owner == 0: return 'games/img/chess/white_pawn.png'
             else: return 'games/img/chess/black_pawn.png'
 
-        def move_valid(self, state, pieces, x_from, y_from, x_to, y_to):
+        def move_valid(self, state, piece, x_to, y_to):
 
-            dir = 1 if state.turn == 1 else -1
-            home = y_from == (1 if state.turn == 1 else 6)
+            dir = 1 if state.turn.current == 0 else -1
+            home = piece.y == (1 if state.turn.current == 0 else 6)
 
-            straight = x_to == x_from and not pieces[x_to][y_to]
-            normal = straight and y_to - y_from == dir
-            double = straight and y_to - y_from == 2 * dir and home
+            straight = x_to == piece.x and not state.pieces[x_to][y_to]
+            normal = straight and y_to - piece.y == dir
+            double = straight and y_to - piece.y == 2 * dir and home
 
-            capture = abs(x_to - x_from) == 1 and pieces[x_to][y_to] and\
-                      y_to - y_from == dir
+            capture = abs(x_to - piece.x) == 1 and state.pieces[x_to][y_to] and\
+                      y_to - piece.y == dir
+
+            print('from: (', piece.x, ', ', piece.y, '), to: (', x_to, ', ', y_to, '), dir: ', dir, ', home: ', home, ', straight: ', straight, ', normal: ', normal, ', double: ', double, ', capture: ', capture, ', valid: ', (normal or double or capture))
 
             return normal or double or capture
 
-    class Rook(Piece):
+    class Rook(PieceType):
         id = 1
 
-        def texture(self, owner_id):
-            if owner_id == 1: return 'games/img/chess/white_rook.png'
+        def texture(self, owner):
+            if owner == 0: return 'games/img/chess/white_rook.png'
             else: return 'games/img/chess/black_rook.png'
 
-        def move_valid(self, state, pieces, x_from, y_from, x_to, y_to):
+        def move_valid(self, state, piece, x_to, y_to):
 
-            sx, sy = direction(x_from, y_from, x_to, y_to)
-            d = distance(x_from, y_from, x_to, y_to)
+            sx, sy = direction(piece.x, piece.y, x_to, y_to)
+            d = distance(piece.x, piece.y, x_to, y_to)
 
             return ((sx == 0) ^ (sy == 0)) and\
-                   path(x_from, y_from, sx, sy, d, pieces)
+                   path(piece.x, piece.y, sx, sy, d, state.pieces)
 
-    class Knight(Piece):
+    class Knight(PieceType):
         id = 2
 
-        def texture(self, owner_id):
-            if owner_id == 1: return 'games/img/chess/white_knight.png'
+        def texture(self, owner):
+            if owner == 0: return 'games/img/chess/white_knight.png'
             else: return 'games/img/chess/black_knight.png'
 
-        def move_valid(self, state, pieces, x_from, y_from, x_to, y_to):
+        def move_valid(self, state, piece, x_to, y_to):
 
-            dx, dy = delta(x_from, y_from, x_to, y_to)
+            dx, dy = delta(piece.x, piece.y, x_to, y_to)
             return (dx == 1 and dy == 2) or (dx == 2 and dy == 1)
 
-    class Bishop(Piece):
+    class Bishop(PieceType):
         id = 3
 
-        def texture(self, owner_id):
-            if owner_id == 1: return 'games/img/chess/white_bishop.png'
+        def texture(self, owner):
+            if owner == 0: return 'games/img/chess/white_bishop.png'
             else: return 'games/img/chess/black_bishop.png'
 
-        def move_valid(self, state, pieces, x_from, y_from, x_to, y_to):
+        def move_valid(self, state, piece, x_to, y_to):
 
-            dx, dy = delta(x_from, y_from, x_to, y_to)
-            sx, sy = direction(x_from, y_from, x_to, y_to)
-            d = distance(x_from, y_from, x_to, y_to)
+            dx, dy = delta(piece.x, piece.y, x_to, y_to)
+            sx, sy = direction(piece.x, piece.y, x_to, y_to)
+            d = distance(piece.x, piece.y, x_to, y_to)
 
             return (abs(dx) == abs(dy)) and\
-                   path(x_from, y_from, sx, sy, d, pieces)
+                   path(piece.x, piece.y, sx, sy, d, state.pieces)
 
-    class Queen(Piece):
+    class Queen(PieceType):
         id = 4
 
-        def texture(self, owner_id):
-            if owner_id == 1: return 'games/img/chess/white_queen.png'
+        def texture(self, owner):
+            if owner == 0: return 'games/img/chess/white_queen.png'
             else: return 'games/img/chess/black_queen.png'
 
-        def move_valid(self, state, pieces, x_from, y_from, x_to, y_to):
+        def move_valid(self, state, piece, x_to, y_to):
 
-            dx, dy = delta(x_from, y_from, x_to, y_to)
-            sx, sy = direction(x_from, y_from, x_to, y_to)
-            d = distance(x_from, y_from, x_to, y_to)
+            dx, dy = delta(piece.x, piece.y, x_to, y_to)
+            sx, sy = direction(piece.x, piece.y, x_to, y_to)
+            d = distance(piece.x, piece.y, x_to, y_to)
 
             return (((sx == 0) ^ (sy == 0)) or (abs(dx) == abs(dy))) and\
-                   path(x_from, y_from, sx, sy, d, pieces)
+                   path(piece.x, piece.y, sx, sy, d, state.pieces)
 
-    class King(Piece):
+    class King(PieceType):
         id = 5
 
-        def texture(self, owner_id):
-            if owner_id == 1: return 'games/img/chess/white_king.png'
+        def texture(self, owner):
+            if owner == 0: return 'games/img/chess/white_king.png'
             else: return 'games/img/chess/black_king.png'
 
-        def move_valid(self, state, pieces, x_from, y_from, x_to, y_to):
-            return distance(x_from, y_from, x_to, y_to) == 1
+        def move_valid(self, state, piece, x_to, y_to):
+            return distance(piece.x, piece.y, x_to, y_to) == 1
 
     types = [Pawn(), Rook(), Knight(), Bishop(), Queen(), King()]
 
-    def move_valid(self, state, pieces, x_from, y_from, x_to, y_to):
-        return not self.mine(state, pieces, x_to, y_to) and\
-               super().move_valid(state, pieces, x_from, y_from, x_to, y_to)
+    actions = [MoveAction()]
 
-    def selectable(self, state, pieces, x, y):
-        return self.mine(state, pieces, x, y)
+    def piece(self, x, y):
 
-    def initial(self, x, y):
+        if y in (0, 7):
+            player = 0 if y == 0 else 1
 
-        if y == 0 or y == 7:
-            player = 1 if y == 0 else 2
+            if x in (0, 7): return Piece(self.Rook(), player, x, y)
+            elif x in (1, 6): return Piece(self.Knight(), player, x, y)
+            elif x in (2, 5): return Piece(self.Bishop(), player, x, y)
+            elif x == 3: return Piece(self.Queen(), player, x, y)
+            elif x == 4: return Piece(self.King(), player, x, y)
 
-            if x == 0 or x == 7: return self.Rook(), player
-            if x == 1 or x == 6: return self.Knight(), player
-            if x == 2 or x == 5: return self.Bishop(), player
-            if x == 3: return self.Queen(), player
-            if x == 4: return self.King(), player
+        elif y == 1: return Piece(self.Pawn(), 0, x, y)
+        elif y == 6: return Piece(self.Pawn(), 1, x, y)
 
-        if y == 1: return self.Pawn(), 1
-        if y == 6: return self.Pawn(), 2
-
-        return None, 0
+        else: return None
 
 def distance(x_from, y_from, x_to, y_to):
     return max(abs(x_to - x_from), abs(y_to - y_from))
@@ -135,4 +133,4 @@ def direction(x_from, y_from, x_to, y_to):
 
 def path(x, y, sx, sy, d, pieces):
     return all(map(lambda r: not pieces
-    [x + sx * r][y + sy * r], range(1, d)))
+        [x + sx * r][y + sy * r], range(1, d)))

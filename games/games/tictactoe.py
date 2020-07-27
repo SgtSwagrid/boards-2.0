@@ -1,4 +1,5 @@
-from .game import Game, Piece
+from games.games.common.game import Game
+
 
 class TicTacToe(Game):
 

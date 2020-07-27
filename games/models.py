@@ -1,35 +1,33 @@
 from django.db import models
 from django.contrib.auth.models import User
-from .games.games import games
+from games.games.common.games import games
 from datetime import time
 import random
 
+from .games.common.game import *
+from .games.common.state import *
+
 class BoardManager(models.Manager):
 
-    def create(self, game_id):
+    def create(self, game):
 
         code = hex(random.randint(0, 1048575))[2:].zfill(5).upper()
-        state = State.objects.create(game_id=game_id, turn=1)
-        board = super().create(game_id=game_id, code=code, state=state)
-        game = games[game_id]
-
-        for x in range(0, game.width):
-            for y in range(0, game.height):
-                type, owner_id = board.game().initial(x, y)
-                if type: Piece.objects.create(
-                    state=state, type_id=type.id, owner_id=owner_id, x=x, y=y)
+        state = StateModel.states.from_state(game.setup(), previous=None)
+        board = super().create(game_id=game.id, code=code, state=state)
         return board
 
-class Board(models.Model):
+class BoardModel(models.Model):
+
+    boards = BoardManager()
 
     game_id = models.IntegerField()
 
     code = models.CharField(max_length=5)
 
-    state = models.ForeignKey('State',
+    state = models.ForeignKey('StateModel',
         on_delete=models.SET_NULL, null=True, blank=True)
 
-    stage = models.IntegerField(default=0)
+    status = models.IntegerField(default=0)
 
     time = models.DateTimeField(auto_now_add=True)
 
@@ -37,55 +35,19 @@ class Board(models.Model):
 
     def __str__(self): return self.code + " " + self.game().name
 
-    boards = BoardManager()
-
-    def place_piece(self, player_id, x, y, type=None):
-
-        if not type: type = self.game().types[0]
-
-        if self.game().place_valid(self.state, self.state.pieces(),
-                                   type, player_id, x, y):
-            self.state = self.state.next()
-            self.game().place_piece(self.state, self.state.pieces(),
-                                    type, player_id, x, y)
-            if self.state.outcome != -1: self.stage = 2
-            self.state.save()
+    def input(self, input, contr):
+        result, contr = self.game().input(self.state.to_state(), input, contr)
+        if result:
+            self.state = StateModel.states.from_state(result, previous=self.state)
+            if self.state.outcome != -2: self.status = 2
             self.save()
-            return True
-        else: return False
-
-    def move_piece(self, x_from, y_from, x_to, y_to):
-
-        if self.game().move_valid(self.state, self.state.pieces(),
-                                  x_from, y_from, x_to, y_to):
-            self.state = self.state.next()
-            self.game().move_piece(self.state, self.state.pieces(),
-                                   x_from, y_from, x_to, y_to)
-            if self.state.outcome != -1: self.stage = 2
-            self.state.save()
-            self.save()
-            return True
-        else: return False
-
-    def remove_piece(self, x, y):
-
-        if self.game().remove_valid(self.state, self.state.pieces(), x, y):
-            self.state = self.state.next()
-            self.game().remove_piece(self.state, self.state.pieces(), x, y)
-            if self.state.outcome != -1: self.stage = 2
-            self.state.save()
-            self.save()
-            return True
-        else: return False
-
-    def selectable(self, x, y):
-        return self.game().selectable(self.state, self.state.pieces(), x, y)
+        return result, contr
 
     def current(self, player):
-        return player and player.order == self.state.turn
+        return player and player.order == self.state.current
 
     def players(self):
-        return Player.objects.filter(board=self)
+        return PlayerModel.objects.filter(board=self)
 
     def player(self, user):
         return self.players().filter(user=user).first()\
@@ -95,17 +57,18 @@ class Board(models.Model):
         return games[self.game_id]
 
     def messages(self):
-        return Message.objects.filter(board=self)
+        return MessageModel.objects.filter(board=self)
 
     def users(self):
         return map(lambda p: p.user, self.players())
 
     def join(self, user):
-        Player.objects.create(user=user, board=self,
-                order=self.players().count()+1)
+        order = self.players().count()
+        PlayerModel.objects.create(user=user, board=self,
+            order=order, leader=order == 0)
 
     def start(self):
-        self.stage = 1
+        self.status = 1
         self.save()
 
     def to_dictionary(self):
@@ -114,17 +77,17 @@ class Board(models.Model):
             'code': self.code,
             'state': self.state,
             'players': self.players(),
-            'stage': self.stage,
+            'status': self.status,
             'time': self.time,
             'messages': self.messages()
         }
 
-class Player(models.Model):
+class PlayerModel(models.Model):
 
     user = models.ForeignKey(User,
         on_delete=models.SET_NULL, null=True)
 
-    board = models.ForeignKey(Board, on_delete=models.CASCADE)
+    board = models.ForeignKey(BoardModel, on_delete=models.CASCADE)
 
     order = models.IntegerField()
 
@@ -177,125 +140,124 @@ class Player(models.Model):
         self.leader = True
         self.save()
 
-class State(models.Model):
+class StateManager(models.Manager):
+
+    def from_state(self, state, previous):
+
+        state_model = super().create(
+            game_id=state.game.id,
+            current=state.turn.current,
+            stage=state.turn.stage,
+            ply=state.turn.ply,
+            outcome=-2 if not state.outcome.finished else
+                -1 if state.outcome.draw else
+                state.outcome.winner.id,
+            previous=previous)
+
+        for player in state.players:
+            PlayerStateModel.players.from_player(player, state_model)
+
+        for col in state.pieces:
+            for piece in col:
+                if piece: PieceModel.pieces.from_piece(piece, state_model)
+
+        return state_model
+
+class StateModel(models.Model):
+
+    states = StateManager()
 
     game_id = models.IntegerField()
 
-    turn = models.IntegerField(default=1)
+    current = models.IntegerField(default=0)
 
     stage = models.IntegerField(default=0)
 
     ply = models.IntegerField(default=0)
 
-    previous = models.ForeignKey('State',
+    outcome = models.IntegerField(default=-2)
+
+    previous = models.ForeignKey('StateModel',
         on_delete=models.CASCADE, null=True)
 
-    outcome = models.IntegerField(default=-1)
+    def to_state(self):
 
-    def next(self):
+        game = games[self.game_id]
 
-        state = State.objects.create(
-            game_id=self.game_id,
-            turn=self.turn,
+        players = [p.to_player() for p in
+            PlayerStateModel.players.filter(state=self)]
+
+        def to_piece(piece): return piece.to_piece() if piece else None
+        pieces = [[to_piece(PieceModel.pieces
+            .filter(state=self, x=x, y=y).first())
+            for y in range(0, game.height)]
+                for x in range(0, game.width)]
+
+        turn = Turn(
+            current=self.current,
             stage=self.stage,
-            ply=self.ply,
-            previous=self,
-            outcome=self.outcome
-        )
+            ply=self.ply)
 
-        for row in self.pieces():
-            for piece in row:
-                if piece: piece.next(state)
-        return state
+        outcome = Outcome(
+            finished=self.outcome > -2,
+            winner=players[self.outcome] if self.outcome > -1 else None,
+            draw=self.outcome == -1)
 
-    def end_stage(self, skip=1):
-        self.stage = self.stage + skip
-        self.save()
+        return State(
+            game=games[self.game_id],
+            players=players,
+            pieces=pieces,
+            turn=turn,
+            outcome=outcome,
+            previous=self.previous_state)
 
-    def end_turn(self, skip=1):
-        self.turn = self.turn % self.game().players + skip
-        self.ply = self.ply + 1
-        self.stage = 0
-        self.save()
+    def previous_state(self):
+        return self.previous.to_state() if self.previous else None
 
-    def end_game(self, winner=0):
-        self.outcome = winner
-        self.save()
+class PlayerStateManager(models.Manager):
 
-    def set_piece(self, type_id, owner_id, x, y):
+    def from_player(self, player, state):
+        return super().create(
+            state=state,
+            order=player.order,
+            score=player.score)
 
-        Piece.objects.filter(state=self, x=x, y=y).delete()
+class PlayerStateModel(models.Model):
 
-        if type_id != -1: Piece.objects.create(
-            state=self,
-            type_id=type_id,
-            x=x, y=y,
-            owner_id=owner_id
-        )
+    players = PlayerStateManager()
 
-        Change.objects.create(state=self, x=x, y=y)
+    state = models.ForeignKey(StateModel, on_delete=models.CASCADE)
 
-    def place_piece(self, type, owner_id, x, y):
-        self.set_piece(type.id, owner_id, x, y)
+    order = models.IntegerField()
 
-    def move_piece(self, x_from, y_from, x_to, y_to):
-        piece = Piece.objects.filter(state=self, x=x_from, y=y_from).get()
-        self.set_piece(-1, 0, x_from, y_from)
-        self.set_piece(piece.type_id, piece.owner_id, x_to, y_to)
+    score = models.IntegerField(default=0)
 
-    def remove_piece(self, x, y):
-        self.set_piece(-1, 0, x, y)
+    class Meta: ordering = ['state', 'order']
 
-    def game(self):
-        return games[self.game_id]
+    def to_player(self):
+        return PlayerState(
+            order=self.order,
+            score=self.score)
 
-    def pieces(self):
+class PieceManager(models.Manager):
 
-        piece_set = Piece.objects.filter(state=self)
-        pieces = []
+    def from_piece(self, piece, state):
+        return super().create(
+            state=state,
+            type=piece.type.id,
+            owner=piece.owner,
+            x=piece.x,
+            y=piece.y)
 
-        for x in range(0, self.game().width):
-            col_set = piece_set.filter(x=x)
-            col = []
+class PieceModel(models.Model):
 
-            for y in range(0, self.game().height):
-                col.append(col_set.filter(y=y).first())
-            pieces.append(col)
-        return pieces
+    pieces = PieceManager()
 
-    def changes(self):
-        return Change.objects.filter(state=self, state__ply=self.ply)
+    state = models.ForeignKey(StateModel, on_delete=models.CASCADE)
 
-    def modified(self, x, y):
-        return any(map(lambda c: c.x == x and c.y == y, self.changes()))
+    type = models.IntegerField()
 
-    def to_dictionary(self):
-        return {
-            'game': self.game(),
-            'turn': self.turn,
-            'stage': self.stage,
-            'previous': self.previous,
-            'number': self.number,
-            'outcome': self.outcome,
-            'pieces': self.pieces()
-        }
-
-class Change(models.Model):
-
-    state = models.ForeignKey(State, on_delete=models.CASCADE)
-
-    x = models.IntegerField()
-
-    y = models.IntegerField()
-
-class Piece(models.Model):
-
-    state = models.ForeignKey(State,
-        on_delete=models.CASCADE)
-
-    type_id = models.IntegerField()
-
-    owner_id = models.IntegerField()
+    owner = models.IntegerField()
 
     x = models.IntegerField()
 
@@ -303,44 +265,28 @@ class Piece(models.Model):
 
     class Meta: ordering = ['state']
 
-    def __str__(self): return self.state.board.code + ":"\
-            + str(self.state.number) + ":" + str(self.id)
-
-    def next(self, state):
-        return Piece.objects.create(
-            state=state,
-            type_id=self.type_id,
-            owner_id=self.owner_id,
+    def to_piece(self):
+        return Piece(
+            type=games[self.state.game_id].types[self.type],
+            owner=self.owner,
             x=self.x,
-            y=self.y
-        )
+            y=self.y)
 
-    def type(self):
-        return self.state.game().types[self.type_id]
+class ChangeModel(models.Model):
 
-    def texture(self):
-        return self.type().texture(self.owner_id)
+    state = models.ForeignKey(StateModel, on_delete=models.CASCADE)
 
-    def owner(self, board):
-        return board.players()[self.owner_id-1]
+    x = models.IntegerField()
 
-    def to_dictionary(self):
-        return {
-            'state': self.state,
-            'type': self.type(),
-            'owner_id': self.owner_id,
-            'x': self.x,
-            'y': self.y,
-            'texture': self.texture()
-        }
+    y = models.IntegerField()
 
-class Message(models.Model):
+class MessageModel(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     message = models.CharField(max_length=500)
 
-    board = models.ForeignKey(Board, on_delete=models.CASCADE)
+    board = models.ForeignKey(BoardModel, on_delete=models.CASCADE)
 
     time = models.DateTimeField(auto_now=True)
 

@@ -1,4 +1,5 @@
-from .game import Game, Piece
+from .common.game import *
+from .common.action import *
 
 #  note to self: phase 1 through 3 are hardcoded conditionals rather than actual variables
 
@@ -16,68 +17,69 @@ class Mill(Game):
         (5, 2), (5, 0), (6, 6), (6, 5), (6, 4), (8, 8), (8, 5), (8, 2), (10, 10), (10, 5), (10, 0)
     ]
 
-    class MillPiece(Piece):
+    class MillPiece(PieceType):
         id = 0
 
         #  a piece of the active player can be placed iff not all pieces have been placed yet = before turn 18
-        def place_valid(self, state, pieces, owner_id, x, y):
-            if state.ply < 18 and state.stage == 0:
-                if (x, y) in Mill.validPoint and not pieces[x][y]:
+        def place_valid(self, state, piece):
+            if state.turn.ply < 18 and state.turn.stage == 0:
+                if (piece.x, piece.y) in Mill.validPoint and not state.pieces[piece.x][piece.y]:
                     return True
             else:
                 return False
 
         #  a piece owned by the active player can be moved iff all pieces have already been placed = after turn 17
-        def move_valid(self, state, pieces, x_from, y_from, x_to, y_to):
-            if state.ply >= 18 and state.stage == 0:
-                if (x_to, y_to) in Mill.validPoint and not pieces[x_to][y_to]:
+        def move_valid(self, state, piece, x_to, y_to):
+            if state.turn.ply >= 18 and state.turn.stage == 0:
+                if (x_to, y_to) in Mill.validPoint and not state.pieces[x_to][y_to]:
                     return True
             else:
                 return False
 
         #  after moving a piece a NEW mill might have been formed iff that is the case remove one opponents piece
-        def move_piece(self, state, pieces, x_from, y_from, x_to, y_to):
-            state.move_piece(x_from, y_from, x_to, y_to)
+        def move_piece(self, state, piece, x_to, y_to):
+            state = state.move_piece(piece, x_to, y_to)
             #  I am sorry
-            if y_to != y_from:
+            if y_to != piece.y:
                 if y_to in [n*2 for n in range(0, 5)]:
                     foo = True
                     for x in [x for (x, y_to) in Mill.validPoint]:
-                        foo = foo * Game.mine(state, pieces, x, y_to)
+                        foo = foo * state.friendly(x, y_to)
                     if foo:
-                        state.end_stage()
+                        state = state.end_stage()
                     else:
-                        state.end_turn()
+                        state = state.end_turn()
                 elif y_to == 5:
                     foo = True
                     bar = True
                     for x in [x for (x, y_to) in Mill.validPoint]:
                         if x < 5:
-                            foo = foo * Game.mine(state, pieces, x, y_to)
+                            foo = foo * state.friendly(x, y_to)
                         elif x > 5:
-                            bar = bar * Game.mine(state, pieces, x, y_to)
+                            bar = bar * state.friendly(x, y_to)
                     if foo or bar:
-                        state.end_stage()
+                        state = state.end_stage()
                     else:
-                        state.end_turn()
+                        state = state.end_turn()
+            return state
 
         #  a piece may only removed IFF a mill has been formed before(state.stage == 1) and it's an opponent's
-        def remove_valid(self, state, pieces, x, y):
-            return state.stage == 1 and Game.enemy(state, pieces, x, y)
-            #  credit to Alec / Sgt. Swagrid for optimization
+        def remove_valid(self, state, piece):
+            return state.turn.stage == 1 and state.enemy(piece.x, piece.y)
 
-        def texture(self, owner_id):
-            if owner_id == 1:
+        def texture(self, owner):
+            if owner == 0:
                 return 'games/img/misc/white_dot.png'
             else:
                 return 'games/img/misc/black_dot.png'
 
     types = [MillPiece()]
 
+    actions = [PlaceAction(MillPiece()), MoveAction(), RemoveAction()]
+
     #  pieces need only be selected when to be moved and in no other case
-    def selectable(self, state, pieces, x, y):
-        if state.stage == 0:
-            return self.mine(state, pieces, x, y)
+    def moveable(self, state, piece):
+        return state.turn.stage == 0 and state.friendly(piece.x, piece.y)
 
     #  drawing colors for (1)tiles/points where pieces can be (2)tiles/lines in between and (3)every other tile
     def background(self, x, y):

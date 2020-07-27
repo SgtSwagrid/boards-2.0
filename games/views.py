@@ -1,11 +1,12 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
+
+from games.games.common.input import ClickInput, Controller
 from .models import *
-from .forms import *
-from .games.games import games
+from games.games.common.games import games
 
 def browse_view(request):
 
-    boards = Board.boards.all()#.filter(state__outcome=-1)
+    boards = BoardModel.boards.all()#.filter(state__outcome=-1)
 
     return render(request, 'games/browse.html', {
         'boards': map(lambda b: b.to_dictionary(), boards)
@@ -15,10 +16,9 @@ def create_view(request):
 
     if 'game' in request.GET and request.user.is_authenticated:
 
-        game_id = int(request.GET['game'])
-        board = Board.boards.create(game_id=game_id)
-        Player.objects.create(user=request.user, board=board,
-                              order=1, leader=True)
+        game = games[int(request.GET['game'])]
+        board = BoardModel.boards.create(game=game)
+        board.join(request.user)
 
         return redirect('../' + board.code)
 
@@ -28,13 +28,13 @@ def create_view(request):
 
 def game_view(request, board_code):
 
-    if not Board.boards.filter(code=board_code).exists():
+    if not BoardModel.boards.filter(code=board_code).exists():
         return render(request, 'games/noboard.html', {})
 
     if not request.user.is_authenticated:
         return redirect('/users/login?next=/games/' + board_code)
 
-    board = Board.boards.get(code=board_code)
+    board = BoardModel.boards.get(code=board_code)
 
     return render(request, 'games/game.html', {
         'board': board.to_dictionary()
@@ -42,7 +42,7 @@ def game_view(request, board_code):
 
 def board_view(request, board_code):
 
-    board = Board.boards.get(code=board_code)
+    board = BoardModel.boards.get(code=board_code)
     game = board.game()
     player = board.player(request.user)
 
@@ -51,20 +51,15 @@ def board_view(request, board_code):
     sx, sy = (int(request.GET['sx']), int(request.GET['sy']))\
         if 'sx' in request.GET else (-1, -1)
 
-    if cx != -1 and board.stage == 1 and board.current(player):
-        if sx != -1 and board.move_piece(sx, sy, cx, cy):
-            sx, sy = -1, -1
-        elif board.place_piece(player.order, cx, cy):
-            sx, sy = -1, -1
-        elif board.remove_piece(cx, cy):
-            sx, sy = -1, -1
-        elif (sx != cx or sy != cy) and board.selectable(cx, cy):
-            sx, sy = cx, cy
-        else: sx, sy = -1, -1
-    elif not board.current(player):
-        sx, sy = -1, -1
+    contr = Controller(selected={(sx, sy)} if sx != -1 else {})
 
-    pieces = board.state.pieces()
+    if cx != -1 and board.status == 1 and board.current(player):
+        input = ClickInput(cx, cy)
+        result, contr = board.input(input, contr)
+        sx, sy = -1, -1
+        for x, y in contr.selected: sx, sy = x, y
+
+    state = board.state.to_state()
 
     return render(request, 'games/board.html', {
         'tiles': map(lambda y:
@@ -73,25 +68,25 @@ def board_view(request, board_code):
                 'y': y,
                 'width': game.scale(x, y)[0],
                 'height': game.scale(x, y)[1],
-                'background': game.colour(board.state,
-                    pieces, x, y, x == sx and y == sy),
-                'piece': pieces[x][y].to_dictionary()
-                    if pieces[x][y] else None,
+                'texture': game.texture(state, x, y),
+                'background': game.colour(state, x, y, contr),
+                'piece': state.pieces[x][y]
+                    if state.pieces[x][y] else None,
                 'selected': x == sx and y == sy
             }, range(0, game.width)),
-         range(game.height-1, -1, -1)),
+         range(game.height - 1, -1, -1)),
         'selected': {'x': sx, 'y': sy},
         'turn': board.current(player)
     })
 
 def sidebar_view(request, board_code):
 
-    board = Board.boards.get(code=board_code)
+    board = BoardModel.boards.get(code=board_code)
 
-    if board.stage == 0: setup(request, board)
+    if board.status == 0: setup(request, board)
 
     if 'message' in request.GET and request.user.is_authenticated:
-        Message.objects.create(
+        MessageModel.objects.create(
             user=request.user,
             message=request.GET['message'],
             board=board)

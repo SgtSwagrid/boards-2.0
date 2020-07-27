@@ -1,5 +1,5 @@
 from django import forms
-from .games.games import games
+from games.games.common.games import games
 
 class GameForm(forms.Form):
 

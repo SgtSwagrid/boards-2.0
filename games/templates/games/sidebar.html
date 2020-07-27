@@ -11,7 +11,7 @@
     &#x2022 Playing
     {% endif %}
 </h6>
-{% if this_player and this_player.leader and board.stage == 0 %}
+{% if this_player and this_player.leader and board.status == 0 %}
 {% if not player == board.players.first %}
 <a class="btn-floating btn-small indigo lighten-2 waves-effect"
         onclick="loadSidebar('promote&user={{ player.user.id }}')">
@@ -37,7 +37,7 @@
 {% endif %}
 <hr>
 {% endfor %}
-{% if board.stage == 0 %}
+{% if board.status == 0 %}
 <br>
 {% if user in users %}
 <a class="btn waves-effect block" onclick="loadSidebar('leave&user={{ user.id }}')">

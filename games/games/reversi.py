@@ -1,4 +1,5 @@
-from .game import Game, Piece
+from .common.game import *
+from .common.action import *
 
 class Reversi(Game):
 
@@ -8,49 +9,55 @@ class Reversi(Game):
     height = 8
     players = 2
 
-    class ReversiPiece(Piece):
+    class ReversiPiece(PieceType):
         id = 0
 
-        def texture(self, owner_id):
-            if owner_id == 1: return 'games/img/misc/white_dot.png'     # Player 1 is White
+        def texture(self, owner):
+            if owner == 0: return 'games/img/misc/white_dot.png'     # Player 1 is White
             else: return 'games/img/misc/black_dot.png'                 # Player 2 is Black
 
     types = [ReversiPiece()]
-    modified = '#16a085'
 
-    def place_valid(self, state, pieces, type, owner_id, x, y):
-        return self.in_bounds(x, y) and \
-                not pieces[x][y] and \
-                len(self.flips(state, pieces, owner_id, x, y)) > 0
+    actions = [PlaceAction(ReversiPiece())]
 
-    def place_piece(self, state, pieces, type, owner_id, x, y):
-        state.place_piece(self.ReversiPiece(), owner_id, x, y)
+    modified_colour = '#16a085'
 
-        flips = self.flips(state, pieces, owner_id, x, y)
+    def place_valid(self, state, piece):
+        return self.in_bounds(piece.x, piece.y) and\
+                not state.pieces[piece.x][piece.y] and\
+                len(self.flips(state, piece)) > 0
+
+    def place_piece(self, state, piece):
+        state = state.place_piece(piece)
+
+        flips = self.flips(state, piece)
 
         for pos in flips:
-            state.place_piece(self.ReversiPiece(), owner_id, pos[0], pos[1])
+            state = state.place_piece(Piece(self.ReversiPiece(),
+                state.turn.current, pos[0], pos[1]))
 
-        self.legal_next(state, pieces, owner_id)
+        self.legal_next(state)
 
-        state.end_turn()
+        return state.end_turn()
 
-    def initial(self, x, y):
+    def piece(self, x, y):
 
         x_mid = self.width // 2 - 1
         y_mid = self.height // 2 - 1
 
         # Centre arrangement 2x2
-        if (x == x_mid and y == y_mid) or (x == x_mid + 1 and y == y_mid + 1): return self.ReversiPiece(), 1  # White
-        if (x == x_mid and y == y_mid + 1) or (x == x_mid + 1 and y == y_mid): return self.ReversiPiece(), 2  # Black
+        if (x == x_mid and y == y_mid) or (x == x_mid + 1 and y == y_mid + 1):
+            return Piece(self.ReversiPiece(), 0, x, y)  # White
+        if (x == x_mid and y == y_mid + 1) or (x == x_mid + 1 and y == y_mid):
+            return Piece(self.ReversiPiece(), 1, x, y)  # Black
 
-        return None, 0
+        return None
 
     def background(self, x, y):
         if (x + y) % 2 == 0: return '#27ae60'   # Dark Green
         else: return '#2ecc71'                  # Light Green
 
-    def flips(self, state, pieces, owner_id, x, y):
+    def flips(self, state, piece):
         directions = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, -1], [-1, 1]]
         flips = []
 
@@ -58,11 +65,11 @@ class Reversi(Game):
             sub_flips = []
 
             for i in range(1, max(self.width, self.height)):
-                x_next = x + i * dir[0]
-                y_next = y + i * dir[1]
-                if self.enemy(state, pieces, x_next, y_next):
+                x_next = piece.x + i * dir[0]
+                y_next = piece.y + i * dir[1]
+                if state.enemy(x_next, y_next):
                     sub_flips.append([x_next, y_next])
-                elif self.mine(state, pieces, x_next, y_next):
+                elif state.friendly(x_next, y_next):
                     flips.extend(sub_flips)
                     break
                 else:
@@ -70,44 +77,36 @@ class Reversi(Game):
 
         return flips
 
-    def legal_next(self, state, pieces, owner_id):
-        adjs = self.adjacents(state, pieces, owner_id)
+    def legal_next(self, state):
+        adjs = self.adjacents(state)
 
         for adj in adjs:
-
+            pass
 
 
         print("Checking legality", adjs)
-        return adjs > 0
+        return len(adjs) > 0
 
-    def count_pieces(self, state, pieces, owner_id):
+    def count_pieces(self, state, owner_id):
         pass
 
-    def mine(self, state, pieces, x, y):
-        return self.exists(pieces, x, y) and \
-               pieces[x][y].owner_id == state.turn
-
-    def enemy(self, state, pieces, x, y):
-        return self.exists(pieces, x, y) and \
-               pieces[x][y].owner_id != state.turn
-
-    def adjacents(self, state, pieces, owner_id):
+    def adjacents(self, state):
         ''' Find all positions that are enemy to owner'''
         adjacents = []
 
-        next_player = (state.turn + 1) % self.players
+        next_player = (state.turn.current + 1) % self.players
 
         for x in range(self.width):
             for y in range(self.height):
-                if not self.exists(pieces, x, y):
+                if not state.exists(x, y):
                     adj = False
 
                     for i in range(-1, 2):
                         for j in range(-1, 2):
                             x_k = x + i
                             y_k = y + j
-                            if i != 0 and j != 0 and self.exists(pieces, x_k, y_k) and not adj:
-                                if pieces[x_k][y_k].owner_id != next_player:
+                            if i != 0 and j != 0 and state.exists(x_k, y_k) and not adj:
+                                if state.pieces[x_k][y_k].owner != next_player:
                                     adjacents.append([x, y])
                                     adj = True
 

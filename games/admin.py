@@ -1,8 +1,10 @@
 from django.contrib import admin
 from .models import *
 
-admin.site.register(Board)
-admin.site.register(Player)
-admin.site.register(State)
-admin.site.register(Piece)
-admin.site.register(Message)
+admin.site.register(BoardModel)
+admin.site.register(PlayerModel)
+admin.site.register(StateModel)
+admin.site.register(PlayerStateModel)
+admin.site.register(PieceModel)
+admin.site.register(ChangeModel)
+admin.site.register(MessageModel)

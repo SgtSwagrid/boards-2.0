@@ -43,9 +43,11 @@
                     </h6>
                 </div>
                 <div class="col s3">
-                    {% if not state or state.outcome == -1 %}
+                    {% if board.status == 0 %}
+                    <h6 class="white-text medium-text right-align">Pending</h6>
+                    {% elif board.status == 1 %}
                     <h6 class="white-text medium-text right-align">In Progress</h6>
-                    {% elif state == 0 %}
+                    {% elif board.state.outcome == 0 %}
                     <br><h6 class="white-text medium-text right-align">Draw</h6>
                     {% else %}
                     <br><h6 class="white-text medium-text right-align">Winner ...</h6>

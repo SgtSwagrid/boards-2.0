@@ -15,24 +15,24 @@
         <div id="board"></div>
     </div>
     <div class="col m3 pull-m9 teal sidebar">
+        <br>
         <div class="container">
-            <br>
             <h6 class="large-text white-text">{{ board.game.name }}</h6>
             <a class="btn waves-effect" id="copy_code">{{ board.code }}</a>
-            <br><br>
-            <div id="sidebar"></div>
-            <form action="" id="message-form" onsubmit="sendMessage(); return false;">
-                {% csrf_token %}
-                <div class="input-field" id="messages">
-                    <input type="text" class="validate teal lighten-4 blue-grey-text text-darken-3"
-                            id="message" style="width: 100%; height: 30px;">
-                </div>
-                <button type="submit" class="btn-floating waves-effect">
-                    <i class="material-icons small white-text">send</i>
-                </button>
-            </form>
-            <br><br>
         </div>
+        <br><br>
+        <div id="sidebar"></div>
+        <form action="" id="message-form" onsubmit="sendMessage(); return false;">
+            {% csrf_token %}
+            <div class="input-field" id="messages">
+                <input type="text" class="validate teal lighten-4 blue-grey-text text-darken-3"
+                        id="message" style="width: 100%; height: 30px;">
+            </div>
+            <button type="submit" class="btn-floating waves-effect">
+                <i class="material-icons small white-text">send</i>
+            </button>
+        </form>
+        <br><br>
     </div>
 </div>
 {% endblock %}
