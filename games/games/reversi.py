@@ -83,10 +83,6 @@ class Reversi(Game):
         for adj in adjs:
             pass
 
-
-        print("Checking legality", adjs)
-        return len(adjs) > 0
-
     def count_pieces(self, state, owner_id):
         pass
 
