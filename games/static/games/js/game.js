@@ -1,9 +1,61 @@
-function loadBoard(cx=-1, cy=-1) {
-    $('#board').load('board', 'cx=' + cx + '&cy=' + cy + '&sx=' + sx + '&sy=' + sy);
+const csrftoken = Cookies.get('csrftoken');
+
+function csrfSafeMethod(method) {
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }
 
-function loadSidebar(action='') {
-    $('#sidebar').load('sidebar', action);
+$.ajaxSetup({
+    beforeSend: function(xhr, settings) {
+        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+        }
+    }
+});
+
+var loc = window.location;
+var socket = new WebSocket('ws://' + loc.host + loc.pathname + 'updater/');
+
+socket.onmessage = event => {
+    $('#board').load('board');
+    $('#sidebar').load('sidebar');
+}
+
+function clickBoard(cx=-1, cy=-1, sx=-1, sy=-1) {
+    $('#board').load('board/',
+        {'cx': cx, 'cy': cy, 'sx': sx, 'sy': sy});
+}
+
+function setState(state) {
+    $('#board').load('board', 'state=' + state);
+    $('#sidebar').load('sidebar', 'state=' + state);
+}
+
+function join(user) {
+    $('#sidebar').load('sidebar/', {'join': true, 'user': user});
+}
+
+function leave(user) {
+    $('#sidebar').load('sidebar/', {'leave': true, 'user': user});
+}
+
+function transfer(user) {
+    $('#sidebar').load('sidebar/', {'transfer': true, 'user': user});
+}
+
+function promote(user) {
+    $('#sidebar').load('sidebar/', {'promote': true, 'user': user});
+}
+
+function demote(user) {
+    $('#sidebar').load('sidebar/', {'demote': true, 'user': user});
+}
+
+function start() {
+    $('#sidebar').load('sidebar/', {'start': true});
+}
+
+function cancel() {
+    $('#sidebar').load('sidebar/', {'cancel': true});
 }
 
 function sendMessage() {
@@ -16,10 +68,10 @@ function sendMessage() {
 $(() => {
     $('#board').load('board');
     $('#sidebar').load('sidebar');
-    setInterval(() => {
-        if(!turn) loadBoard();
-        loadSidebar();
-    }, 500);
+    //setInterval(() => {
+        //if(!turn) refreshBoard();
+        //refreshSidebar();
+    //}, 500);
 
     $('#copy_code').click(() => {
         navigator.clipboard.writeText(CODE).then(() => {

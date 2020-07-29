@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block header %}
+{% csrf_token %}
 <script src="{% static 'games/js/game.js' %}"></script>
 <script type="text/javascript">
     const CODE = '{{ board.code }}';

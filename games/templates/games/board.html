@@ -1,16 +1,12 @@
 {% load static %}
-<script type="text/javascript">
-    var sx = {{ selected.x }}, sy = {{ selected.y }};
-    var turn = {% if turn %} true {% else %} false {% endif %};
-</script>
 <table class="board"><tbody>
     {% for row in tiles %}
     <tr class="row">
         {% for tile in row %}
         <td class="tile" style="--aspect-ratio: 1/1; background: {{ tile.background }}"
-                onclick="loadBoard({{ tile.x }}, {{ tile.y }})">
+                onclick="clickBoard({{ tile.x }}, {{ tile.y }}, {{ selected.x }}, {{ selected.y }})">
             {% if tile.texture %}
-            <img src="{% static tile.texture %}"}>
+            <img class="waves-effect" src="{% static tile.texture %}"}>
             {% endif %}
         </td>
         {% endfor %}

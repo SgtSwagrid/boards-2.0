@@ -28,8 +28,6 @@ class Chess(Game):
             capture = abs(x_to - piece.x) == 1 and state.pieces[x_to][y_to] and\
                       y_to - piece.y == dir
 
-            print('from: (', piece.x, ', ', piece.y, '), to: (', x_to, ', ', y_to, '), dir: ', dir, ', home: ', home, ', straight: ', straight, ', normal: ', normal, ', double: ', double, ', capture: ', capture, ', valid: ', (normal or double or capture))
-
             return normal or double or capture
 
     class Rook(PieceType):

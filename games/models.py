@@ -67,6 +67,7 @@ class BoardModel(models.Model):
         PlayerModel.objects.create(user=user, board=self,
             order=order, leader=order == 0)
 
+
     def start(self):
         self.status = 1
         self.save()
