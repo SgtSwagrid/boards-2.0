@@ -56,9 +56,6 @@ class BoardModel(models.Model):
     def game(self):
         return games[self.game_id]
 
-    def messages(self):
-        return MessageModel.objects.filter(board=self)
-
     def users(self):
         return map(lambda p: p.user, self.players())
 
@@ -66,7 +63,6 @@ class BoardModel(models.Model):
         order = self.players().count()
         PlayerModel.objects.create(user=user, board=self,
             order=order, leader=order == 0)
-
 
     def start(self):
         self.status = 1
@@ -79,8 +75,7 @@ class BoardModel(models.Model):
             'state': self.state,
             'players': self.players(),
             'status': self.status,
-            'time': self.time,
-            'messages': self.messages()
+            'time': self.time
         }
 
 class PlayerModel(models.Model):
@@ -287,17 +282,3 @@ class ChangeModel(models.Model):
     x = models.IntegerField()
 
     y = models.IntegerField()
-
-class MessageModel(models.Model):
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-
-    message = models.CharField(max_length=500)
-
-    board = models.ForeignKey(BoardModel, on_delete=models.CASCADE)
-
-    time = models.DateTimeField(auto_now=True)
-
-    class Meta: ordering = ['board', '-time']
-
-    def __str__(self): return self.board.code + ":" + str(self.id)

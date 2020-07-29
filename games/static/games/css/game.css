@@ -1,0 +1,47 @@
+.sidebar {
+    position: absolute;
+    left: 0;
+    width: 275px;
+    height: 100%;
+    padding: 10px;
+}
+
+.sidebar-header {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 125px;
+    padding: 10px 10px 10px 25px;
+}
+
+.sidebar-content {
+    position: absolute;
+    top: 140px;
+    width: 255px;
+}
+
+.sidebar-footer {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 10px;
+}
+
+.message-history {
+    height: 150px;
+    overflow-y: scroll;
+    padding: 10px;
+}
+
+.message-input {
+    padding: 10px;
+}
+
+.board {
+    position: absolute;
+    left: 295px;
+    top: 20px;
+    width: 800px;
+}

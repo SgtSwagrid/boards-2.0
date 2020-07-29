@@ -13,12 +13,12 @@ $.ajaxSetup({
 });
 
 var loc = window.location;
-var socket = new WebSocket('ws://' + loc.host + loc.pathname + 'updater/');
 
+var socket = new WebSocket('ws://' + loc.host + loc.pathname + 'updater/');
 socket.onmessage = event => {
     $('#board').load('board');
     $('#sidebar').load('sidebar');
-}
+};
 
 function clickBoard(cx=-1, cy=-1, sx=-1, sy=-1) {
     $('#board').load('board/',
@@ -58,20 +58,18 @@ function cancel() {
     $('#sidebar').load('sidebar/', {'cancel': true});
 }
 
+var messageSocket = new WebSocket('ws://' + loc.host + loc.pathname + 'messages/');
+messageSocket.onmessage = event => {
+    $('#messages')[0].append('<p>' + event.data + '</p>');
+};
+
 function sendMessage() {
-    $(document).on('submit', '#message-form', () => {
-        $.get('sidebar?message=' + $('#message')[0].value);
-        $('#message')[0].value = '';
-    });
+    messageSocket.send('message: ' + $('#message')[0].value);
 }
 
 $(() => {
     $('#board').load('board');
     $('#sidebar').load('sidebar');
-    //setInterval(() => {
-        //if(!turn) refreshBoard();
-        //refreshSidebar();
-    //}, 500);
 
     $('#copy_code').click(() => {
         navigator.clipboard.writeText(CODE).then(() => {

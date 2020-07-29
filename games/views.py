@@ -96,12 +96,6 @@ def sidebar_view(request, board_code):
 
     if board.status == 0: setup(request, board)
 
-    if 'message' in request.GET and request.user.is_authenticated:
-        MessageModel.objects.create(
-            user=request.user,
-            message=request.GET['message'],
-            board=board)
-
     return render(request, 'games/sidebar.html', {
         'board': board.to_dictionary(),
         'state': state_model.to_state(),
