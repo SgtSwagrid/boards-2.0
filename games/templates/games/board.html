@@ -3,11 +3,16 @@
     {% for row in tiles %}
     <tr class="row">
         {% for tile in row %}
-        <td class="tile" style="--aspect-ratio: 1/1; background: {{ tile.background }}"
+        <td class="tile" style="--aspect-ratio: 1/1; background: {{ tile.colour }};"
                 onclick="clickBoard({{ tile.x }}, {{ tile.y }}, {{ selected.x }}, {{ selected.y }})">
-            {% if tile.texture %}
-            <img class="waves-effect" src="{% static tile.texture %}"}>
-            {% endif %}
+            {% for texture in tile.textures %}
+            <img class="piece waves-effect" src="{% static texture.image %}"}
+                style="opacity: {{ texture.opacity }};
+                    left: {{ texture.x }}%;
+                    top: {{ texture.y }}%;
+                    width: {{ texture.width }}%;
+                    height: {{ texture.height }}%;">
+            {% endfor %}
         </td>
         {% endfor %}
     </tr>

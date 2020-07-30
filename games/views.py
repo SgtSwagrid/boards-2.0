@@ -1,9 +1,9 @@
 from django.shortcuts import render, redirect
 
-from games.consumers import *
-from games.games.common.input import ClickInput, Controller
 from .models import *
-from games.games.common.games import games
+from .consumers import *
+from .games.common.games import *
+from .games.common.input import *
 
 def browse_view(request):
 
@@ -58,33 +58,31 @@ def board_view(request, board_code):
     sx, sy = (int(request.POST['sx']), int(request.POST['sy']))\
         if 'sx' in request.POST else (-1, -1)
 
-    contr = Controller(selected={(sx, sy)} if sx != -1 else {})
+    display = Display(game.width, game.height)
+    if sx != -1: display = display.select(sx, sy)
 
     if cx != -1 and board.status == 1 and board.current(player)\
             and state_model == board.state:
         input = ClickInput(cx, cy)
-        result, contr = board.input(input, contr)
-        if result: notify_board(board)
-        sx, sy = -1, -1
-        for x, y in contr.selected: sx, sy = x, y
+        result, display = board.input(display, input)
+        if result:
+            notify_board(board)
+            state = result
+
+    if board.current(player) and\
+            state_model == board.state and\
+            board.status == 1:
+        display = display.set_current(True)
+    display = game.display(state, display)
 
     return render(request, 'games/board.html', {
-        'board': board,
-        'tiles': map(lambda y:
-            map(lambda x: {
-                'x': x,
-                'y': y,
-                'width': game.scale(x, y)[0],
-                'height': game.scale(x, y)[1],
-                'texture': game.texture(state, x, y),
-                'background': game.colour(state, x, y, contr),
-                'piece': state.pieces[x][y]
-                    if state.pieces[x][y] else None,
-                'selected': x == sx and y == sy
-            }, range(0, game.width)),
-         range(game.height - 1, -1, -1)),
-        'selected': {'x': sx, 'y': sy},
-        'turn': board.current(player)
+        'tiles': reversed(list(map(list, zip(*display.tiles)))),
+        'selected': {
+            'x': display.selections[0][0]
+                if len(display.selections) > 0 else -1,
+            'y': display.selections[0][1]
+                if len(display.selections) > 0 else -1
+        }
     })
 
 def sidebar_view(request, board_code):

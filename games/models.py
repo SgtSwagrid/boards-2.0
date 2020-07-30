@@ -35,13 +35,13 @@ class BoardModel(models.Model):
 
     def __str__(self): return self.code + " " + self.game().name
 
-    def input(self, input, contr):
-        result, contr = self.game().input(self.state.to_state(), input, contr)
+    def input(self, display, input):
+        result, display = self.game().input(self.state.to_state(), display, input)
         if result:
             self.state = StateModel.states.from_state(result, previous=self.state)
             if self.state.outcome != -2: self.status = 2
             self.save()
-        return result, contr
+        return result, display
 
     def current(self, player):
         return player and player.order == self.state.current

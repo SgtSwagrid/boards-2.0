@@ -23,7 +23,8 @@ class Chess(Game):
 
             straight = x_to == piece.x and not state.pieces[x_to][y_to]
             normal = straight and y_to - piece.y == dir
-            double = straight and y_to - piece.y == 2 * dir and home
+            double = straight and y_to - piece.y == 2 * dir and home and\
+                not state.pieces[piece.x][piece.y + dir]
 
             capture = abs(x_to - piece.x) == 1 and state.pieces[x_to][y_to] and\
                       y_to - piece.y == dir

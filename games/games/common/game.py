@@ -1,3 +1,4 @@
+from games.games.common.input import *
 from games.games.common.state import *
 
 class Game:
@@ -41,13 +42,13 @@ class Game:
         return piece and piece.owner == state.turn.current and\
                piece.type.moveable(state, piece)
 
-    def input(self, state, input, contr):
+    def input(self, state, display, input):
 
         for action in self.actions:
             if isinstance(input, action.input):
-                result, contr = action.apply(state, input, contr)
-                if result: return result, contr
-        return None, contr
+                result, display = action.apply(state, display, input)
+                if result: return result, display
+        return None, display
 
     def setup(self):
 
@@ -67,16 +68,26 @@ class Game:
     def piece(self, x, y):
         return None
 
-    def texture(self, state, x, y):
-        piece = state.pieces[x][y]
-        if piece: return piece.type.texture(piece.owner)
-        else: return None
+    def display(self, state, display):
 
-    def scale(self, x, y):
-        return 1, 1
+        for x in range(0, self.width):
+            for y in range(0, self.height):
 
-    def colour(self, state, x, y, contr):
-        if contr.is_selected(x, y): return self.selected_colour
+                colour = self.colour(state, display, x, y)
+                display = display.set_colour(x, y, colour)
+
+                if state.pieces[x][y]:
+                    texture = self.texture(state, x, y)
+                    display = display.add_texture(x, y, Texture(texture))
+
+        if display.current:
+            for action in self.actions:
+                display = action.display(state, display)
+
+        return display
+
+    def colour(self, state, display, x, y):
+        if display.tiles[x][y].selected: return self.selected_colour
         elif state.changed(x, y): return self.modified_colour
         else: return self.background(x, y)
 
@@ -84,8 +95,17 @@ class Game:
         if (x + y) % 2 == 0: return '#FDCB6E'
         else: return '#FFEAA7'
 
+    attack_icon = Texture('games/img/common/attack.png', 0.8)
     selected_colour = '#6A89CC'
     modified_colour = '#74B9FF'
+
+    def texture(self, state, x, y):
+        piece = state.pieces[x][y]
+        if piece: return piece.type.texture(piece.owner)
+        else: return None
+
+    def scale(self, x, y):
+        return 1, 1
 
 class PieceType:
 

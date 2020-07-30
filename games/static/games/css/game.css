@@ -45,3 +45,7 @@
     top: 20px;
     width: 800px;
 }
+
+.piece {
+    position: absolute;
+}
