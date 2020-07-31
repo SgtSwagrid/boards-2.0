@@ -75,7 +75,9 @@ def board_view(request, board_code):
             notify_board(board)
             state = result
 
-    display = display.set_current(current and board.current(player))
+    current = board.status == 1 and board.current(player)\
+        and state_model == board.state
+    display = display.set_current(current)
     display = game.display(state, display)
 
     return render(request, 'games/board.html', {
@@ -85,7 +87,8 @@ def board_view(request, board_code):
                 if len(display.selections) > 0 else -1,
             'y': display.selections[0][1]
                 if len(display.selections) > 0 else -1
-        }
+        },
+        'current': current
     })
 
 def sidebar_view(request, board_code):
