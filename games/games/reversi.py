@@ -28,17 +28,26 @@ class Reversi(Game):
                 len(self.flips(state, piece)) > 0
 
     def place_piece(self, state, piece):
-        state = state.place_piece(piece)
+
+        state = state.place_piece(piece)\
+            .add_score(state.turn.current, 1)
 
         flips = self.flips(state, piece)
 
         for pos in flips:
-            state = state.place_piece(Piece(self.ReversiPiece(),
-                state.turn.current, pos[0], pos[1]))
+            state = state\
+                .add_score(state.pieces[pos[0]][pos[1]].owner, -1)\
+                .add_score(state.turn.current, 1)\
+                .place_piece(Piece(self.ReversiPiece(),
+                    state.turn.current, pos[0], pos[1]))
 
         self.legal_next(state)
-
         return state.end_turn()
+
+    def setup(self):
+        return super().setup()\
+            .add_score(0, 2)\
+            .add_score(1, 2)
 
     def piece(self, x, y):
 

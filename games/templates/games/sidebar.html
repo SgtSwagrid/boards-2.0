@@ -5,13 +5,13 @@
         <a class="btn waves-effect" id="copy_code">{{ board.code }}</a>
     </div>
     <div class="sidebar-content">
-        {% for player in board.players %}
+        {% for player in players %}
         <h6 class="medium-text white-text">
             <i class="material-icons small white-text left">person</i>
             {{ player.user }}
         </h6>
         <h6 class="small-text white-text">
-            {{ player.score }} pts &#x2022 {{ player.time|time:"i:s" }}
+            {{ player.state.score }} pts &#x2022 {{ player.player.time|time:"i:s" }}
             {% if game.state and game.state.turn == player %}
             &#x2022 Playing
             {% endif %}
@@ -44,7 +44,7 @@
         {% endfor %}
         {% if board.status == 0 %}
         <br>
-        {% if user in users %}
+        {% if this_player %}
         <a class="btn waves-effect block" onclick="leave('{{ user.id }}')">
             Leave Game
             <i class="material-icons small white-text right">close</i>

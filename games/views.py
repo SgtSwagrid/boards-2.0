@@ -53,26 +53,29 @@ def board_view(request, board_code):
     game = board.game()
     player = board.player(request.user)
 
-    cx, cy = (int(request.POST['cx']), int(request.POST['cy']))\
-        if 'cx' in request.POST else (-1, -1)
-    sx, sy = (int(request.POST['sx']), int(request.POST['sy']))\
-        if 'sx' in request.POST else (-1, -1)
+    cx, cy = -1, -1
+    if 'cx' in request.POST:
+        cx, cy = int(request.POST['cx']), int(request.POST['cy'])
+
+    sx, sy = -1, -1
+    if 'sx' in request.POST:
+        sx, sy = int(request.POST['sx']), int(request.POST['sy'])
 
     display = Display(game.width, game.height)
     if sx != -1: display = display.select(sx, sy)
 
-    if cx != -1 and board.status == 1 and board.current(player)\
-            and state_model == board.state:
-        input = ClickInput(cx, cy)
-        result, display = board.input(display, input)
+    current = board.status == 1 and board.current(player)\
+        and state_model == board.state
+
+    if cx != -1 and current:
+        input = BoardInput(cx, cy)
+        result, display = game.input(state, display, input)
         if result:
+            board.set_state(result)
             notify_board(board)
             state = result
 
-    if board.current(player) and\
-            state_model == board.state and\
-            board.status == 1:
-        display = display.set_current(True)
+    display = display.set_current(current and board.current(player))
     display = game.display(state, display)
 
     return render(request, 'games/board.html', {
@@ -95,9 +98,16 @@ def sidebar_view(request, board_code):
     if board.status == 0: setup(request, board)
 
     return render(request, 'games/sidebar.html', {
-        'board': board.to_dictionary(),
+        'board': board,
         'state': state_model.to_state(),
-        'users': board.users(),
+        'players': [
+            {
+                'user': player.user,
+                'player': player,
+                'state': state,
+            }
+            for player, state in
+                zip(board.players(), state_model.player_states())],
         'this_player': board.player(request.user),
         'previous': state_model.previous,
         'next': StateModel.states.filter(previous=state_model).first(),

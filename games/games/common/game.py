@@ -96,6 +96,7 @@ class Game:
         else: return '#FFEAA7'
 
     attack_icon = Texture('games/img/common/attack.png', 0.8)
+    place_icon = Texture('games/img/common/place.png', 0.8)
     selected_colour = '#6A89CC'
     modified_colour = '#74B9FF'
 

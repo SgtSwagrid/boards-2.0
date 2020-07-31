@@ -67,11 +67,11 @@ class State:
 
     def set_score(self, player, score):
         return State(state=self,
-            players=[p if p.order != player.order else
+            players=[p if p.order != player else
                 PlayerState(player=p, score=score) for p in self.players])
 
     def add_score(self, player, score):
-        return self.set_score(player, player.score + score)
+        return self.set_score(player, self.players[player].score + score)
 
     def set_changed(self, x, y):
         return State(state=self, changes=self.changes | {(x, y)})

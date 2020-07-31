@@ -1,9 +1,9 @@
 from games.games.common.input import *
-from games.games.common.state import Piece
+from games.games.common.state import *
 
 class PlaceAction:
 
-    input = ClickInput
+    input = BoardInput
 
     def __init__(self, type):
         self.type = type
@@ -26,13 +26,14 @@ class PlaceAction:
                 piece = Piece(self.type, state.turn.current, x, y)
                 if state.game.place_valid(state, piece):
                     texture = self.type.texture(state.turn.current)
-                    display = display.add_texture(x, y, Texture(texture, 0.2))
+                    display = display.add_texture(x, y, Texture(texture, 0.2))\
+                        .add_texture(x, y, state.game.place_icon)
 
         return display
 
 class MoveAction:
 
-    input = ClickInput
+    input = BoardInput
 
     def apply(self, state, display, input):
 
@@ -70,7 +71,7 @@ class MoveAction:
 
 class RemoveAction:
 
-    input = ClickInput
+    input = BoardInput
 
     def apply(self, state, display, input):
 
@@ -83,5 +84,12 @@ class RemoveAction:
         return None, display
 
     def display(self, state, display):
+
+        for x in range(0, state.game.width):
+            for y in range(0, state.game.height):
+
+                if state.game.remove_valid(state, state.pieces[x][y]):
+                    display = display.add_texture(x, y, state.game.attack_icon)\
+                        .enable_buffering(x, y)
 
         return display

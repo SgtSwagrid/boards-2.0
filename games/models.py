@@ -35,13 +35,10 @@ class BoardModel(models.Model):
 
     def __str__(self): return self.code + " " + self.game().name
 
-    def input(self, display, input):
-        result, display = self.game().input(self.state.to_state(), display, input)
-        if result:
-            self.state = StateModel.states.from_state(result, previous=self.state)
-            if self.state.outcome != -2: self.status = 2
-            self.save()
-        return result, display
+    def set_state(self, state):
+        self.state = StateModel.states.from_state(state, previous=self.state)
+        if self.state.outcome != -2: self.status = 2
+        self.save()
 
     def current(self, player):
         return player and player.order == self.state.current
@@ -55,9 +52,6 @@ class BoardModel(models.Model):
 
     def game(self):
         return games[self.game_id]
-
-    def users(self):
-        return map(lambda p: p.user, self.players())
 
     def join(self, user):
         order = self.players().count()
@@ -216,6 +210,9 @@ class StateModel(models.Model):
 
     def previous_state(self):
         return self.previous.to_state() if self.previous else None
+
+    def player_states(self):
+        return PlayerStateModel.players.filter(state=self)
 
 class PlayerStateManager(models.Manager):
 
