@@ -6,24 +6,37 @@
     </div>
     <div class="sidebar-content">
         {% for player in players %}
+        {% if player.player == this_player %}
+        <h6 class="medium-text yellow-text text-lighten-1">
+        {% else %}
         <h6 class="medium-text white-text">
-            <i class="material-icons small white-text left">person</i>
+        {% endif %}
+            {% if player.player.leader %}
+            <i class="material-icons small left">person_add</i>
+            {% else %}
+            <i class="material-icons small left">person</i>
+            {% endif %}
             {{ player.user }}
         </h6>
         <h6 class="small-text white-text">
-            {{ player.state.score }} pts &#x2022 {{ player.player.time|time:"i:s" }}
-            {% if game.state and game.state.turn == player %}
+            {% if player.state.score == 1 %}
+            {{ player.state.score }} pt
+            {% else %}
+            {{ player.state.score }} pts
+            {% endif %}
+            &#x2022 {{ player.player.time|time:"i:s" }}
+            {% if board.status == 1 and player.state.order == state.turn.current %}
             &#x2022 Playing
             {% endif %}
         </h6>
         {% if this_player and this_player.leader and board.status == 0 %}
-        {% if not player == board.players.first %}
+        {% if not player.player == board.players.first %}
         <a class="btn-floating btn-small indigo lighten-2 waves-effect"
                 onclick="promote('{{ player.user.id }}')">
             <i class="material-icons small white-text">keyboard_arrow_up</i>
         </a>
         {% endif %}
-        {% if not player == board.players.last %}
+        {% if not player.player == board.players.last %}
         <a class="btn-floating btn-small indigo lighten-2 waves-effect"
                 onclick="demote('{{ player.user.id }}')">
             <i class="material-icons small white-text">keyboard_arrow_down</i>
@@ -33,7 +46,7 @@
                 onclick="leave('{{ player.user.id }}')">
             <i class="material-icons small white-text">close</i>
         </a>
-        {% if not player.leader %}
+        {% if not player.player.leader %}
         <a class="btn-floating btn-small orange lighten-3 waves-effect"
                 onclick="transfer('{{ player.user.id }}')">
             <i class="material-icons small white-text">star</i>
