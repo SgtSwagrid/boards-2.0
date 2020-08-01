@@ -52,18 +52,11 @@ class Game:
 
     def setup(self):
 
-        players = [PlayerState(order=i, score=0)
-            for i in range(0, self.players)]
-
         pieces = [[self.piece(x, y)
             for y in range(0, self.height)]
                 for x in range(0, self.width)]
 
-        turn = Turn(current=0, stage=0, ply=0)
-        outcome = Outcome(finished=False, winner=None, draw=False)
-
-        return State(game=self, players=players, pieces=pieces,
-            turn=turn, outcome=outcome, previous=None)
+        return State(game=self, pieces=pieces)
 
     def piece(self, x, y):
         return None

@@ -139,6 +139,7 @@ class StateManager(models.Manager):
             current=state.turn.current,
             stage=state.turn.stage,
             ply=state.turn.ply,
+            epoch=state.turn.epoch,
             outcome=-2 if not state.outcome.finished else
                 -1 if state.outcome.draw else
                 state.outcome.winner.id,
@@ -168,6 +169,8 @@ class StateModel(models.Model):
 
     ply = models.IntegerField(default=0)
 
+    epoch = models.IntegerField(default=0)
+
     outcome = models.IntegerField(default=-2)
 
     previous = models.ForeignKey('StateModel',
@@ -189,15 +192,16 @@ class StateModel(models.Model):
         turn = Turn(
             current=self.current,
             stage=self.stage,
-            ply=self.ply)
+            ply=self.ply,
+            epoch=self.epoch)
 
         outcome = Outcome(
             finished=self.outcome > -2,
             winner=players[self.outcome] if self.outcome > -1 else None,
             draw=self.outcome == -1)
 
-        changes = {(change.x, change.y)
-            for change in ChangeModel.objects.filter(state=self)}
+        changes = [(change.x, change.y)
+            for change in ChangeModel.objects.filter(state=self)]
 
         return State(
             game=games[self.game_id],
@@ -220,7 +224,8 @@ class PlayerStateManager(models.Manager):
         return super().create(
             state=state,
             order=player.order,
-            score=player.score)
+            score=player.score,
+            mode=player.mode)
 
 class PlayerStateModel(models.Model):
 
@@ -232,12 +237,15 @@ class PlayerStateModel(models.Model):
 
     score = models.IntegerField(default=0)
 
+    mode = models.IntegerField(default=0)
+
     class Meta: ordering = ['state', 'order']
 
     def to_player(self):
         return PlayerState(
             order=self.order,
-            score=self.score)
+            score=self.score,
+            mode=self.mode)
 
 class PieceManager(models.Manager):
 
@@ -247,7 +255,8 @@ class PieceManager(models.Manager):
             type=piece.type.id,
             owner=piece.owner,
             x=piece.x,
-            y=piece.y)
+            y=piece.y,
+            mode=piece.mode)
 
 class PieceModel(models.Model):
 
@@ -263,6 +272,8 @@ class PieceModel(models.Model):
 
     y = models.IntegerField()
 
+    mode = models.IntegerField(default=0)
+
     class Meta: ordering = ['state']
 
     def to_piece(self):
@@ -270,7 +281,8 @@ class PieceModel(models.Model):
             type=games[self.state.game_id].types[self.type],
             owner=self.owner,
             x=self.x,
-            y=self.y)
+            y=self.y,
+            mode=self.mode)
 
 class ChangeModel(models.Model):
 
