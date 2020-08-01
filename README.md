@@ -11,7 +11,7 @@ pip install channels_redis
 pip install mysqlclient
 pip install python-dotenv
 ```
-\boards\boards\.env:
+/boards/boards/.env:
 ```python
 SECRET_KEY=...
 DB_NAME=...
