@@ -3,3 +3,4 @@ pyvenv.cfg
 Lib/
 Scripts/
 .idea/
+*.pyc

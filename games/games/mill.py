@@ -1,5 +1,5 @@
 from .common.game import *
-from .common.action import *
+from .common.handler import *
 
 #  note to self: phase 1 through 3 are hardcoded conditionals rather than actual variables
 
@@ -75,7 +75,7 @@ class Mill(Game):
 
     types = [MillPiece()]
 
-    actions = [PlaceAction(MillPiece()), MoveAction(), RemoveAction()]
+    handlers = [PlaceHandler(MillPiece()), MoveHandler(), RemoveHandler()]
 
     #  pieces need only be selected when to be moved and in no other case
     def moveable(self, state, piece):

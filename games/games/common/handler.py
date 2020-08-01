@@ -1,16 +1,16 @@
 from games.games.common.input import *
 from games.games.common.state import *
 
-class PlaceAction:
+class PlaceHandler:
 
-    input = BoardInput
+    event = BoardEvent
 
     def __init__(self, type):
         self.type = type
 
-    def apply(self, state, display, input):
+    def apply(self, state, display, event):
 
-        clicked = Piece(self.type, state.turn.current, input.x, input.y)
+        clicked = Piece(self.type, state.turn.current, event.x, event.y)
 
         if state.game.place_valid(state, clicked):
             result = state.game.place_piece(state.clear_changes(), clicked)
@@ -31,25 +31,25 @@ class PlaceAction:
 
         return display
 
-class MoveAction:
+class MoveHandler:
 
-    input = BoardInput
+    event = BoardEvent
 
-    def apply(self, state, display, input):
+    def apply(self, state, display, event):
 
-        clicked = state.pieces[input.x][input.y]
+        clicked = state.pieces[event.x][event.y]
 
         if len(display.selections) > 0:
             pos = display.selections[0]
             selected = state.pieces[pos[0]][pos[1]]
 
-            if state.game.move_valid(state, selected, input.x, input.y):
+            if state.game.move_valid(state, selected, event.x, event.y):
                 result = state.game.move_piece(
-                    state.clear_changes(), selected, input.x, input.y)
+                    state.clear_changes(), selected, event.x, event.y)
                 return result, display.clear_selections()
 
         if state.game.moveable(state, clicked):
-            return None, display.clear_selections().select(input.x, input.y)
+            return None, display.clear_selections().select(event.x, event.y)
 
         return None, display.clear_selections()
 
@@ -69,13 +69,13 @@ class MoveAction:
 
         return display
 
-class RemoveAction:
+class RemoveHandler:
 
-    input = BoardInput
+    event = BoardEvent
 
-    def apply(self, state, display, input):
+    def apply(self, state, display, event):
 
-        clicked = state.pieces[input.x][input.y]
+        clicked = state.pieces[event.x][event.y]
 
         if state.game.remove_valid(state, clicked):
             result = state.game.remove_piece(state.clear_changes(), clicked)

@@ -1,6 +1,6 @@
 import copy
 
-class BoardInput:
+class BoardEvent:
 
     def __init__(self, x, y):
         self.x = x

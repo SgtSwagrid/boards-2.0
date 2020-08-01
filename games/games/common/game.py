@@ -4,7 +4,7 @@ from games.games.common.state import *
 class Game:
 
     types = []
-    actions = []
+    handlers = []
 
     def in_bounds(self, x, y):
         return 0 <= x < self.width and 0 <= y < self.height
@@ -42,11 +42,11 @@ class Game:
         return piece and piece.owner == state.turn.current and\
                piece.type.moveable(state, piece)
 
-    def input(self, state, display, input):
+    def event(self, state, display, event):
 
-        for action in self.actions:
-            if isinstance(input, action.input):
-                result, display = action.apply(state, display, input)
+        for handler in self.handlers:
+            if isinstance(event, handler.event):
+                result, display = handler.apply(state, display, event)
                 if result: return result, display
         return None, display
 
@@ -74,8 +74,8 @@ class Game:
                     display = display.add_texture(x, y, Texture(texture))
 
         if display.current:
-            for action in self.actions:
-                display = action.display(state, display)
+            for handler in self.handlers:
+                display = handler.display(state, display)
 
         return display
 

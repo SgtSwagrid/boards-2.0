@@ -68,8 +68,7 @@ def board_view(request, board_code):
         and state_model == board.state
 
     if cx != -1 and current:
-        input = BoardInput(cx, cy)
-        result, display = game.input(state, display, input)
+        result, display = game.event(state, display, BoardEvent(cx, cy))
         if result:
             board.set_state(result)
             notify_board(board)

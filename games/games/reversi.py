@@ -1,5 +1,5 @@
 from .common.game import *
-from .common.action import *
+from .common.handler import *
 
 class Reversi(Game):
 
@@ -18,7 +18,7 @@ class Reversi(Game):
 
     types = [ReversiPiece()]
 
-    actions = [PlaceAction(ReversiPiece())]
+    handlers = [PlaceHandler(ReversiPiece())]
 
     modified_colour = '#16a085'
 

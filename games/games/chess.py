@@ -1,5 +1,5 @@
 from .common.game import *
-from .common.action import *
+from .common.handler import *
 
 class Chess(Game):
 
@@ -102,7 +102,7 @@ class Chess(Game):
 
     types = [Pawn(), Rook(), Knight(), Bishop(), Queen(), King()]
 
-    actions = [MoveAction()]
+    handlers = [MoveHandler()]
 
     def piece(self, x, y):
 
