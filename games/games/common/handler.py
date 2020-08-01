@@ -1,9 +1,17 @@
 from games.games.common.input import *
 from games.games.common.state import *
 
-class PlaceHandler:
+class Handler:
 
     event = BoardEvent
+
+    def apply(self, state, display, event):
+        return None, display
+
+    def display(self, state, display):
+        return display
+
+class PlaceHandler(Handler):
 
     def __init__(self, type):
         self.type = type
@@ -31,9 +39,7 @@ class PlaceHandler:
 
         return display
 
-class MoveHandler:
-
-    event = BoardEvent
+class MoveHandler(Handler):
 
     def apply(self, state, display, event):
 
@@ -69,9 +75,7 @@ class MoveHandler:
 
         return display
 
-class RemoveHandler:
-
-    event = BoardEvent
+class RemoveHandler(Handler):
 
     def apply(self, state, display, event):
 
