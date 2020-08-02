@@ -85,10 +85,10 @@
                     <h6 class="white-text medium-text right-align">Pending</h6>
                     {% elif board.status == 1 %}
                     <h6 class="white-text medium-text right-align">In Progress</h6>
-                    {% elif board.state.outcome == 0 %}
-                    <br><h6 class="white-text medium-text right-align">Draw</h6>
+                    {% elif board.winner %}
+                    <br><h6 class="white-text medium-text right-align">{{ board.winner.user }}</h6>
                     {% else %}
-                    <br><h6 class="white-text medium-text right-align">Winner ...</h6>
+                    <br><h6 class="white-text medium-text right-align">Draw</h6>
                     {% endif %}
                     <h6 class="white-text small-text right-align">{{ board.time|date:"j/n/y" }}</h6>
                 </div>
