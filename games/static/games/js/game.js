@@ -58,6 +58,10 @@ function cancel() {
     $('#sidebar').load('sidebar/', {'cancel': true});
 }
 
+function forfeit() {
+    $('#sidebar').load('sidebar/', {'forfeit': true});
+}
+
 $(() => {
 
     $('#board').load('board');
