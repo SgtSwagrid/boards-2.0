@@ -67,7 +67,8 @@ $(() => {
         var messageSocket = new WebSocket(loc + 'messages/');
         messageSocket.onmessage = event => {
             message = JSON.parse(event.data);
-            html = '<h6> [' + message.user + '] ' + message.message + '</h6>';
+            html = '<h6><span class=teal-text>[' + message.user
+                + ']</span> ' + message.message + '</h6>';
             $('#messages').append(html);
             var messages = $('#messages')[0];
             messages.scrollTop = messages.scrollHeight - messages.clientHeight;
