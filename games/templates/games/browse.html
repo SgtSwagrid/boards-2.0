@@ -26,6 +26,7 @@
         </div>
     </div>
 
+    {% if pages %}
     <ul class="pagination center">
         {% if page == 1 %}
         <li class="disabled"><a href="#!">
@@ -53,6 +54,14 @@
         </a></li>
         {% endif %}
     </ul>
+    {% endif %}
+
+    {% if not pages %}
+    <div class="center-align">
+        <br>
+        <h6 class="medium-text indigo-text">There are no existing boards.</h6>
+    </div>
+    {% endif %}
 
     {% for board in boards %}
     <a href="/games/{{ board.code }}">
@@ -87,6 +96,7 @@
     </a>
     {% endfor %}
 
+    {% if pages %}
     <ul class="pagination center">
         {% if page == 1 %}
         <li class="disabled"><a href="#!">
@@ -114,5 +124,6 @@
         </a></li>
         {% endif %}
     </ul>
+    {% endif %}
 </div>
 {% endblock %}
