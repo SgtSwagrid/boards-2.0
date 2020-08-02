@@ -69,6 +69,8 @@ class BoardModel(models.Model):
             'state': self.state,
             'players': self.players(),
             'status': self.status,
+            'winner': self.players()[self.state.outcome]\
+                if self.state.outcome > -1 else None,
             'time': self.time
         }
 
@@ -86,6 +88,8 @@ class PlayerModel(models.Model):
     leader = models.BooleanField(default=False)
 
     time = models.TimeField(default=time(0, 0, 0))
+
+    forfeited = models.BooleanField(default=False)
 
     class Meta: ordering = ['board', 'order']
 
@@ -130,6 +134,17 @@ class PlayerModel(models.Model):
         self.leader = True
         self.save()
 
+    def concede(self):
+
+        self.forfeited = True
+        self.save()
+        remaining = self.board.players().filter(forfeited=False)
+        if len(remaining) == 1:
+            self.board.state.outcome = remaining.get().order
+            self.board.state.save()
+            self.board.status = 2
+            self.board.save()
+
 class StateManager(models.Manager):
 
     def from_state(self, state, previous):
@@ -142,7 +157,7 @@ class StateManager(models.Manager):
             epoch=state.turn.epoch,
             outcome=-2 if not state.outcome.finished else
                 -1 if state.outcome.draw else
-                state.outcome.winner.id,
+                state.outcome.winner,
             previous=previous)
 
         for player in state.players:
@@ -197,7 +212,7 @@ class StateModel(models.Model):
 
         outcome = Outcome(
             finished=self.outcome > -2,
-            winner=players[self.outcome] if self.outcome > -1 else None,
+            winner=self.outcome,
             draw=self.outcome == -1)
 
         changes = [(change.x, change.y)
