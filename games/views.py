@@ -24,7 +24,11 @@ def browse_view(request):
 
 def create_view(request):
 
-    if 'game' in request.GET and request.user.is_authenticated:
+    if 'game' in request.GET:
+
+        if not request.user.is_authenticated:
+            return redirect('/users/login?next=/games/create?game='
+                + request.GET['game'])
 
         game = games[int(request.GET['game'])]
         board = BoardModel.boards.create(game=game)
