@@ -69,6 +69,8 @@ class BoardModel(models.Model):
             'state': self.state,
             'players': self.players(),
             'status': self.status,
+            'winner': self.players[self.state.outcome]\
+                if self.state.outcome > -1 else None,
             'time': self.time
         }
 
