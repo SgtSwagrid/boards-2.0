@@ -14,7 +14,7 @@ def browse_view(request):
     end = start + boards_per_page - 1
 
     boards = BoardModel.boards.all()
-    pages = max(math.ceil(len(boards) / boards_per_page), 1)
+    pages = math.ceil(len(boards) / boards_per_page)
 
     return render(request, 'games/browse.html', {
         'boards': [b.to_dictionary() for b in boards[start:end]],

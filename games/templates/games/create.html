@@ -6,14 +6,18 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container center-align">
+    <br><br><br>
+    <i class="large material-icons indigo-text">videogame_asset</i>
     <br><br>
+    <h6 class="large-text indigo-text">Create a new board.</h6>
+    <br><br><br>
     {% for game in games %}
     {% if not forloop.counter|divisibleby:2 %}
     <div class="row">
     {% endif %}
     <div class="col s6">
-        <a class="card-panel block z-depth-3 teal waves-effect center-align" href="?game={{ game.id }}">
+        <a class="card-panel block z-depth-3 indigo darken-2 waves-effect center-align" href="?game={{ game.id }}">
             <i class="material-icons medium white-text left">golf_course</i>
             <h6 class="large-text white-text">{{ game.name }}</h6>
         </a>
@@ -25,5 +29,9 @@
     {% if not games.size|divisibleby:2 %}
     </div>
     {% endif %}
+    <br>
+    <a class="waves-effect waves-light btn-large" href="/games">
+        <i class="material-icons left">cancel</i>Cancel
+    </a>
 </div>
 {% endblock %}
