@@ -71,7 +71,7 @@ class Reversi(Game):
             else: # This player has a turn at 'skip' skips
                 break
 
-        if skip > 1: print("Game ended" if game_ended else (str(skip-1)) + " turns skipped")
+        # if skip > 1: print("Game ended" if game_ended else (str(skip-1)) + " turns skipped")
 
         final_state = state.end_turn(skip) if not game_ended\
             else state.end_game(winner=self.get_winner(state))
