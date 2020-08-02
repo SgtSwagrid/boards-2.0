@@ -89,6 +89,8 @@ class PlayerModel(models.Model):
 
     time = models.TimeField(default=time(0, 0, 0))
 
+    forfeited = models.BooleanField(default=False)
+
     class Meta: ordering = ['board', 'order']
 
     def __str__(self): return self.board.code + " " + self.user.username
@@ -131,6 +133,17 @@ class PlayerModel(models.Model):
         other_player.save()
         self.leader = True
         self.save()
+
+    def concede(self):
+
+        self.forfeited = True
+        self.save()
+        remaining = self.board.players().filter(forfeited=False)
+        if len(remaining) == 1:
+            self.board.state.outcome = remaining.get().order
+            self.board.state.save()
+            self.board.status = 2
+            self.board.save()
 
 class StateManager(models.Manager):
 
@@ -199,7 +212,7 @@ class StateModel(models.Model):
 
         outcome = Outcome(
             finished=self.outcome > -2,
-            winner=players[self.outcome] if self.outcome > -1 else None,
+            winner=self.outcome,
             draw=self.outcome == -1)
 
         changes = [(change.x, change.y)

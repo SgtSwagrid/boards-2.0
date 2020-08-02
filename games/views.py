@@ -112,6 +112,11 @@ def sidebar_view(request, board_code):
 
     if board.status == 0: setup(request, board)
 
+    player = board.player(request.user)
+    if board.status == 1 and 'forfeit' in request.POST and player:
+        player.concede()
+        notify_board(board)
+
     return render(request, 'games/sidebar.html', {
         'board': board,
         'state': state_model.to_state(),
@@ -123,6 +128,9 @@ def sidebar_view(request, board_code):
             }
             for player, state in
                 zip(board.players(), state_model.player_states())],
+        'turn': board.players()[board.state.current],
+        'winner': board.players()[board.state.outcome]\
+            if board.state.outcome > -1 else None,
         'this_player': board.player(request.user),
         'previous': state_model.previous,
         'next': StateModel.states.filter(previous=state_model).first(),
@@ -132,7 +140,7 @@ def sidebar_view(request, board_code):
 def setup(request, board):
 
     this_user = request.user
-    this_player = board.players().filter(user=this_user).first()
+    this_player = board.player(this_user)
     leader = this_player and this_player.leader
 
     if 'start' in request.POST and leader:
