@@ -86,7 +86,7 @@
                     {% elif board.status == 1 %}
                     <h6 class="white-text medium-text right-align">In Progress</h6>
                     {% elif board.winner %}
-                    <br><h6 class="white-text medium-text right-align">{{ board.winner.user }} Won</h6>
+                    <h6 class="white-text medium-text right-align">{{ board.winner.user }} Won</h6>
                     {% else %}
                     <br><h6 class="white-text medium-text right-align">Draw</h6>
                     {% endif %}

@@ -26,7 +26,7 @@
     </div>
     {% endif %}
     {% endfor %}
-    {% if not games.size|divisibleby:2 %}
+    {% if not games|length|divisibleby:2 %}
     </div>
     {% endif %}
     <br>

@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import HttpResponse
 import math
 from .models import *
 from .consumers import *
@@ -105,7 +106,7 @@ def board_view(request, board_code):
 
 def sidebar_view(request, board_code):
 
-    board = BoardModel.boards.get(code=board_code)
+    board = BoardModel.boards.filter(code=board_code).get()
     state_model = StateModel.states.filter(
         id=int(request.GET['state'])).first()\
         if 'state' in request.GET else board.state
