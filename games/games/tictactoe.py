@@ -3,7 +3,6 @@ from .common.handler import *
 
 
 class TicTacToe(Game):
-
     name = "Tic Tac Toe"
     id = 1
     width = 3
@@ -23,21 +22,37 @@ class TicTacToe(Game):
     types = [TicTacToePiece()]
     handlers = [PlaceHandler(TicTacToePiece())]
 
+    run_colour = '#16a085'
+
     def setup(self):
-        return super().setup()\
-            .set_score(0, 0)\
+        return super().setup() \
+            .set_score(0, 0) \
             .set_score(1, 0)
 
     def place_valid(self, state, piece):
-        return self.in_bounds(piece.x, piece.y) and\
-                not state.pieces[piece.x][piece.y]
+        return self.in_bounds(piece.x, piece.y) and \
+               not state.pieces[piece.x][piece.y]
 
     def place_piece(self, state, piece):
         state = state.place_piece(piece)
         game_ended = self.has_run(state, piece)
 
-        return state.end_turn() if not game_ended\
+        return state.end_turn() if not game_ended \
             else state.end_game(winner=state.turn.current)
+
+    def colour(self, state, display, x, y):
+        col = super().colour(state, display, x, y)
+
+        last_piece = self.last_piece(state)
+        if last_piece:
+            runs = self.runs(state, last_piece)
+
+            if state.outcome.finished and not state.outcome.draw:
+                for sub_run in runs:
+                    if [x, y] in sub_run:
+                        col = self.run_colour
+
+        return col
 
     def has_run(self, state, piece):
         return len(self.runs(state, piece)) > 0
@@ -54,9 +69,16 @@ class TicTacToe(Game):
                 y_next = piece.y + i * dir[1]
                 if state.friendly(x_next, y_next):
                     sub_runs.append([x_next, y_next])
-                    if len(sub_runs) >= self.target-1:
+                    if len(sub_runs) >= self.target - 1:
                         runs.append(sub_runs)
                         break
-                elif state.enemy(x_next, y_next):
+                else:
                     break
         return runs
+
+    def last_piece(self, state):
+        if len(state.changes) > 0:
+            return Piece(self.types[0], state.turn.current,
+                         state.changes[-1][0], state.changes[-1][1])
+        else:
+            return None
