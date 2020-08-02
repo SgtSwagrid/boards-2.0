@@ -67,7 +67,7 @@ class TicTacToe(Game):
             for mult in [-1, 1]:
                 for i in range(1, max(self.width, self.height)):
                     x_next = piece.x + mult * i * dir[0]
-                    y_next = piece.y + i * dir[1]
+                    y_next = piece.y + mult * i * dir[1]
                     if state.friendly(x_next, y_next):
                         sub_runs.append([x_next, y_next])
                     else:

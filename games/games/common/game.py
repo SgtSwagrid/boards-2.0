@@ -14,10 +14,10 @@ class Game:
         return piece and self.in_bounds(piece.x, piece.y) and\
             piece.owner == state.turn.current and\
             not state.pieces[piece.x][piece.y] and\
-            type.place_valid(state, piece)
+            piece.type.place_valid(state, piece)
 
     def place_piece(self, state, piece):
-        return type.place_piece(state, piece)
+        return piece.type.place_piece(state, piece)
 
     def move_valid(self, state, piece, x_to, y_to):
 
