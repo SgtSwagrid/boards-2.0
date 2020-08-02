@@ -13,5 +13,29 @@
 
 {% block content %}
 <div id="board"></div>
-<div id="sidebar"></div>
+<div class="teal sidebar">
+    <div class="sidebar-header teal darken-1">
+        <h6 class="large-text white-text">{{ board.game.name }}</h6>
+        <a class="btn waves-effect" id="copy_code">{{ board.code }}</a>
+    </div>
+    <div class="sidebar-content">
+        <div id="sidebar"></div>
+    </div>
+    <div class="sidebar-footer">
+        <div class="row">
+            <div class="col s6">
+                <a class="block waves-effect waves-light btn-small" href="/games">
+                    <i class="material-icons left">arrow_back</i>Menu
+                </a>
+            </div>
+            <div class="col s6">
+                <a class="block waves-effect waves-light btn-small" href="/games/create">
+                    <i class="material-icons left">create</i>New
+                </a>
+            </div>
+        </div>
+        <div id="messages" class="teal lighten-3 message-history"></div>
+        <input id="message" class="teal lighten-4 message-input" type="text">
+    </div>
+</div>
 {% endblock %}
