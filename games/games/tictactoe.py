@@ -58,27 +58,29 @@ class TicTacToe(Game):
         return len(self.runs(state, piece)) > 0
 
     def runs(self, state, piece):
-        directions = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, -1], [-1, 1]]
+        directions = [[1, 0], [0, 1], [1, 1], [1, -1]]
         runs = []
 
         for dir in directions:
             sub_runs = []
 
-            for i in range(1, max(self.width, self.height)):
-                x_next = piece.x + i * dir[0]
-                y_next = piece.y + i * dir[1]
-                if state.friendly(x_next, y_next):
-                    sub_runs.append([x_next, y_next])
-                    if len(sub_runs) >= self.target - 1:
-                        runs.append(sub_runs)
+            for mult in [-1, 1]:
+                for i in range(1, max(self.width, self.height)):
+                    x_next = piece.x + mult * i * dir[0]
+                    y_next = piece.y + i * dir[1]
+                    if state.friendly(x_next, y_next):
+                        sub_runs.append([x_next, y_next])
+                    else:
                         break
-                else:
-                    break
+
+            if len(sub_runs) >= self.target - 1: runs.append(sub_runs)
         return runs
 
     def last_piece(self, state):
         if len(state.changes) > 0:
-            return Piece(self.types[0], state.turn.current,
-                         state.changes[-1][0], state.changes[-1][1])
+            return Piece(self.types[0],
+                         state.turn.current,
+                         state.changes[-1][0],
+                         state.changes[-1][1])
         else:
             return None
