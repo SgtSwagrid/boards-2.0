@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-
+import math
 from .models import *
 from .consumers import *
 from .games.common.games import *
@@ -7,10 +7,19 @@ from .games.common.input import *
 
 def browse_view(request):
 
-    boards = BoardModel.boards.all()#.filter(state__outcome=-1)
+    boards_per_page = 10
+
+    page = int(request.GET['page']) if 'page' in request.GET else 1
+    start = (page - 1) * boards_per_page
+    end = start + boards_per_page - 1
+
+    boards = BoardModel.boards.all()
+    pages = max(math.ceil(len(boards) / boards_per_page), 1)
 
     return render(request, 'games/browse.html', {
-        'boards': map(lambda b: b.to_dictionary(), boards)
+        'boards': [b.to_dictionary() for b in boards[start:end]],
+        'page': page,
+        'pages': range(1, pages + 1)
     })
 
 def create_view(request):

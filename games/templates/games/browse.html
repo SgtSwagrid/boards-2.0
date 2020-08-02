@@ -20,13 +20,41 @@
         </div>
         <div class="col m3 push-m3 s6">
             <br>
-            <a class="waves-effect waves-light btn block" id="goto_board">Go
+            <a class="btn block waves-effect waves-light" id="goto_board">Go
                 <i class="material-icons right">send</i>
             </a>
         </div>
     </div>
+
+    <ul class="pagination center">
+        {% if page == 1 %}
+        <li class="disabled"><a href="#!">
+            <i class="material-icons">chevron_left</i>
+        </a></li>
+        {% else %}
+        <li><a href="?page={{ page|add:'-1' }}">
+            <i class="material-icons">chevron_left</i>
+        </a></li>
+        {% endif %}
+        {% for p in pages %}
+        {% if p == page %}
+        <li class="active teal"><a href="#!">{{ p }}</a></li>
+        {% else %}
+        <li class="waves-effect"><a href="?page={{ p }}">{{ p }}</a></li>
+        {% endif %}
+        {% endfor %}
+        {% if page == pages|last %}
+        <li class="disabled"><a href="#!">
+            <i class="material-icons">chevron_right</i>
+        </a></li>
+        {% else %}
+        <li><a href="?page={{ page|add:'1' }}">
+            <i class="material-icons">chevron_right</i>
+        </a></li>
+        {% endif %}
+    </ul>
+
     {% for board in boards %}
-    <br>
     <a href="/games/{{ board.code }}">
         <div class="card-panel block z-depth-3 indigo darken-2 waves-effect waves-teal">
             <div class="row">
@@ -58,5 +86,33 @@
         </div>
     </a>
     {% endfor %}
+
+    <ul class="pagination center">
+        {% if page == 1 %}
+        <li class="disabled"><a href="#!">
+            <i class="material-icons">chevron_left</i>
+        </a></li>
+        {% else %}
+        <li><a href="?page={{ page|add:'-1' }}">
+            <i class="material-icons">chevron_left</i>
+        </a></li>
+        {% endif %}
+        {% for p in pages %}
+        {% if p == page %}
+        <li class="active teal"><a href="#!">{{ p }}</a></li>
+        {% else %}
+        <li class="waves-effect"><a href="?page={{ p }}">{{ p }}</a></li>
+        {% endif %}
+        {% endfor %}
+        {% if page == pages|last %}
+        <li class="disabled"><a href="#!">
+            <i class="material-icons">chevron_right</i>
+        </a></li>
+        {% else %}
+        <li><a href="?page={{ page|add:'1' }}">
+            <i class="material-icons">chevron_right</i>
+        </a></li>
+        {% endif %}
+    </ul>
 </div>
 {% endblock %}
