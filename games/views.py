@@ -114,7 +114,7 @@ def sidebar_view(request, board_code):
 
     player = board.player(request.user)
     if board.status == 1 and 'forfeit' in request.POST and player:
-        player.concede()
+        player.forfeit()
         notify_board(board)
 
     return render(request, 'games/sidebar.html', {

@@ -134,7 +134,7 @@ class PlayerModel(models.Model):
         self.leader = True
         self.save()
 
-    def concede(self):
+    def forfeit(self):
 
         self.forfeited = True
         self.save()
