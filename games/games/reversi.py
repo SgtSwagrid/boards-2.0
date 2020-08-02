@@ -5,22 +5,28 @@ class Reversi(Game):
 
     name = "Reversi"
     id = 3
-    width = 8
-    height = 8
+    width = 4
+    height = 4
     players = 2
 
     class ReversiPiece(PieceType):
         id = 0
 
         def texture(self, owner):
-            if owner == 0: return 'games/img/misc/white_dot.png'     # Player 1 is White
-            else: return 'games/img/misc/black_dot.png'                 # Player 2 is Black
+            if owner == 0:
+                return 'games/img/misc/white_dot.png'  # Player 1 is White
+            else:
+                return 'games/img/misc/black_dot.png'  # Player 2 is Black
 
     types = [ReversiPiece()]
 
     handlers = [PlaceHandler(ReversiPiece())]
 
     modified_colour = '#16a085'
+
+    def place_valid_2(self, state, x, y):
+        piece = Piece(self.ReversiPiece(), state.turn.current, x, y)
+        return self.place_valid(state, piece)
 
     def place_valid(self, state, piece):
         return self.in_bounds(piece.x, piece.y) and\
@@ -41,8 +47,36 @@ class Reversi(Game):
                 .place_piece(Piece(self.ReversiPiece(),
                     state.turn.current, pos[0], pos[1]))
 
-        self.legal_next(state)
-        return state.end_turn()
+
+        # Take for example 4 player game:
+        # Currently is it player 2's turn and they are ending their turn
+        # We must check player 3's then 4s then 1s, then finally if we return
+        #   to player 2, we must end the game
+
+        #
+        skip = 1
+        game_ended = False
+
+        # Loop through all the players once
+        for i in range(len(state.players)):
+            # Get the state by skipping X turns, 1 is next player
+            state_next_player = state.end_turn(skip)
+            current_player = state_next_player.turn.current
+
+            if not self.has_moves(state_next_player):
+                skip += 1
+
+                if current_player == state.turn.current:
+                    game_ended = True
+            else: # This player has a turn at 'skip' skips
+                break
+
+        if skip > 1: print("Game ended" if game_ended else (str(skip-1)) + " turns skipped")
+
+        final_state = state.end_turn(skip) if not game_ended\
+            else state.end_game(winner=self.get_winner(state))
+
+        return final_state
 
     def setup(self):
         return super().setup()\
@@ -86,27 +120,26 @@ class Reversi(Game):
 
         return flips
 
-    def count_pieces(self, state, owner_id):
-        pass
-
-    def adjacents(self, state):
-        ''' Find all positions that are enemy to owner'''
-        adjacents = []
-
-        next_player = (state.turn.current + 1) % self.players
+    def has_moves(self, state):
+        '''Returns true if the current state player has a turn they can play'''
+        has_valid = False
 
         for x in range(self.width):
             for y in range(self.height):
-                if not state.exists(x, y):
-                    adj = False
+                if not state.pieces[x][y]:
+                    if self.place_valid_2(state, x, y):
+                        has_valid = True
+                        return has_valid
 
-                    for i in range(-1, 2):
-                        for j in range(-1, 2):
-                            x_k = x + i
-                            y_k = y + j
-                            if i != 0 and j != 0 and state.exists(x_k, y_k) and not adj:
-                                if state.pieces[x_k][y_k].owner != next_player:
-                                    adjacents.append([x, y])
-                                    adj = True
+        return has_valid
 
-        return adjacents
+    def get_winner(self, state):
+        winning_player = -1
+        winning_score = -1
+
+        for i, player in enumerate(state.players):
+            if player.score > winning_score:
+                winning_score = player.score
+                winning_player = i
+
+        return winning_player
