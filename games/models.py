@@ -142,7 +142,7 @@ class StateManager(models.Manager):
             epoch=state.turn.epoch,
             outcome=-2 if not state.outcome.finished else
                 -1 if state.outcome.draw else
-                state.outcome.winner.id,
+                state.outcome.winner,
             previous=previous)
 
         for player in state.players:
