@@ -1,3 +1,5 @@
+const loc = 'ws://' + window.location.host + window.location.pathname;
+
 const csrftoken = Cookies.get('csrftoken');
 
 function csrfSafeMethod(method) {
@@ -12,10 +14,8 @@ $.ajaxSetup({
     }
 });
 
-var loc = window.location;
-
-var socket = new WebSocket('ws://' + loc.host + loc.pathname + 'updater/');
-socket.onmessage = event => {
+var updateSocket = new WebSocket(loc + 'updater/');
+updateSocket.onmessage = event => {
     $('#board').load('board');
     $('#sidebar').load('sidebar');
 };
@@ -58,25 +58,37 @@ function cancel() {
     $('#sidebar').load('sidebar/', {'cancel': true});
 }
 
-var messageSocket = new WebSocket('ws://' + loc.host + loc.pathname + 'messages/');
-messageSocket.onmessage = event => {
-    $('#messages')[0].append('<p>' + event.data + '</p>');
-};
-
-function sendMessage() {
-    messageSocket.send('message: ' + $('#message')[0].value);
-}
-
 $(() => {
+
     $('#board').load('board');
-    $('#sidebar').load('sidebar');
+
+    $('#sidebar').load('sidebar', () => {
+
+        var messageSocket = new WebSocket(loc + 'messages/');
+        messageSocket.onmessage = event => {
+            message = JSON.parse(event.data);
+            html = '<h6> [' + message.user + '] ' + message.message + '</h6>';
+            $('#messages').append(html);
+            var messages = $('#messages')[0];
+            messages.scrollTop = messages.scrollHeight - messages.clientHeight;
+        };
+
+        $('#message').select();
+        $('#message').on('keyup', event => {
+            var message = $('#message').val();
+            if(event.keyCode == 13 && message != '') {
+                messageSocket.send(JSON.stringify({
+                    'user': USER,
+                    'message': message
+                }));
+                $('#message').val('');
+            }
+        });
+    });
 
     $('#copy_code').click(() => {
         navigator.clipboard.writeText(CODE).then(() => {
             M.toast({html: 'Copied Code'});
         });
     });
-    var messages = $('#messages')[0];
-    messages.scrollTop = messages.scrollHeight - messages.clientHeight;
-    $('#message').select();
 });

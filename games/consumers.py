@@ -51,10 +51,13 @@ class MessageConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_send)(
             self.group_name, {
                 'type': 'send_message',
+                'user': json.loads(text_data)['user'],
                 'message': json.loads(text_data)['message']
             })
 
     def send_message(self, event):
 
         self.send(text_data=json.dumps({
-            'message': event['message']}))
+            'user': event['user'],
+            'message': event['message']
+        }))
