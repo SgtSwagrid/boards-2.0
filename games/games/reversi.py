@@ -86,12 +86,6 @@ class Reversi(Game):
 
         return flips
 
-    def legal_next(self, state):
-        adjs = self.adjacents(state)
-
-        for adj in adjs:
-            pass
-
     def count_pieces(self, state, owner_id):
         pass
 
