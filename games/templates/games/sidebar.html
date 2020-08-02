@@ -23,28 +23,30 @@
     {% endif %}
 </h6>
 {% if this_player and this_player.leader and board.status == 0 %}
-{% if not player.player == board.players.first %}
-<a class="btn-floating btn-small indigo lighten-2 waves-effect"
-        onclick="promote('{{ player.user.id }}')">
-    <i class="material-icons small white-text">keyboard_arrow_up</i>
-</a>
-{% endif %}
-{% if not player.player == board.players.last %}
-<a class="btn-floating btn-small indigo lighten-2 waves-effect"
-        onclick="demote('{{ player.user.id }}')">
-    <i class="material-icons small white-text">keyboard_arrow_down</i>
-</a>
-{% endif %}
-<a class="btn-floating btn-small red lighten-2 waves-effect"
-        onclick="leave('{{ player.user.id }}')">
-    <i class="material-icons small white-text">close</i>
-</a>
-{% if not player.player.leader %}
-<a class="btn-floating btn-small orange lighten-3 waves-effect"
-        onclick="transfer('{{ player.user.id }}')">
-    <i class="material-icons small white-text">star</i>
-</a>
-{% endif %}
+<div class="right-align">
+    {% if not player.player == board.players.first %}
+    <a class="btn-floating btn-small indigo lighten-2 waves-effect"
+            onclick="promote('{{ player.user.id }}')">
+        <i class="material-icons small white-text">keyboard_arrow_up</i>
+    </a>
+    {% endif %}
+    {% if not player.player == board.players.last %}
+    <a class="btn-floating btn-small indigo lighten-2 waves-effect"
+            onclick="demote('{{ player.user.id }}')">
+        <i class="material-icons small white-text">keyboard_arrow_down</i>
+    </a>
+    {% endif %}
+    <a class="btn-floating btn-small red lighten-2 waves-effect"
+            onclick="leave('{{ player.user.id }}')">
+        <i class="material-icons small white-text">close</i>
+    </a>
+    {% if not player.player.leader %}
+    <a class="btn-floating btn-small orange lighten-3 waves-effect"
+            onclick="transfer('{{ player.user.id }}')">
+        <i class="material-icons small white-text">star</i>
+    </a>
+    {% endif %}
+</div>
 {% endif %}
 <hr>
 {% endfor %}

@@ -1,0 +1,30 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block header %}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="center-align">
+        <div class="row">
+            <div class="col m8 s12 push-m2">
+                <br><br><br>
+                <i class="large material-icons indigo-text">videogame_asset</i>
+                <br><br>
+                <h6 class="large-text indigo-text">Welcome to Boards.</h6>
+                <br>
+                <h6 class="small-text indigo-text">
+                    Boards is an online platform for the design and testing of game playing bots.
+                    With an assortment of abstract strategy board games available,
+                    Boards is able to facilitate games featuring any combination of human and computer-controlled players.
+                </h6>
+                <br><br><br>
+                <a class="btn block indigo waves-effect" href="/games">View Boards</a>
+                <br><br>
+                <a class="btn block indigo waves-effect" href="/users/login">Login or Register</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
