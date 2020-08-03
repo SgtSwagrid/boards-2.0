@@ -42,6 +42,14 @@ h6 p a {
     border: 0px;
 }
 
+.board-row {
+    border: 0px;
+}
+
+.board-row:after {
+    display: none;
+}
+
 .tile {
     padding: 0px;
 }

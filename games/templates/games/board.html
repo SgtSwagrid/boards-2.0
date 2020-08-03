@@ -1,9 +1,12 @@
 {% load static %}
 <table class="board z-depth-3"><tbody>
     {% for row in tiles %}
-    <tr class="row">
+    <tr class="board-row">
         {% for tile in row %}
-        <td class="tile" style="--aspect-ratio: 1/1; background: {{ tile.colour }};"
+        <td class="tile" style="/*--aspect-ratio: {{ tile.sx }}/{{ tile.sy }}; */
+        width: {{ tile.sx }}px;
+        height: {{ tile.sy }}px;
+        background: {{ tile.colour }};"
             {% if current %}
             onclick="clickBoard({{ tile.x }}, {{ tile.y }}, {{ selected.x }}, {{ selected.y }})"
             {% endif %}>

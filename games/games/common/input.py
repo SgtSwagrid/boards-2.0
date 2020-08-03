@@ -35,6 +35,16 @@ class Display:
         display.tiles[x][y].height = height
         return display
 
+    def set_sx(self, x, y, sx):
+        display = copy.deepcopy(self)
+        display.tiles[x][y].sx = round(sx, 0)
+        return display
+
+    def set_sy(self, x, y, sy):
+        display = copy.deepcopy(self)
+        display.tiles[x][y].sy = round(sy, 0)
+        return display
+
     def select(self, x, y):
         display = copy.deepcopy(self)
         display.tiles[x][y].selected = True
@@ -63,6 +73,8 @@ class Tile:
         self.width = 1
         self.height = 1
         self.selected = False
+        self.sx = 1
+        self.sy = 1
 
 class Texture:
 

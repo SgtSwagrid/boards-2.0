@@ -63,11 +63,31 @@ class Game:
 
     def display(self, state, display):
 
+        scale_x_sum = 0
+        scale_y_sum = 0
+
+        for x in range(0, self.width):
+            dx, _ = self.scale(x, 0)
+            scale_x_sum += dx
+
+        for y in range(0, self.height):
+            _, dy = self.scale(0, y)
+            scale_y_sum += dy
+
+        display_width = 800
+        tile_width = float(display_width / scale_x_sum)
+        tile_height = tile_width
+
         for x in range(0, self.width):
             for y in range(0, self.height):
 
                 colour = self.colour(state, display, x, y)
                 display = display.set_colour(x, y, colour)
+
+                sx, sy = self.scale(x, y)
+                display = display \
+                    .set_sx(x, y, sx * tile_width) \
+                    .set_sy(x, y, sy * tile_height)
 
                 if state.pieces[x][y]:
                     texture = self.texture(state, x, y)
