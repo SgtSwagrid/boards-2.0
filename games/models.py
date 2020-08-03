@@ -317,10 +317,10 @@ class ActionManager(models.Manager):
 
         elif isinstance(action, MoveAction):
             action_model = super().create(type=1,
-                x_from=action.x_from,
-                y_from=action.y_from,
-                x_to=action.piece.x,
-                y_to=action.piece.y)
+                x_from=action.piece.x,
+                y_from=action.piece.y,
+                x_to=action.x_to,
+                y_to=action.y_to)
 
         elif isinstance(action, RemoveAction):
             action_model = super().create(type=1,
@@ -354,17 +354,19 @@ class ActionModel(models.Model):
     def get_action(self, state):
 
         changes = self.get_changes()
+        pieces = state.get_pieces()
+        previous = state.previous.get_pieces()
 
         if self.type == 0:
-            piece = state.pieces()[self.x_to][self.y_to]
+            piece = pieces[self.x_to][self.y_to]
             return PlaceAction(piece, changes)
 
         elif self.type == 1:
-            piece = state.get_pieces()[self.x_to][self.y_to]
-            return MoveAction(piece, self.x_from, self.y_from, changes)
+            piece = previous[self.x_from][self.y_from]
+            return MoveAction(piece, self.x_to, self.y_to, changes)
 
         elif self.type == 2:
-            piece = state.previous.get_pieces()[self.x_from][self.y_from]
+            piece = previous[self.x_from][self.y_from]
             return RemoveAction(piece, changes)
 
 class ChangeModel(models.Model):
