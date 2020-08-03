@@ -43,8 +43,8 @@ class TicTacToe(Game):
     def colour(self, state, display, x, y):
         col = super().colour(state, display, x, y)
 
-        last_piece = self.last_piece(state)
-        if last_piece:
+        if state.action:
+            last_piece = state.action.piece
             runs = self.runs(state, last_piece)
 
             if state.outcome.finished and not state.outcome.draw:
@@ -75,12 +75,3 @@ class TicTacToe(Game):
 
             if len(sub_runs) >= self.target - 1: runs.append(sub_runs)
         return runs
-
-    def last_piece(self, state):
-        if len(state.changes) > 0:
-            return Piece(self.types[0],
-                         state.turn.current,
-                         state.changes[-1][0],
-                         state.changes[-1][1])
-        else:
-            return None
