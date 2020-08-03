@@ -5,8 +5,8 @@ from .common.handler import *
 class Amazons(Game):
     name = "Amazons"
     id = 6
-    width = 4
-    height = 4
+    width = 8
+    height = 8
     players = 2
 
     class AmazonPiece(PieceType):
@@ -22,7 +22,7 @@ class Amazons(Game):
         def move_valid(self, state, piece, x_to, y_to):
             return state.turn.stage == 0 and \
                 not state.pieces[x_to][y_to] and \
-                is_queen_move(state, piece, x_to, y_to)
+                state.game.is_queen_move(state, piece, x_to, y_to)
 
         def move_piece(self, state, piece, x_to, y_to):
             return state \
@@ -46,7 +46,7 @@ class Amazons(Game):
 
             return state.turn.stage == 1 and \
                 not state.pieces[piece.x][piece.y] and \
-                is_queen_move(state, queen, piece.x, piece.y)
+                state.game.is_queen_move(state, queen, piece.x, piece.y)
 
         def place_piece(self, state, piece):
             piece = Piece(self, state.turn.current, piece.x, piece.y)

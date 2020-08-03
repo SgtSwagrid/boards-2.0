@@ -11,7 +11,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'localhost',
-    'swagbets.net'
+    'swagbets.net',
+    '58.175.82.21'
 ]
 
 INSTALLED_APPS = [

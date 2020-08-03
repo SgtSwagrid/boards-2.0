@@ -18,7 +18,7 @@ def browse_view(request):
     pages = math.ceil(len(boards) / boards_per_page)
 
     return render(request, 'games/browse.html', {
-        'boards': [b.to_dictionary() for b in boards[start:end]],
+        'boards': boards[start:end],
         'page': page,
         'pages': range(1, pages + 1)
     })
@@ -52,7 +52,7 @@ def game_view(request, board_code):
     board = BoardModel.boards.get(code=board_code)
 
     return render(request, 'games/game.html', {
-        'board': board.to_dictionary(),
+        'board': board,
         'state': board.state
     })
 
@@ -62,7 +62,7 @@ def board_view(request, board_code):
     state_model = StateModel.states.filter(
         id=int(request.GET['state'])).first()\
         if 'state' in request.GET else board.state
-    state = state_model.to_state()
+    state = state_model.get_state()
 
     game = board.game()
     player = board.player(request.user)
@@ -120,7 +120,7 @@ def sidebar_view(request, board_code):
 
     return render(request, 'games/sidebar.html', {
         'board': board,
-        'state': state_model.to_state(),
+        'state': state_model.get_state(),
         'players': [
             {
                 'user': player.user,
@@ -128,7 +128,7 @@ def sidebar_view(request, board_code):
                 'state': state,
             }
             for player, state in
-                zip(board.players(), state_model.player_states())],
+                zip(board.players(), state_model.get_players())],
         'turn': board.players()[board.state.current],
         'winner': board.players()[board.state.outcome]\
             if board.state.outcome > -1 else None,

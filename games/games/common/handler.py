@@ -1,3 +1,4 @@
+from games.games.common.action import *
 from games.games.common.input import *
 from games.games.common.state import *
 
@@ -21,8 +22,9 @@ class PlaceHandler(Handler):
         clicked = Piece(self.type, state.turn.current, event.x, event.y)
 
         if state.game.place_valid(state, clicked):
-            result = state.game.place_piece(state.clear_changes(), clicked)
-            return result, display
+            state = state.push_action(PlaceAction(clicked))
+            state = state.game.place_piece(state, clicked)
+            return state, display
 
         return None, display
 
@@ -50,9 +52,12 @@ class MoveHandler(Handler):
             selected = state.pieces[pos[0]][pos[1]]
 
             if state.game.move_valid(state, selected, event.x, event.y):
-                result = state.game.move_piece(
-                    state.clear_changes(), selected, event.x, event.y)
-                return result, display.clear_selections()
+                moved = selected.at(event.x, event.y)
+                action = MoveAction(moved, event.x, event.y)
+                state = state.push_action(action)
+                state = state.game.move_piece(
+                    state, selected, event.x, event.y)
+                return state, display.clear_selections()
 
         if state.game.moveable(state, clicked):
             return None, display.clear_selections().select(event.x, event.y)
@@ -82,8 +87,9 @@ class RemoveHandler(Handler):
         clicked = state.pieces[event.x][event.y]
 
         if state.game.remove_valid(state, clicked):
-            result = state.game.remove_piece(state.clear_changes(), clicked)
-            return result, display
+            state = state.push_action(RemoveAction(clicked))
+            state = state.game.remove_piece(state, clicked)
+            return state, display
 
         return None, display
 
