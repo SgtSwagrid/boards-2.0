@@ -19,6 +19,7 @@ updateSocket.onmessage = event => {
     $('#board').load('board');
     $('#sidebar').load('sidebar');
 };
+updateSocket.onclose = event => location.reload(true);
 
 function clickBoard(cx=-1, cy=-1, sx=-1, sy=-1) {
     $('#board').load('board/',
@@ -69,6 +70,7 @@ $(() => {
     $('#sidebar').load('sidebar', () => {
 
         var messageSocket = new WebSocket(loc + 'messages/');
+
         messageSocket.onmessage = event => {
             message = JSON.parse(event.data);
             html = '<h6><span class=teal-text>[' + message.user
