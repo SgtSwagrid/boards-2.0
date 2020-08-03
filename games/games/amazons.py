@@ -22,7 +22,7 @@ class Amazons(Game):
         def move_valid(self, state, piece, x_to, y_to):
             return state.turn.stage == 0 and \
                 not state.pieces[x_to][y_to] and \
-                state.game.is_queen_move(state, piece, x_to, y_to)
+                state.game.is_queen_move(state, piece.x, piece.y, x_to, y_to)
 
         def move_piece(self, state, piece, x_to, y_to):
             return state \
@@ -39,14 +39,13 @@ class Amazons(Game):
                 return 'games/img/chess/black_pawn.png'
 
         def place_valid(self, state, piece):
-            if len(state.changes) == 0: return False
-            x_from, y_from = state.changes[-1]
-
-            queen = Piece(self, state.turn.current, x_from, y_from)
+            if state.turn.stage == 0: return False
+            x_from = state.action.x_to
+            y_from = state.action.y_to
 
             return state.turn.stage == 1 and \
                 not state.pieces[piece.x][piece.y] and \
-                state.game.is_queen_move(state, queen, piece.x, piece.y)
+                state.game.is_queen_move(state, x_from, y_from, piece.x, piece.y)
 
         def place_piece(self, state, piece):
             piece = Piece(self, state.turn.current, piece.x, piece.y)
@@ -60,7 +59,6 @@ class Amazons(Game):
 
     def piece(self, x, y):
         # Top and bottom arrangement
-
         tw = self.width // 3
         th = self.height // 3
 
@@ -74,7 +72,7 @@ class Amazons(Game):
             return Piece(self.AmazonPiece(), 0, x, y)  # White
 
         if [x, y] in black_queens:
-            return Piece(self.AmazonPiece(), 1, x, y)  # White
+            return Piece(self.AmazonPiece(), 1, x, y)  # Black
 
         return None
 
@@ -85,12 +83,12 @@ class Amazons(Game):
                     for piece in state.pieces_by_player[state.turn.current]
                     if piece.type.id == self.AmazonPiece().id])
 
-    def is_queen_move(self, state, piece, x_to, y_to):
-        dx, dy = delta(piece.x, piece.y, x_to, y_to)
-        sx, sy = direction(piece.x, piece.y, x_to, y_to)
-        d = distance(piece.x, piece.y, x_to, y_to)
+    def is_queen_move(self, state, x_from, y_from, x_to, y_to):
+        dx, dy = delta(x_from, y_from, x_to, y_to)
+        sx, sy = direction(x_from, y_from, x_to, y_to)
+        d = distance(x_from, y_from, x_to, y_to)
         return (((sx == 0) ^ (sy == 0)) or (abs(dx) == abs(dy))) and \
-               path(piece.x, piece.y, sx, sy, d, state.pieces)
+               path(x_from, y_from, sx, sy, d, state.pieces)
 
 def distance(x_from, y_from, x_to, y_to):
     return max(abs(x_to - x_from), abs(y_to - y_from))
