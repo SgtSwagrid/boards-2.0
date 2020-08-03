@@ -26,9 +26,9 @@ class DotsAndBoxes(Game):
 
         def texture(self, owner):
             if owner == 0:
-                return 'games/img/dotsandboxes/red_edge.png'  # Player 1 is Red
+                return Texture('games/img/dotsandboxes/red_edge.png', 0.5)  # Player 1 is Red
             else:
-                return 'games/img/dotsandboxes/blue_edge.png'  # Player 2 is Blue
+                return Texture('games/img/dotsandboxes/blue_edge.png', 0.5)  # Player 2 is Blue
 
     types = [EdgePiece(), CapturePiece()]
     handlers = [PlaceHandler(EdgePiece())]
@@ -86,5 +86,5 @@ class DotsAndBoxes(Game):
         return [state.pieces[x+dx][y+dy]
                 for dx in [-1, 0, 1]
                 for dy in [-1, 0, 1]
-                if ((x+dx) % 2 == 0 and ((y+dy) % 2 == 0))
+                if (((x+dx) % 2 == 0) ^ ((y+dy) % 2 == 0))
                 and not (dx == 0 and dy == 0)]
