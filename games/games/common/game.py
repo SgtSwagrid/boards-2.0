@@ -1,6 +1,8 @@
 from games.games.common.input import *
 from games.games.common.state import *
 
+import time as timer
+
 class Game:
 
     types = []
