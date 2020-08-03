@@ -144,7 +144,8 @@ def setup(request, board):
     this_player = board.player(this_user)
     leader = this_player and this_player.leader
 
-    if 'start' in request.POST and leader:
+    if 'start' in request.POST and leader and\
+            len(board.players()) == board.game().players:
         board.start()
         notify_board(board)
 
@@ -158,7 +159,8 @@ def setup(request, board):
         other_player = board.players().filter(user=other_user).first()
         me = this_user == other_user
 
-        if 'join' in request.POST and not other_player and (leader or me):
+        if 'join' in request.POST and not other_player and (leader or me) and\
+                len(board.players()) < board.game().players:
             board.join(other_user)
             notify_board(board)
 

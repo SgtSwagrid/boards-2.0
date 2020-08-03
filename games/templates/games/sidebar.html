@@ -101,10 +101,17 @@
     <i class="material-icons small white-text right">close</i>
 </a>
 {% else %}
+{% if players|length < board.game.players %}
 <a class="btn waves-effect block" onclick="join('{{ user.id }}')">
     Join Game
     <i class="material-icons small white-text right">done</i>
 </a>
+{% else %}
+<a class="btn grey block">
+    Join Game
+    <i class="material-icons small white-text right">done</i>
+</a>
+{% endif %}
 {% endif %}
 <br><br>
 {% if this_player and this_player.leader %}
@@ -113,10 +120,17 @@
     <i class="material-icons small white-text right">close</i>
 </a>
 <br><br>
+{% if players|length == board.game.players %}
 <a class="btn btn-large green lighten-2 block waves-effect" onclick="start()">
     Start Game
     <i class="material-icons medium white-text right">play_arrow</i>
 </a>
+{% else %}
+<a class="btn btn-large grey block">
+    Start Game
+    <i class="material-icons medium white-text right">play_arrow</i>
+</a>
+{% endif %}
 <br><br>
 {% else %}
 <h6 class="medium-text white-text">
