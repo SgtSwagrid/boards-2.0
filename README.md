@@ -1,5 +1,5 @@
 # Boards
-Boards is an online platform for the design and testing of game playing bots. With an assortment of abstract strategy board games available, Boards is able to facilitate games featuring any combination of human and computer-controlled players.
+Boards is an online platform for the design and testing of game playing bots. With an assortment of abstract strategy board games available, Boards is able to facilitate gameplay featuring any combination of human and computer-controlled players.
 
 ## Installation
 Requirements:
