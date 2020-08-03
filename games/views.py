@@ -47,7 +47,7 @@ def game_view(request, board_code):
         return redirect('/users/login?next=/games/' + board_code)
 
     if not BoardModel.boards.filter(code=board_code).exists():
-        return render(request, 'games/noboard.html', {})
+        return render(request, 'games/game_invalid.html', {})
 
     board = BoardModel.boards.get(code=board_code)
 
@@ -57,6 +57,9 @@ def game_view(request, board_code):
     })
 
 def board_view(request, board_code):
+
+    if not BoardModel.boards.filter(code=board_code).exists():
+        return render(request, 'games/board_deleted.html')
 
     board = BoardModel.boards.get(code=board_code)
     state_model = StateModel.states.filter(
@@ -106,6 +109,9 @@ def board_view(request, board_code):
 
 def sidebar_view(request, board_code):
 
+    if not BoardModel.boards.filter(code=board_code).exists():
+        return HttpResponse('')
+
     board = BoardModel.boards.filter(code=board_code).get()
     state_model = StateModel.states.filter(
         id=int(request.GET['state'])).first()\
@@ -117,6 +123,13 @@ def sidebar_view(request, board_code):
     if board.status == 1 and 'forfeit' in request.POST and player:
         player.forfeit()
         notify_board(board)
+
+    if 'cancel' in request.POST and player and player.leader and board.status != 1:
+        board.delete()
+        notify_board(board)
+
+    if not BoardModel.boards.filter(code=board_code).exists():
+        return HttpResponse('')
 
     return render(request, 'games/sidebar.html', {
         'board': board,
@@ -147,10 +160,6 @@ def setup(request, board):
     if 'start' in request.POST and leader and\
             len(board.players()) == board.game().players:
         board.start()
-        notify_board(board)
-
-    elif 'cancel' in request.POST and leader:
-        board.delete()
         notify_board(board)
 
     if 'user' in request.POST:
