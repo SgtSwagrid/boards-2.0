@@ -93,7 +93,9 @@ class Game:
 
                 if state.pieces[x][y]:
                     texture = self.texture(state, x, y)
-                    display = display.add_texture(x, y, Texture(texture))
+                    if not isinstance(texture, Texture):
+                        texture = Texture(texture)
+                    display = display.add_texture(x, y, texture)
 
         if display.current:
             for handler in self.handlers:
