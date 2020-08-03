@@ -18,7 +18,7 @@ def browse_view(request):
     pages = math.ceil(len(boards) / boards_per_page)
 
     return render(request, 'games/browse.html', {
-        'boards': [b.to_dictionary() for b in boards[start:end]],
+        'boards': boards[start:end],
         'page': page,
         'pages': range(1, pages + 1)
     })
@@ -47,22 +47,25 @@ def game_view(request, board_code):
         return redirect('/users/login?next=/games/' + board_code)
 
     if not BoardModel.boards.filter(code=board_code).exists():
-        return render(request, 'games/noboard.html', {})
+        return render(request, 'games/game_invalid.html', {})
 
     board = BoardModel.boards.get(code=board_code)
 
     return render(request, 'games/game.html', {
-        'board': board.to_dictionary(),
+        'board': board,
         'state': board.state
     })
 
 def board_view(request, board_code):
 
+    if not BoardModel.boards.filter(code=board_code).exists():
+        return render(request, 'games/board_deleted.html')
+
     board = BoardModel.boards.get(code=board_code)
     state_model = StateModel.states.filter(
         id=int(request.GET['state'])).first()\
         if 'state' in request.GET else board.state
-    state = state_model.to_state()
+    state = state_model.get_state()
 
     game = board.game()
     player = board.player(request.user)
@@ -106,6 +109,9 @@ def board_view(request, board_code):
 
 def sidebar_view(request, board_code):
 
+    if not BoardModel.boards.filter(code=board_code).exists():
+        return HttpResponse('')
+
     board = BoardModel.boards.filter(code=board_code).get()
     state_model = StateModel.states.filter(
         id=int(request.GET['state'])).first()\
@@ -118,9 +124,21 @@ def sidebar_view(request, board_code):
         player.forfeit()
         notify_board(board)
 
+    if 'cancel' in request.POST and player and player.leader and board.status != 1:
+        board.delete()
+        notify_board(board)
+
+    if 'rematch' in request.POST and player and board.status == 2:
+        rematch = board.join_rematch(request.user)
+        notify_board(board)
+        return redirect('/games/' + rematch.code)
+
+    if not BoardModel.boards.filter(code=board_code).exists():
+        return HttpResponse('')
+
     return render(request, 'games/sidebar.html', {
         'board': board,
-        'state': state_model.to_state(),
+        'state': state_model.get_state(),
         'players': [
             {
                 'user': player.user,
@@ -128,7 +146,7 @@ def sidebar_view(request, board_code):
                 'state': state,
             }
             for player, state in
-                zip(board.players(), state_model.player_states())],
+                zip(board.players(), state_model.get_players())],
         'turn': board.players()[board.state.current],
         'winner': board.players()[board.state.outcome]\
             if board.state.outcome > -1 else None,
@@ -138,18 +156,23 @@ def sidebar_view(request, board_code):
         'current': board.state
     })
 
+def rematch_view(request, board_code):
+
+    board = BoardModel.boards.filter(code=board_code).get()
+    rematch = board.join_rematch(request.user)
+    notify_board(board)
+    notify_board(rematch)
+    return redirect('/games/' + rematch.code)
+
 def setup(request, board):
 
     this_user = request.user
     this_player = board.player(this_user)
     leader = this_player and this_player.leader
 
-    if 'start' in request.POST and leader:
+    if 'start' in request.POST and leader and\
+            len(board.players()) == board.game().players:
         board.start()
-        notify_board(board)
-
-    elif 'cancel' in request.POST and leader:
-        board.delete()
         notify_board(board)
 
     if 'user' in request.POST:
@@ -158,7 +181,8 @@ def setup(request, board):
         other_player = board.players().filter(user=other_user).first()
         me = this_user == other_user
 
-        if 'join' in request.POST and not other_player and (leader or me):
+        if 'join' in request.POST and not other_player and (leader or me) and\
+                len(board.players()) < board.game().players:
             board.join(other_user)
             notify_board(board)
 

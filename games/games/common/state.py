@@ -16,6 +16,15 @@ class Piece:
         self.y = y
         self.mode = mode
 
+    def at(self, x, y):
+        piece = copy.deepcopy(self)
+        piece.x = x
+        piece.y = y
+        return piece
+
+    def is_type(self, type):
+        return isinstance(self.type, type)
+
 class Turn:
 
     def __init__(self, current=0, stage=0, ply=0, epoch=0):
@@ -37,10 +46,10 @@ class State:
             game,
             players=None,
             pieces=None,
+            action=None,
             turn=Turn(),
             outcome=Outcome(),
-            previous=lambda: None,
-            changes=[]):
+            previous=lambda: None):
 
         self.game = game
 
@@ -50,9 +59,9 @@ class State:
         self.pieces = pieces if pieces else\
             [[None] * game.height] * game.width
 
+        self.action = action
         self.turn = turn
         self.outcome = outcome
-        self.changes = changes
         self.previous = previous
 
         self.pieces_by_player = {player.order:
@@ -92,7 +101,7 @@ class State:
     def set_piece(self, piece, x, y):
         state = copy.deepcopy(self)
         state.pieces[x][y] = piece
-        state.changes.append((x, y))
+        state.action = state.action.set_changed(x, y)
         return state
 
     def place_piece(self, piece):
@@ -100,11 +109,8 @@ class State:
             if piece else self
 
     def move_piece(self, piece, x_to, y_to):
-        new_piece = copy.deepcopy(piece)
-        new_piece.x = x_to
-        new_piece.y = y_to
         return self.remove_piece(piece)\
-            .place_piece(new_piece)
+            .place_piece(piece.at(x_to, y_to))
 
     def remove_piece(self, piece):
         return self.set_piece(None, piece.x, piece.y)
@@ -137,15 +143,15 @@ class State:
         return self.exists(x, y) and\
             self.pieces[x][y].owner != self.turn.current
 
-    def set_changed(self, x, y):
+    def push_action(self, action):
         state = copy.deepcopy(self)
-        state.changes.append((x, y))
+        state.action = action
         return state
 
-    def clear_changes(self):
+    def set_changed(self, x, y):
         state = copy.deepcopy(self)
-        state.changes = []
+        state.action = state.action.set_changed((x, y))
         return state
 
     def changed(self, x, y):
-        return any(c == (x, y) for c in self.changes)
+        return self.action and self.action.changed(x, y)

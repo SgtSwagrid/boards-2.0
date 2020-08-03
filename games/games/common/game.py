@@ -87,8 +87,8 @@ class Game:
                 display = display.set_colour(x, y, colour)
 
                 sx, sy = self.scale(x, y)
-                display = display \
-                    .set_sx(x, y, sx * tile_width) \
+                display = display\
+                    .set_sx(x, y, sx * tile_width)\
                     .set_sy(x, y, sy * tile_height)
 
                 if state.pieces[x][y]:
