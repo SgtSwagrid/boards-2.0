@@ -7,4 +7,5 @@ urlpatterns = [
     path('<str:board_code>/', views.game_view),
     path('<str:board_code>/board/', views.board_view),
     path('<str:board_code>/sidebar/', views.sidebar_view),
+    path('<str:board_code>/rematch/', views.rematch_view)
 ]

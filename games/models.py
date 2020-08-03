@@ -6,7 +6,6 @@ from games.games.common.games import games
 from datetime import time
 import random
 
-from .games.common.game import *
 from .games.common.state import *
 
 class BoardManager(models.Manager):
@@ -30,6 +29,9 @@ class BoardModel(models.Model):
         on_delete=models.SET_NULL, null=True, blank=True)
 
     status = models.IntegerField(default=0)
+
+    rematch = models.ForeignKey('BoardModel',
+        on_delete=models.SET_NULL, null=True)
 
     time = models.DateTimeField(auto_now_add=True)
 
@@ -67,6 +69,13 @@ class BoardModel(models.Model):
     def start(self):
         self.status = 1
         self.save()
+
+    def join_rematch(self, user):
+        if not self.rematch:
+            self.rematch = BoardModel.boards.create(self.game())
+        self.save()
+        self.rematch.join(user)
+        return self.rematch
 
 class PlayerModel(models.Model):
 

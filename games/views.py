@@ -128,6 +128,11 @@ def sidebar_view(request, board_code):
         board.delete()
         notify_board(board)
 
+    if 'rematch' in request.POST and player and board.status == 2:
+        rematch = board.join_rematch(request.user)
+        notify_board(board)
+        return redirect('/games/' + rematch.code)
+
     if not BoardModel.boards.filter(code=board_code).exists():
         return HttpResponse('')
 
@@ -150,6 +155,14 @@ def sidebar_view(request, board_code):
         'next': StateModel.states.filter(previous=state_model).first(),
         'current': board.state
     })
+
+def rematch_view(request, board_code):
+
+    board = BoardModel.boards.filter(code=board_code).get()
+    rematch = board.join_rematch(request.user)
+    notify_board(board)
+    notify_board(rematch)
+    return redirect('/games/' + rematch.code)
 
 def setup(request, board):
 
