@@ -1,12 +1,17 @@
 from .common.game import *
 from .common.handler import *
 
+
 # note to self: phase 1 through 3 are hardcoded conditionals rather than actual variables
 # TODO replace above circumstance with usage of state.epoch
+#   am at it:
+#   epoch 0 implemented
+#   epoch 1 partially implemented:
+#     missing flying
+# TODO add mill recognition
 
 
 class Mill(Game):
-
     name = "Mill"
     id = 4
     width = 11
@@ -26,6 +31,9 @@ class Mill(Game):
                 if other not in self.neighbours:
                     self.neighbours.append(other)
 
+            def is_neighbour(self, other):
+                return other in self.neighbours
+
         def __init__(self):
             self.nodes = []
 
@@ -41,6 +49,24 @@ class Mill(Game):
             for point in self.nodes:
                 if x == point.x and y == point.y:
                     return point
+
+        def is_node(self, x, y):
+            return self.fetch_node(x, y) in self.nodes
+
+        def is_mill(self, state, piece):
+            # if the current player owns all pieces alongside the respective y-axis or the x-axis they achieved a mill
+            print([piece.x, piece.y])
+            print([state.pieces[point.x][point.y] and state.turn.current == state.pieces[point.x][point.y].owner
+                   for point in self.nodes if point.x == piece.x])
+            print([state.pieces[point.x][point.y] and state.turn.current == state.pieces[point.x][point.y].owner
+                   for point in self.nodes if point.y == piece.y])
+            if all([state.pieces[point.x][point.y] and state.turn.current == state.pieces[point.x][point.y].owner
+                    for point in self.nodes if point.x == piece.x]) \
+                    or all(
+                [state.pieces[point.x][point.y] and state.turn.current == state.pieces[point.x][point.y].owner
+                 for point in self.nodes if point.y == piece.y]):
+                print('MILL!')
+                return True
 
     graph = Graph()
 
@@ -120,8 +146,7 @@ class Mill(Game):
                 # tests that only connection tiles get to be shown as connections
                 if (x, y) in self.connections:
                     # tests whether a tile needs to be marked as a valid point to be moved one
-                    # TODO replace self.validPoint with Node member function
-                    if (x, y) in self.validPoint:
+                    if self.graph.is_node(x, y):
                         texture = 'games/img/mill/dot.png'
                         display = display.add_texture(x, y, Texture(texture))
                     # tests whether a tile has neighbours it needs to be connected to
@@ -144,11 +169,9 @@ class Mill(Game):
     def place_valid(self, state, piece):
         # if epoch is placing epoch and the selected tile is valid and there is no other piece already
         if state.turn.epoch == 0:
-            # TODO replace self.validPoint with Node member function
-            if (piece.x, piece.y) in self.validPoint and not state.pieces[piece.x][piece.y]:
-                return True
-            else: return False
-        else: return False
+            return self.graph.is_node(piece.x, piece.y) and not state.pieces[piece.x][piece.y]
+        else:
+            return False
 
     # in case all pieces are placed, that means both players have a score of 9, the epoch advances and no more pieces
     # shall be placed
@@ -160,10 +183,10 @@ class Mill(Game):
 
     # a piece owned by the active player can be moved iff all pieces have already been placed = after turn 17
     def move_valid(self, state, piece, x_to, y_to):
-        # TODO add movement restrictions; flying only when 3 pieces
         if state.turn.epoch == 1 and state.turn.stage == 0:
-            # TODO replace self.validPoint with Node member function
-            if (x_to, y_to) in self.validPoint and not state.pieces[x_to][y_to]:
+            # if in the graph from the starting node the target node is reachable and there is no other piece yet
+            if self.graph.fetch_node(piece.x, piece.y).is_neighbour(self.graph.fetch_node(x_to, y_to)) and not \
+                    state.pieces[x_to][y_to]:
                 return True
         else:
             return False
@@ -171,21 +194,16 @@ class Mill(Game):
     # after moving a piece a NEW mill might have been formed iff that is the case remove one opponents piece
     def move_piece(self, state, piece, x_to, y_to):
         state = state.move_piece(piece, x_to, y_to)
-        # TODO add find mill thing
-        return state.end_turn()
+        # TODO: some parts will be calculated before, others after having moved that piece, this leads to wrong
+        #  recognition,
+        #  also the middle things are not working as intended and consider all 6 instead of only the 3 connected nodes,
+        #  maybe it's above me to do list comprehension, maybe I need to sleep before
+        print([x_to, y_to])
+        if not self.graph.is_mill(state, piece):
+            return state.end_turn()
+        else:
+            return state.end_stage()
 
     #  a piece may only removed IFF a mill has been formed before(state.stage == 1) and it's an opponent's
     def remove_valid(self, state, piece):
         return state.turn.stage == 1 and state.enemy(piece.x, piece.y)
-
-    # def find_mills(self, state, pieces, x, y):
-    #     next_x = 0
-    #     next_y = 0
-    #     for possible_x in range(x, 10):
-    #         if (possible_x, y) in self.validPoint:
-    #             next_x = possible_x
-    #     if next_x == 0:
-    #         return self.mine(state, pieces, x, y)
-    #     if self.mine(state, pieces, x, y) and self.find_mills(state, pieces, next_x, y):
-    #         pass
-    #     return False
