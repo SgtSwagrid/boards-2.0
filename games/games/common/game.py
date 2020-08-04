@@ -44,6 +44,11 @@ class Game:
         return piece and piece.owner == state.turn.current and\
                piece.type.moveable(state, piece)
 
+    def positions(self, mapper):
+        return [[mapper(x, y)
+            for y in range(0, self.height)]
+            for x in range(0, self.width)]
+
     def event(self, state, display, event):
 
         for handler in self.handlers:
@@ -65,37 +70,19 @@ class Game:
 
     def display(self, state, display):
 
-        scale_x_sum = 0
-        scale_y_sum = 0
+        colours = self.positions(lambda x, y:
+            self.colour(state, display, x, y))
 
-        for x in range(0, self.width):
-            dx, _ = self.scale(x, 0)
-            scale_x_sum += dx
+        textures = self.positions(lambda x, y:
+            self.texture(state, display, x, y))
 
-        for y in range(0, self.height):
-            _, dy = self.scale(0, y)
-            scale_y_sum += dy
+        widths = [self.h_scale(x) for x in range(0, self.width)]
+        heights = [self.v_scale(y) for y in range(0, self.height)]
 
-        display_width = 800
-        tile_width = float(display_width / scale_x_sum)
-        tile_height = tile_width
-
-        for x in range(0, self.width):
-            for y in range(0, self.height):
-
-                colour = self.colour(state, display, x, y)
-                display = display.set_colour(x, y, colour)
-
-                sx, sy = self.scale(x, y)
-                display = display\
-                    .set_sx(x, y, sx * tile_width)\
-                    .set_sy(x, y, sy * tile_height)
-
-                if state.pieces[x][y]:
-                    texture = self.texture(state, x, y)
-                    if not isinstance(texture, Texture):
-                        texture = Texture(texture)
-                    display = display.add_texture(x, y, texture)
+        display = display.set_colours(colours)\
+            .add_textures(textures)\
+            .set_widths(widths)\
+            .set_heights(heights)
 
         if display.current:
             for handler in self.handlers:
@@ -104,31 +91,50 @@ class Game:
         return display
 
     def colour(self, state, display, x, y):
-        if display.tiles[x][y].selected: return self.selected_colour
-        elif state.changed(x, y): return self.modified_colour
-        else: return self.background(x, y)
 
-    def background(self, x, y):
+        piece_colour = state.pieces[x][y].type.colour(
+            state.pieces[x][y], state, display)\
+            if state.pieces[x][y] else None
+
+        if piece_colour: return piece_colour
+        elif display.tiles[x][y].selected: return self.selected_colour
+        elif state.changed(x, y): return self.modified_colour
+        else: return self.background_colour(x, y)
+
+    def texture(self, state, display, x, y):
+
+        textures = self.background_texture(x, y)
+        piece = state.pieces[x][y]
+        if piece:
+            texture = piece.type.texture(piece, state, display)
+            if texture: textures.append(texture)
+        return textures
+
+    def background_colour(self, x, y):
         if (x + y) % 2 == 0: return '#FDCB6E'
         else: return '#FFEAA7'
+
+    def background_texture(self, x, y):
+        return []
+
+    def h_scale(self, x):
+        return 1
+
+    def v_scale(self, y):
+        return 1
 
     attack_icon = Texture('games/img/common/attack.png', 0.8)
     place_icon = Texture('games/img/common/place.png', 0.8)
     selected_colour = '#6A89CC'
     modified_colour = '#74B9FF'
 
-    def texture(self, state, x, y):
-        piece = state.pieces[x][y]
-        if piece: return piece.type.texture(piece.owner)
-        else: return None
-
-    def scale(self, x, y):
-        return 1, 1
-
 class PieceType:
 
-    def texture(self, owner):
-        return 'games/img/empty.png'
+    def texture(self, piece, state, display):
+        return None
+
+    def colour(self, piece, state, display):
+        return None
 
     def place_valid(self, state, piece):
         return False

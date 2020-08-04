@@ -13,11 +13,11 @@ class TicTacToe(Game):
     class TicTacToePiece(PieceType):
         id = 0
 
-        def texture(self, owner):
-            if owner == 0:
-                return 'games/img/misc/naught.png'  # Player 1 is Naughts
+        def texture(self, piece, state, display):
+            if piece.owner == 0:
+                return Texture('games/img/misc/naught.png')  # Player 1 is Naughts
             else:
-                return 'games/img/misc/cross.png'  # Player 2 is Crosses
+                return Texture('games/img/misc/cross.png')  # Player 2 is Crosses
 
     types = [TicTacToePiece()]
     handlers = [PlaceHandler(TicTacToePiece())]

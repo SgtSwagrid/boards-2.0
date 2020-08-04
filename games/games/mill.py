@@ -126,18 +126,18 @@ class Mill(Game):
     class MillPiece(PieceType):
         id = 0
 
-        def texture(self, owner):
-            if owner == 0:
-                return 'games/img/misc/white_dot.png'
+        def texture(self, piece, state, display):
+            if piece.owner == 0:
+                return Texture('games/img/misc/white_dot.png')
             else:
-                return 'games/img/misc/black_dot.png'
+                return Texture('games/img/misc/black_dot.png')
 
     types = [MillPiece()]
 
     handlers = [PlaceHandler(MillPiece()), MoveHandler(), RemoveHandler()]
 
     #  drawing colors for (1)tiles/points where pieces can be (2)tiles/lines in between and (3)every other tile
-    def background(self, x, y):
+    def background_colour(self, x, y):
         return '#FFEAA7'
 
     def display(self, state, display):

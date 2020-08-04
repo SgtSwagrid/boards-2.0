@@ -13,11 +13,11 @@ class Amazons(Game):
         id = 0
 
         # White is player 1, black player 2
-        def texture(self, owner):
-            if owner == 0:
-                return 'games/img/chess/white_queen.png'
+        def texture(self, piece, state, display):
+            if piece.owner == 0:
+                return Texture('games/img/chess/white_queen.png')
             else:
-                return 'games/img/chess/black_queen.png'
+                return Texture('games/img/chess/black_queen.png')
 
         def move_valid(self, state, piece, x_to, y_to):
             return state.turn.stage == 0 and \
@@ -32,11 +32,11 @@ class Amazons(Game):
     class ArrowPiece(PieceType):
         id = 1
 
-        def texture(self, owner):
-            if owner == 0:
-                return 'games/img/chess/white_pawn.png'
+        def texture(self, piece, state, display):
+            if piece.owner == 0:
+                return Texture('games/img/chess/white_pawn.png')
             else:
-                return 'games/img/chess/black_pawn.png'
+                return Texture('games/img/chess/black_pawn.png')
 
         def place_valid(self, state, piece):
             if state.turn.stage == 0: return False

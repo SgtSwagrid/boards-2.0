@@ -10,7 +10,10 @@ class Handler:
         return None, display
 
     def display(self, state, display):
-        return display
+
+        return display.add_textures([[self.texture(state, display, x, y)
+            for y in range(0, state.game.height)]
+            for x in range(0, state.game.width)])
 
 class PlaceHandler(Handler):
 
@@ -27,25 +30,22 @@ class PlaceHandler(Handler):
 
         return None, display
 
-    def display(self, state, display):
+    def texture(self, state, display, x, y):
 
-        for x in range(0, state.game.width):
-            for y in range(0, state.game.height):
+        piece = Piece(self.type, state.turn.current, x, y)
 
-                piece = Piece(self.type, state.turn.current, x, y)
-                if PlaceAction(piece).validate(state):
+        if PlaceAction(piece).validate(state):
+            texture = self.type.texture(piece, state, display)
+            return [Texture(texture, 0.2), state.game.place_icon]
 
-                    texture = self.type.texture(state.turn.current)
-                    display = display.add_texture(x, y, Texture(texture, 0.2))\
-                        .add_texture(x, y, state.game.place_icon)
-
-        return display
+        return []
 
 class MoveHandler(Handler):
 
     def apply(self, state, display, event):
 
         clicked = state.pieces[event.x][event.y]
+        print(display.selections)
 
         if len(display.selections) > 0:
             pos = display.selections[0]
@@ -60,22 +60,20 @@ class MoveHandler(Handler):
 
         return None, display.clear_selections()
 
-    def display(self, state, display):
+    def texture(self, state, display, x, y):
 
         if len(display.selections) > 0:
+
             pos = display.selections[0]
             selected = state.pieces[pos[0]][pos[1]]
 
-            for x in range(0, state.game.width):
-                for y in range(0, state.game.height):
+            if MoveAction(selected, x, y).validate(state):
 
-                    if MoveAction(selected, x, y).validate(state):
+                if state.enemy(x, y): return [state.game.attack_icon]
+                else:
+                    return [selected.type.texture(selected, state, display).set_opacity(0.2)]
 
-                        texture = state.game.attack_icon if state.enemy(x, y) else\
-                            Texture(selected.type.texture(state.turn.current), 0.2)
-                        display = display.add_texture(x, y, texture)
-
-        return display
+        return []
 
 class RemoveHandler(Handler):
 
@@ -89,12 +87,7 @@ class RemoveHandler(Handler):
 
         return None, display
 
-    def display(self, state, display):
+    def texture(self, state, display, x, y):
 
-        for x in range(0, state.game.width):
-            for y in range(0, state.game.height):
-
-                if RemoveAction(state.pieces[x][y]).validate(state):
-                    display = display.add_texture(x, y, state.game.attack_icon)
-
-        return display
+        if RemoveAction(state.pieces[x][y]).validate(state):
+            return [state.game.attack_icon]

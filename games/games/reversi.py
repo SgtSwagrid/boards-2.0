@@ -12,11 +12,11 @@ class Reversi(Game):
     class ReversiPiece(PieceType):
         id = 0
 
-        def texture(self, owner):
-            if owner == 0:
-                return 'games/img/misc/white_dot.png'  # Player 1 is White
+        def texture(self, piece, state, display):
+            if piece.owner == 0:
+                return Texture('games/img/misc/white_dot.png')  # Player 1 is White
             else:
-                return 'games/img/misc/black_dot.png'  # Player 2 is Black
+                return Texture('games/img/misc/black_dot.png')  # Player 2 is Black
 
     types = [ReversiPiece()]
 
@@ -40,7 +40,7 @@ class Reversi(Game):
             return Piece(self.ReversiPiece(), 1, x, y)  # Black
         return None
 
-    def background(self, x, y):
+    def background_colour(self, x, y):
         if (x + y) % 2 == 0:
             return '#27ae60'  # Dark Green
         else:

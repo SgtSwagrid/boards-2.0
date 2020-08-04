@@ -10,22 +10,22 @@ class DotsAndBoxes(Game):
     height = 6 * 2 + 1
     players = 2
 
-    line_width = 0.2
+    box_size = 5
 
     class EdgePiece(PieceType):
         id = 0
 
-        def texture(self, owner):
-            if owner == 0:
-                return 'games/img/dotsandboxes/red_edge.png'  # Player 1 is Red
+        def texture(self, piece, state, display):
+            if piece.owner == 0:
+                return Texture('games/img/dotsandboxes/red_edge.png')  # Player 1 is Red
             else:
-                return 'games/img/dotsandboxes/blue_edge.png'  # Player 2 is Blue
+                return Texture('games/img/dotsandboxes/blue_edge.png')  # Player 2 is Blue
 
     class CapturePiece(PieceType):
         id = 1
 
-        def texture(self, owner):
-            if owner == 0:
+        def texture(self, piece, state, display):
+            if piece.owner == 0:
                 return Texture('games/img/dotsandboxes/red_edge.png', 0.5)  # Player 1 is Red
             else:
                 return Texture('games/img/dotsandboxes/blue_edge.png', 0.5)  # Player 2 is Blue
@@ -33,16 +33,16 @@ class DotsAndBoxes(Game):
     types = [EdgePiece(), CapturePiece()]
     handlers = [PlaceHandler(EdgePiece())]
 
-    def background(self, x, y):
+    def background_colour(self, x, y):
         if x % 2 == 0 and y % 2 == 0: return '#000000'
         if x % 2 == 0 or y % 2 == 0 == 0: return '#FDCB6E'
         else: return '#FFEAA7'
 
-    def scale(self, x, y):
-        if x % 2 == 0 and y % 2 == 0: return self.line_width, self.line_width
-        if x % 2 == 0: return self.line_width, 1
-        if y % 2 == 0: return 1, self.line_width
-        else: return 1, 1
+    def h_scale(self, x):
+        return 1 if x % 2 == 0 else self.box_size
+
+    def v_scale(self, y):
+        return 1 if y % 2 == 0 else self.box_size
 
     def place_valid(self, state, piece):
         return ((piece.x % 2 == 0) ^ (piece.y % 2 == 0)) and\

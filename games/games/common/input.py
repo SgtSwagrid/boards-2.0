@@ -9,52 +9,57 @@ class BoardEvent:
 class Display:
 
     def __init__(self, width, height):
+
+        self.width = width
+        self.height = height
+
         self.tiles = [[Tile(x, y)
             for y in range(0, height)]
             for x in range(0, width)]
-        self.selections = []
+
         self.current = False
+        self.selections = []
 
-    def set_colour(self, x, y, colour):
+    def set_colours(self, colours):
         display = copy.deepcopy(self)
-        display.tiles[x][y].colour = colour
+        for x in range(0, self.width):
+            for y in range(0, self.height):
+                display.tiles[x][y].colour = colours[x][y]
         return display
 
-    def add_texture(self, x, y, texture):
+    def add_textures(self, textures):
         display = copy.deepcopy(self)
-        display.tiles[x][y].textures += [texture]
+        for x in range(0, self.width):
+            for y in range(0, self.height):
+                display.tiles[x][y].textures =\
+                    display.tiles[x][y].textures + textures[x][y]
         return display
 
-    def set_width(self, x, y, width):
+    def set_widths(self, widths):
         display = copy.deepcopy(self)
-        display.tiles[x][y].width = width
+        for x in range(0, self.width):
+            for y in range(0, self.height):
+                display.tiles[x][y].width = widths[x]
         return display
 
-    def set_height(self, x, y, height):
+    def set_heights(self, heights):
         display = copy.deepcopy(self)
-        display.tiles[x][y].height = height
-        return display
-
-    def set_sx(self, x, y, sx):
-        display = copy.deepcopy(self)
-        display.tiles[x][y].sx = round(sx, 0)
-        return display
-
-    def set_sy(self, x, y, sy):
-        display = copy.deepcopy(self)
-        display.tiles[x][y].sy = round(sy, 0)
+        for x in range(0, self.width):
+            for y in range(0, self.height):
+                display.tiles[x][y].height = heights[y]
         return display
 
     def select(self, x, y):
         display = copy.deepcopy(self)
         display.tiles[x][y].selected = True
-        display.selections = display.selections + [(x, y)]
+        display.selections.append((x, y))
         return display
 
     def clear_selections(self):
         display = copy.deepcopy(self)
-        for x, y in display.selections:
-            display.tiles[x][y].selected = False
+        for x in range(0, self.width):
+            for y in range(0, self.height):
+                display.tiles[x][y].selected = False
         display.selections = []
         return display
 
@@ -65,16 +70,15 @@ class Display:
 
 class Tile:
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, colour='#FFFFFF', textures=[],
+            width=1, height=1, selected=False):
         self.x = x
         self.y = y
-        self.colour = '#FFFFFF'
-        self.textures = []
-        self.width = 1
-        self.height = 1
-        self.selected = False
-        self.sx = 1
-        self.sy = 1
+        self.colour = colour
+        self.textures = textures
+        self.width = width
+        self.height = height
+        self.selected = selected
 
 class Texture:
 
@@ -85,3 +89,8 @@ class Texture:
         self.y = y
         self.width = width
         self.height = height
+
+    def set_opacity(self, opacity):
+        texture = copy.deepcopy(self)
+        texture.opacity = opacity
+        return texture

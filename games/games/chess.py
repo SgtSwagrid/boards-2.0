@@ -12,9 +12,9 @@ class Chess(Game):
     class Pawn(PieceType):
         id = 0
 
-        def texture(self, owner):
-            if owner == 0: return 'games/img/chess/white_pawn.png'
-            else: return 'games/img/chess/black_pawn.png'
+        def texture(self, piece, state, display):
+            if piece.owner == 0: return Texture('games/img/chess/white_pawn.png')
+            else: return Texture('games/img/chess/black_pawn.png')
 
         def move_valid(self, state, piece, x_to, y_to):
 
@@ -34,9 +34,9 @@ class Chess(Game):
     class Rook(PieceType):
         id = 1
 
-        def texture(self, owner):
-            if owner == 0: return 'games/img/chess/white_rook.png'
-            else: return 'games/img/chess/black_rook.png'
+        def texture(self, piece, state, display):
+            if piece.owner == 0: return Texture('games/img/chess/white_rook.png')
+            else: return Texture('games/img/chess/black_rook.png')
 
         def move_valid(self, state, piece, x_to, y_to):
 
@@ -49,9 +49,9 @@ class Chess(Game):
     class Knight(PieceType):
         id = 2
 
-        def texture(self, owner):
-            if owner == 0: return 'games/img/chess/white_knight.png'
-            else: return 'games/img/chess/black_knight.png'
+        def texture(self, piece, state, display):
+            if piece.owner == 0: return Texture('games/img/chess/white_knight.png')
+            else: return Texture('games/img/chess/black_knight.png')
 
         def move_valid(self, state, piece, x_to, y_to):
 
@@ -61,9 +61,9 @@ class Chess(Game):
     class Bishop(PieceType):
         id = 3
 
-        def texture(self, owner):
-            if owner == 0: return 'games/img/chess/white_bishop.png'
-            else: return 'games/img/chess/black_bishop.png'
+        def texture(self, piece, state, display):
+            if piece.owner == 0: return Texture('games/img/chess/white_bishop.png')
+            else: return Texture('games/img/chess/black_bishop.png')
 
         def move_valid(self, state, piece, x_to, y_to):
 
@@ -77,9 +77,9 @@ class Chess(Game):
     class Queen(PieceType):
         id = 4
 
-        def texture(self, owner):
-            if owner == 0: return 'games/img/chess/white_queen.png'
-            else: return 'games/img/chess/black_queen.png'
+        def texture(self, piece, state, display):
+            if piece.owner == 0: return Texture('games/img/chess/white_queen.png')
+            else: return Texture('games/img/chess/black_queen.png')
 
         def move_valid(self, state, piece, x_to, y_to):
 
@@ -93,9 +93,9 @@ class Chess(Game):
     class King(PieceType):
         id = 5
 
-        def texture(self, owner):
-            if owner == 0: return 'games/img/chess/white_king.png'
-            else: return 'games/img/chess/black_king.png'
+        def texture(self, piece, state, display):
+            if piece.owner == 0: return Texture('games/img/chess/white_king.png')
+            else: return Texture('games/img/chess/black_king.png')
 
         def move_valid(self, state, piece, x_to, y_to):
             return distance(piece.x, piece.y, x_to, y_to) == 1

@@ -15,11 +15,11 @@ class ConnectFour(TicTacToe):
     class ConnectFourPiece(PieceType):
         id = 0
 
-        def texture(self, owner):
-            if owner == 0:
-                return 'games/img/connectfour/yellow_dot.png'  # Player 1 is White
+        def texture(self, piece, state, display):
+            if piece.owner == 0:
+                return Texture('games/img/connectfour/yellow_dot.png')  # Player 1 is White
             else:
-                return 'games/img/connectfour/red_dot.png'  # Player 2 is Black
+                return Texture('games/img/connectfour/red_dot.png')  # Player 2 is Black
 
     types = [ConnectFourPiece()]
     handlers = [PlaceHandler(ConnectFourPiece())]
