@@ -36,7 +36,7 @@ class PlaceHandler(Handler):
 
         if PlaceAction(piece).validate(state):
             texture = self.type.texture(piece, state, display)
-            return [Texture(texture, 0.2), state.game.place_icon]
+            return [texture.set_opacity(0.2), state.game.place_icon]
 
         return []
 
@@ -45,7 +45,6 @@ class MoveHandler(Handler):
     def apply(self, state, display, event):
 
         clicked = state.pieces[event.x][event.y]
-        print(display.selections)
 
         if len(display.selections) > 0:
             pos = display.selections[0]
