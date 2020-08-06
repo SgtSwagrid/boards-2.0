@@ -37,10 +37,17 @@ class Turn:
 
 class Outcome:
 
-    def __init__(self, finished=False, winner=-1, draw=False):
-        self.finished = finished
-        self.winner = winner
-        self.draw = draw
+    def __init__(self, finished=-1, winner=-2, draw=-1):
+
+        if winner != -2: self.winner = winner
+        elif draw: winner = -1
+
+        if draw != -1: self.draw = draw
+        elif winner != -2: self.draw = winner == -1
+        else: self.draw = False
+
+        if finished != -1: self.finished = finished
+        else: self.finished = winner != -1 or draw
 
 class State:
 
