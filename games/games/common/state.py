@@ -96,6 +96,11 @@ class State:
         state.outcome.draw = winner == -1
         return state
 
+    def set_outcome(self, outcome):
+        state = copy.deepcopy(self)
+        state.outcome = outcome
+        return state
+
     def set_piece_mode(self, piece, mode):
         state = copy.deepcopy(self)
         state.pieces[piece.x][piece.y].mode = mode

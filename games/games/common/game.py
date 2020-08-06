@@ -47,14 +47,6 @@ class Game:
             for y in range(0, self.height)]
             for x in range(0, self.width)]
 
-    def event(self, state, display, event):
-
-        for handler in self.handlers:
-            if isinstance(event, handler.event):
-                result, display = handler.apply(state, display, event)
-                if result: return result, display
-        return None, display
-
     def setup(self):
 
         pieces = [[self.piece(x, y)
@@ -65,6 +57,21 @@ class Game:
 
     def piece(self, x, y):
         return None
+
+    def event(self, state, display, event):
+
+        for handler in self.handlers:
+            if isinstance(event, handler.event):
+
+                result, display = handler.apply(state, display, event)
+                if result:
+                    outcome = self.outcome(result)
+                    return result.set_outcome(outcome), display
+
+        return None, display
+
+    def outcome(self, state):
+        return state.outcome
 
     def display(self, state, display):
 
