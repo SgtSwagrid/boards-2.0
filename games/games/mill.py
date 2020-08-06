@@ -56,14 +56,14 @@ class Mill(Game):
         def is_mill(self, state, piece):
             # if the current player owns all pieces alongside the respective y-axis or the x-axis they achieved a mill
             print([piece.x, piece.y])
-            print([state.pieces[point.x][point.y] and state.turn.current == state.pieces[point.x][point.y].owner
+            print([state.pieces[point.x][point.y] and state.turn.current_id == state.pieces[point.x][point.y].owner_id
                    for point in self.nodes if point.x == piece.x])
-            print([state.pieces[point.x][point.y] and state.turn.current == state.pieces[point.x][point.y].owner
+            print([state.pieces[point.x][point.y] and state.turn.current_id == state.pieces[point.x][point.y].owner_id
                    for point in self.nodes if point.y == piece.y])
-            if all([state.pieces[point.x][point.y] and state.turn.current == state.pieces[point.x][point.y].owner
+            if all([state.pieces[point.x][point.y] and state.turn.current_id == state.pieces[point.x][point.y].owner_id
                     for point in self.nodes if point.x == piece.x]) \
                     or all(
-                [state.pieces[point.x][point.y] and state.turn.current == state.pieces[point.x][point.y].owner
+                [state.pieces[point.x][point.y] and state.turn.current_id == state.pieces[point.x][point.y].owner_id
                  for point in self.nodes if point.y == piece.y]):
                 print('MILL!')
                 return True
@@ -176,8 +176,8 @@ class Mill(Game):
     # in case all pieces are placed, that means both players have a score of 9, the epoch advances and no more pieces
     # shall be placed
     def place_piece(self, state, piece):
-        state = state.place_piece(piece).add_score(state.turn.current, 1)
-        if state.players[state.turn.current].score == state.players[1 - state.turn.current].score >= 9:
+        state = state.place_piece(piece).add_score(state.turn.current_id, 1)
+        if state.player_states[state.turn.current_id].score == state.player_states[1 - state.turn.current_id].score >= 9:
             state = state.end_epoch()
         return state.end_turn()
 

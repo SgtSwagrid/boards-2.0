@@ -18,7 +18,7 @@ class DotsAndBoxes(Game):
         id = 0
 
         def texture(self, piece, state, display):
-            if piece.owner == 0:
+            if piece.owner_id == 0:
                 return Texture('games/img/dotsandboxes/red_edge.png')  # Player 1 is Red
             else:
                 return Texture('games/img/dotsandboxes/blue_edge.png')  # Player 2 is Blue
@@ -27,7 +27,7 @@ class DotsAndBoxes(Game):
         id = 1
 
         def texture(self, piece, state, display):
-            if piece.owner == 0:
+            if piece.owner_id == 0:
                 return Texture('games/img/dotsandboxes/red_edge.png', 0.5)  # Player 1 is Red
             else:
                 return Texture('games/img/dotsandboxes/blue_edge.png', 0.5)  # Player 2 is Blue
@@ -67,10 +67,10 @@ class DotsAndBoxes(Game):
             if not state.pieces[tile[0]][tile[1]] and\
                     all(self.adjacent_edges(state, tile[0], tile[1])):
                 print("we got one", tile[0], tile[1])
-                cap_piece = Piece(self.types[1], state.turn.current, tile[0], tile[1])
+                cap_piece = Piece(self.types[1], state.turn.current_id, tile[0], tile[1])
                 state = state\
                     .place_piece(cap_piece)\
-                    .add_score(state.turn.current, 1)
+                    .add_score(state.turn.current_id, 1)
 
         return state
 

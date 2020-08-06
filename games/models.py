@@ -158,17 +158,17 @@ class StateManager(models.Manager):
         state_model = super().create(
             game_id=state.game.id,
             action=action,
-            current=state.turn.current,
+            current=state.turn.current_id,
             stage=state.turn.stage,
             ply=state.turn.ply,
             epoch=state.turn.epoch,
             outcome=-2 if not state.outcome.finished else
                 -1 if state.outcome.draw else
-                state.outcome.winner,
+                state.outcome.winner_id,
             previous=previous)
 
-        for player in state.players:
-            PlayerStateModel.players.create(player, state_model)
+        for player_state in state.player_states:
+            PlayerStateModel.players.create(player_state, state_model)
 
         for col in state.pieces:
             for piece in col:
@@ -201,7 +201,7 @@ class StateModel(models.Model):
     previous = models.ForeignKey('StateModel',
         on_delete=models.CASCADE, null=True)
 
-    def get_players(self):
+    def get_player_states(self):
 
         return [p.get_player() for p in
             PlayerStateModel.players.filter(state=self)]
@@ -233,7 +233,7 @@ class StateModel(models.Model):
     def get_turn(self):
 
         return Turn(
-            current=self.current,
+            current_id=self.current,
             stage=self.stage,
             ply=self.ply,
             epoch=self.epoch,
@@ -243,7 +243,7 @@ class StateModel(models.Model):
 
         return Outcome(
             finished=self.outcome > -2,
-            winner=self.outcome,
+            winner_id=self.outcome,
             draw=self.outcome == -1)
 
     def get_changes(self):
@@ -253,7 +253,7 @@ class StateModel(models.Model):
 
         return State(
             game=games[self.game_id],
-            players=self.get_players(),
+            player_states=self.get_player_states(),
             pieces=self.get_pieces(),
             action=self.get_action(),
             changes=self.get_changes(),
@@ -302,7 +302,7 @@ class PieceManager(models.Manager):
         return super().create(
             state=state,
             type=piece.type.id,
-            owner=piece.owner,
+            owner=piece.owner_id,
             x=piece.x,
             y=piece.y,
             mode=piece.mode)
@@ -329,7 +329,7 @@ class PieceModel(models.Model):
 
         return Piece(
             type=games[self.state.game_id].types[self.type],
-            owner=self.owner,
+            owner_id=self.owner,
             x=self.x,
             y=self.y,
             mode=self.mode)

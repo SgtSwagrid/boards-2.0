@@ -18,7 +18,7 @@
             {% else %}
                 {{ player.state.score }} pts
             {% endif %}
-            {% if not state.outcome.finished and player.state.order == state.turn.current %}
+            {% if not state.outcome.finished and player.state.order == state.turn.current_id %}
                 &#x2022 Playing
             {% elif state.outcome.winner == player.player.order %}
                 &#x2022 Winner

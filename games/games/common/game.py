@@ -13,7 +13,7 @@ class Game:
     def place_valid(self, state, piece):
 
         return piece and self.in_bounds(piece.x, piece.y) and\
-            piece.owner == state.turn.current and\
+            piece.owner_id == state.turn.current_id and\
             not state.pieces[piece.x][piece.y] and\
             piece.type.place_valid(state, piece)
 
@@ -24,7 +24,7 @@ class Game:
 
         return piece and self.in_bounds(piece.x, piece.y) and \
             self.in_bounds(x_to, y_to) and \
-            piece.owner == state.turn.current and\
+            piece.owner_id == state.turn.current_id and\
             (x_to != piece.x or y_to != piece.y) and\
             not state.friendly(x_to, y_to) and\
             piece.type.move_valid(state, piece, x_to, y_to)
@@ -40,7 +40,7 @@ class Game:
         return piece.type.remove_piece(state, piece)
 
     def moveable(self, state, piece):
-        return piece and piece.owner == state.turn.current and\
+        return piece and piece.owner_id == state.turn.current_id and\
                piece.type.moveable(state, piece)
 
     def positions(self, mapper):

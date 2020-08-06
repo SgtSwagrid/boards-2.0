@@ -22,7 +22,7 @@ class PlaceHandler(Handler):
 
     def apply(self, state, display, event):
 
-        clicked = Piece(self.type, state.turn.current, event.x, event.y)
+        clicked = Piece(self.type, state.turn.current_id, event.x, event.y)
         action = PlaceAction(clicked)
 
         if action.validate(state):
@@ -32,7 +32,7 @@ class PlaceHandler(Handler):
 
     def texture(self, state, display, x, y):
 
-        piece = Piece(self.type, state.turn.current, x, y)
+        piece = Piece(self.type, state.turn.current_id, x, y)
 
         if PlaceAction(piece).validate(state):
             texture = self.type.texture(piece, state, display)

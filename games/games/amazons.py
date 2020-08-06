@@ -16,7 +16,7 @@ class Amazons(Game):
 
         # White is player 1, black player 2
         def texture(self, piece, state, display):
-            if piece.owner == 0:
+            if piece.owner_id == 0:
                 return Texture('games/img/chess/white_queen.png')
             else:
                 return Texture('games/img/chess/black_queen.png')
@@ -35,7 +35,7 @@ class Amazons(Game):
         id = 1
 
         def texture(self, piece, state, display):
-            if piece.owner == 0:
+            if piece.owner_id == 0:
                 return Texture('games/img/chess/white_pawn.png')
             else:
                 return Texture('games/img/chess/black_pawn.png')
@@ -50,11 +50,11 @@ class Amazons(Game):
                 state.game.is_queen_move(state, x_from, y_from, piece.x, piece.y)
 
         def place_piece(self, state, piece):
-            piece = Piece(self, state.turn.current, piece.x, piece.y)
+            piece = Piece(self, state.turn.current_id, piece.x, piece.y)
             state_next_turn = state.place_piece(piece).end_turn()
 
             return state_next_turn if state.game.can_move(state_next_turn) \
-                else state_next_turn.end_game(winner=state.turn.current)
+                else state_next_turn.end_game(winner_id=state.turn.current_id)
 
     types = [AmazonPiece(), ArrowPiece()]
     handlers = [MoveHandler(), PlaceHandler(ArrowPiece())]
@@ -82,7 +82,7 @@ class Amazons(Game):
         return any([state.open(piece.x + dx, piece.y + dy)
                     for dx in range(-1, 2)
                     for dy in range(-1, 2)
-                    for piece in state.pieces_by_player[state.turn.current]
+                    for piece in state.find_pieces(state.turn.current_id)
                     if piece.type.id == self.AmazonPiece().id])
 
     def is_queen_move(self, state, x_from, y_from, x_to, y_to):

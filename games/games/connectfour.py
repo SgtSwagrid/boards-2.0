@@ -18,7 +18,7 @@ class ConnectFour(TicTacToe):
         id = 0
 
         def texture(self, piece, state, display):
-            if piece.owner == 0:
+            if piece.owner_id == 0:
                 return Texture('games/img/connectfour/yellow_dot.png')  # Player 1 is White
             else:
                 return Texture('games/img/connectfour/red_dot.png')  # Player 2 is Black

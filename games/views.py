@@ -148,7 +148,7 @@ def sidebar_view(request, board_code):
                 'name': game.player_names[player.order]
             }
             for player, state in
-                zip(board.players(), state_model.get_players())],
+                zip(board.players(), state_model.get_player_states())],
         'turn': board.players()[board.state.current],
         'winner': board.players()[board.state.outcome]\
             if board.state.outcome > -1 else None,

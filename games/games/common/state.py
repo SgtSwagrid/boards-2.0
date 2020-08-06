@@ -9,9 +9,9 @@ class PlayerState:
 
 class Piece:
 
-    def __init__(self, type, owner, x, y, mode=0):
+    def __init__(self, type, owner_id, x, y, mode=0):
         self.type = type
-        self.owner = owner
+        self.owner_id = owner_id
         self.x = x
         self.y = y
         self.mode = mode
@@ -22,13 +22,10 @@ class Piece:
         piece.y = y
         return piece
 
-    def is_type(self, type):
-        return isinstance(self.type, type)
-
 class Turn:
 
-    def __init__(self, current=0, stage=0, ply=0, epoch=0, new=True):
-        self.current = current
+    def __init__(self, current_id=0, stage=0, ply=0, epoch=0, new=True):
+        self.current_id = current_id
         self.stage = stage
         self.ply = ply
         self.epoch = epoch
@@ -36,13 +33,13 @@ class Turn:
 
 class Outcome:
 
-    def __init__(self, finished=-1, winner=-2, draw=-1):
+    def __init__(self, finished=-1, winner_id=-2, draw=-1):
 
-        if winner != -2: self.winner = winner
+        if winner_id != -2: self.winner = winner_id
         elif draw: self.winner = -1
 
         if draw != -1: self.draw = draw
-        elif winner != -2: self.draw = winner == -1
+        elif winner_id != -2: self.draw = winner_id == -1
         else: self.draw = False
 
         if finished != -1: self.finished = finished
@@ -58,12 +55,12 @@ class Change:
 
 class State:
 
-    def __init__(self, game, players=None, pieces=None, action=None,
+    def __init__(self, game, player_states=None, pieces=None, action=None,
             changes=[], turn=Turn(), outcome=Outcome(), previous=lambda: None):
 
         self.game = game
 
-        self.players = players if players else\
+        self.player_states = player_states if player_states else\
             [PlayerState(i) for i in range(0, game.players)]
 
         self.pieces = pieces if pieces else\
@@ -75,10 +72,10 @@ class State:
         self.outcome = outcome
         self.previous = previous
 
-        self.pieces_by_player = {player.order:
-            [piece for col in self.pieces for piece in col
-                if piece and piece.owner == player.order]
-            for player in self.players}
+    def find_pieces(self, player_id=-1, type=-1):
+        return [piece for col in self.pieces for piece in col if piece and\
+            (type == -1 or isinstance(piece.type, type)) and\
+            (player_id == -1 or piece.owner_id == player_id)]
 
     def end_stage(self, skip=1):
         state = copy.deepcopy(self)
@@ -87,7 +84,8 @@ class State:
 
     def end_turn(self, skip=1):
         state = copy.deepcopy(self)
-        state.turn.current = (state.turn.current + skip) % len(state.players)
+        state.turn.current_id = (state.turn.current_id + skip)\
+            % len(state.player_states)
         state.turn.stage = 0
         state.turn.ply += 1
         state.turn.new = True
@@ -98,11 +96,11 @@ class State:
         state.turn.epoch += skip
         return state
 
-    def end_game(self, winner=-1):
+    def end_game(self, winner_id=-1):
         state = copy.deepcopy(self)
         state.outcome.finished = True
-        state.outcome.winner = winner
-        state.outcome.draw = winner == -1
+        state.outcome.winner_id = winner_id
+        state.outcome.draw = winner_id == -1
         return state
 
     def set_outcome(self, outcome):
@@ -132,18 +130,18 @@ class State:
     def remove_piece(self, piece):
         return self.set_piece(None, piece.x, piece.y)
 
-    def set_score(self, player, score):
+    def set_score(self, player_id, score):
         state = copy.deepcopy(self)
-        state.players[player].score = score
+        state.player_states[player_id].score = score
         return state
 
-    def add_score(self, player, score):
-        total = self.players[player].score + score
-        return self.set_score(player, total)
+    def add_score(self, player_id, score):
+        total = self.player_states[player_id].score + score
+        return self.set_score(player_id, total)
 
-    def set_player_mode(self, player, mode):
+    def set_player_mode(self, player_id, mode):
         state = copy.deepcopy(self)
-        state.players[player].mode = mode
+        state.player_states[player_id].mode = mode
         return state
 
     def exists(self, x, y):
@@ -154,11 +152,11 @@ class State:
 
     def friendly(self, x, y):
         return self.exists(x, y) and\
-            self.pieces[x][y].owner == self.turn.current
+            self.pieces[x][y].owner_id == self.turn.current_id
 
     def enemy(self, x, y):
         return self.exists(x, y) and\
-            self.pieces[x][y].owner != self.turn.current
+            self.pieces[x][y].owner_id != self.turn.current_id
 
     def push_action(self, action):
         state = copy.deepcopy(self)

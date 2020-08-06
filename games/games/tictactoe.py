@@ -17,7 +17,7 @@ class TicTacToe(Game):
         id = 0
 
         def texture(self, piece, state, display):
-            if piece.owner == 0:
+            if piece.owner_id == 0:
                 return Texture('games/img/misc/naught.png')  # Player 1 is Naughts
             else:
                 return Texture('games/img/misc/cross.png')  # Player 2 is Crosses
@@ -41,7 +41,7 @@ class TicTacToe(Game):
         game_ended = self.has_run(state, piece)
 
         return state.end_turn() if not game_ended \
-            else state.end_game(winner=state.turn.current)
+            else state.end_game(winner_id=state.turn.current_id)
 
     def colour(self, state, display, x, y):
         col = super().colour(state, display, x, y)
