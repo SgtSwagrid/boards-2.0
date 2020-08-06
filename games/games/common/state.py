@@ -47,7 +47,7 @@ class Outcome:
         else: self.draw = False
 
         if finished != -1: self.finished = finished
-        else: self.finished = winner != -1 or draw
+        else: self.finished = self.winner != -1 or self.draw
 
 class State:
 
