@@ -58,36 +58,36 @@
     <div class="row">
         <div class="col s4">
             {% if previous %}
-                <a class="block waves-effect waves-light btn-small"
+                <a class="block btn-small waves-effect"
                         onclick="setState({{ previous.id }})">
                     <i class="material-icons">skip_previous</i>
                 </a>
             {% else %}
-                <a class="block grey waves-effect waves-light btn-small">
+                <a class="block btn-small grey">
                     <i class="material-icons">skip_previous</i>
                 </a>
             {% endif %}
         </div>
         <div class="col s4">
             {% if next %}
-                <a class="block waves-effect waves-light btn-small"
+                <a class="block btn-small waves-effect"
                         onclick="setState({{ next.id }})">
                     <i class="material-icons">skip_next</i>
                 </a>
             {% else %}
-                <a class="block grey waves-effect waves-light btn-small">
+                <a class="block btn-small grey">
                     <i class="material-icons">skip_next</i>
                 </a>
             {% endif %}
             </div>
             <div class="col s4">
             {% if next %}
-                <a class="block waves-effect waves-light btn-small"
+                <a class="block btn-small waves-effect"
                         onclick="setState({{ current.id }})">
                     <i class="material-icons">last_page</i>
                 </a>
             {% else %}
-                <a class="block grey waves-effect waves-light btn-small">
+                <a class="block btn-small grey">
                     <i class="material-icons">last_page</i>
                 </a>
             {% endif %}

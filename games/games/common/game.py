@@ -1,8 +1,6 @@
 from games.games.common.input import *
 from games.games.common.state import *
 
-import time as timer
-
 class Game:
 
     types = []
@@ -84,7 +82,7 @@ class Game:
             .set_widths(widths)\
             .set_heights(heights)
 
-        if display.current:
+        if display.mode.active:
             for handler in self.handlers:
                 display = handler.display(state, display)
 
@@ -111,11 +109,21 @@ class Game:
         return textures
 
     def background_colour(self, x, y):
-        if (x + y) % 2 == 0: return '#FDCB6E'
-        else: return '#FFEAA7'
+        return self.checkerboard('#FDCB6E', '#FFEAA7', x, y)
 
     def background_texture(self, x, y):
         return []
+
+    def checkerboard(self, colour1, colour2, x, y):
+        return colour1 if (x + y) % 2 == 0 else colour2
+
+    def table(self, colour1, colour2, x, y):
+        return colour1 if x % 2 == 1 and y % 2 == 1 else colour2
+
+    def gingham(self, colour1, colour2, colour3, x, y):
+        if (x % 2 == 0) ^ (y % 2 == 0): return colour1
+        elif x % 2 == 0 and y % 2 == 0: return colour2
+        else: return colour3
 
     def h_scale(self, x):
         return 1

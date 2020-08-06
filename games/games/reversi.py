@@ -41,10 +41,7 @@ class Reversi(Game):
         return None
 
     def background_colour(self, x, y):
-        if (x + y) % 2 == 0:
-            return '#27ae60'  # Dark Green
-        else:
-            return '#2ecc71'  # Light Green
+        return self.checkerboard('#27AE60', '#2ECC71', x, y)
 
     def place_valid(self, state, piece):
         return self.in_bounds(piece.x, piece.y) and\

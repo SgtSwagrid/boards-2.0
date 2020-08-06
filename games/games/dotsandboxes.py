@@ -34,9 +34,7 @@ class DotsAndBoxes(Game):
     handlers = [PlaceHandler(EdgePiece())]
 
     def background_colour(self, x, y):
-        if x % 2 == 0 and y % 2 == 0: return '#000000'
-        if x % 2 == 0 or y % 2 == 0 == 0: return '#FDCB6E'
-        else: return '#FFEAA7'
+        return self.gingham('#FDCB6E', '#000000', '#FFEAA7', x, y)
 
     def h_scale(self, x):
         return 1 if x % 2 == 0 else self.box_size

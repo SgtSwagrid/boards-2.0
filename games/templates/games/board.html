@@ -6,7 +6,7 @@
         <td class="tile" style="
         --aspect-ratio: 1/1 /*{{ tile.width }}/{{ tile.height }}*/;
         background: {{ tile.colour }};"
-            {% if current %}
+            {% if active %}
             onclick="clickBoard({{ tile.x }}, {{ tile.y }}, {{ selected.x }}, {{ selected.y }})"
             {% endif %}>
             {% for texture in tile.textures %}

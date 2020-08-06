@@ -8,7 +8,7 @@ class BoardEvent:
 
 class Display:
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, mode):
 
         self.width = width
         self.height = height
@@ -17,8 +17,9 @@ class Display:
             for y in range(0, height)]
             for x in range(0, width)]
 
-        self.current = False
         self.selections = []
+
+        self.mode = mode
 
     def set_colours(self, colours):
         display = copy.deepcopy(self)
@@ -63,9 +64,9 @@ class Display:
         display.selections = []
         return display
 
-    def set_current(self, current):
+    def set_mode(self, mode):
         display = copy.deepcopy(self)
-        display.current = current
+        display.mode = mode
         return display
 
 class Tile:
@@ -94,3 +95,9 @@ class Texture:
         texture = copy.deepcopy(self)
         texture.opacity = opacity
         return texture
+
+class Mode:
+
+    def __init__(self, player, active):
+        self.player = player
+        self.active = active

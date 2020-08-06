@@ -11,18 +11,18 @@ class Action:
     def apply(self, state):
         return state.push_action(self)
 
-    def set_changed(self, x, y):
+    def set_changed(self, change):
         action = copy.deepcopy(self)
-        action.changes.append((x, y))
+        action.changes.append(change)
         return action
 
     def changed(self, x, y):
-        return any(c == (x, y) for c in self.changes)
+        return any((c.x, c.y) == (x, y) for c in self.changes)
 
 class PlaceAction(Action):
 
-    def __init__(self, piece, changes=None):
-        super().__init__(changes if changes else [(piece.x, piece.y)])
+    def __init__(self, piece, changes=[]):
+        super().__init__(changes)
         self.piece = piece
 
     def validate(self, state):
@@ -33,9 +33,8 @@ class PlaceAction(Action):
 
 class MoveAction(Action):
 
-    def __init__(self, piece, x_to, y_to, changes=None):
-        super().__init__(changes if changes else\
-            [(piece.x, piece.y), (x_to, y_to)])
+    def __init__(self, piece, x_to, y_to, changes=[]):
+        super().__init__(changes)
         self.piece = piece
         self.x_to = x_to
         self.y_to = y_to
@@ -50,8 +49,8 @@ class MoveAction(Action):
 
 class RemoveAction(Action):
 
-    def __init__(self, piece, changes=None):
-        super().__init__(changes if changes else [(piece.x, piece.y)])
+    def __init__(self, piece, changes=[]):
+        super().__init__(changes)
         self.piece = piece
 
     def validate(self, state):
@@ -59,3 +58,11 @@ class RemoveAction(Action):
 
     def apply(self, state):
         return state.game.remove_piece(super().apply(state), self.piece)
+
+class Change:
+
+    def __init__(self, x, y, old, new):
+        self.x = x
+        self.y = y
+        self.old = old
+        self.new = new

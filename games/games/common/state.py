@@ -1,5 +1,7 @@
 import copy
 
+from games.games.common.action import Change
+
 class PlayerState:
 
     def __init__(self, order, score=0, mode=0):
@@ -62,6 +64,7 @@ class State:
         self.action = action
         self.turn = turn
         self.outcome = outcome
+
         self.previous = previous
 
         self.pieces_by_player = {player.order:
@@ -101,7 +104,8 @@ class State:
     def set_piece(self, piece, x, y):
         state = copy.deepcopy(self)
         state.pieces[x][y] = piece
-        state.action = state.action.set_changed(x, y)
+        change = Change(x, y, self.pieces[x][y], piece)
+        state.action = state.action.set_changed(change)
         return state
 
     def place_piece(self, piece):
@@ -148,9 +152,9 @@ class State:
         state.action = action
         return state
 
-    def set_changed(self, x, y):
+    def set_changed(self, change):
         state = copy.deepcopy(self)
-        state.action = state.action.set_changed((x, y))
+        state.action = state.action.set_changed(change)
         return state
 
     def changed(self, x, y):

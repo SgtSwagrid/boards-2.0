@@ -78,22 +78,22 @@ def board_view(request, board_code):
     if 'sx' in request.POST:
         sx, sy = int(request.POST['sx']), int(request.POST['sy'])
 
-    display = Display(game.width, game.height)
+    active = board.status == 1 and board.current(player)\
+        and state_model == board.state
+    player_id = player.order if player else -1
+
+    display = Display(game.width, game.height, Mode(player_id, active))
     if sx != -1: display = display.select(sx, sy)
 
-    current = board.status == 1 and board.current(player)\
-        and state_model == board.state
-
-    if cx != -1 and current:
+    if cx != -1 and active:
         result, display = game.event(state, display, BoardEvent(cx, cy))
         if result:
             board.set_state(result)
             notify_board(board)
             state = result
 
-    current = board.status == 1 and board.current(player)\
-        and state_model == board.state
-    display = display.set_current(current)
+    active &= board.current(player)
+    display = display.set_mode(Mode(player_id, active))
     display = game.display(state, display)
 
     return render(request, 'games/board.html', {
@@ -104,7 +104,7 @@ def board_view(request, board_code):
             'y': display.selections[0][1]
                 if len(display.selections) > 0 else -1
         },
-        'current': current
+        'active': active
     })
 
 def sidebar_view(request, board_code):
