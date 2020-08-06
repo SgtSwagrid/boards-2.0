@@ -1,7 +1,5 @@
 import copy
 
-from games.games.common.action import Change
-
 class PlayerState:
 
     def __init__(self, order, score=0, mode=0):
@@ -29,11 +27,12 @@ class Piece:
 
 class Turn:
 
-    def __init__(self, current=0, stage=0, ply=0, epoch=0):
+    def __init__(self, current=0, stage=0, ply=0, epoch=0, new=True):
         self.current = current
         self.stage = stage
         self.ply = ply
         self.epoch = epoch
+        self.new = new
 
 class Outcome:
 
@@ -49,16 +48,18 @@ class Outcome:
         if finished != -1: self.finished = finished
         else: self.finished = self.winner != -1 or self.draw
 
+class Change:
+
+    def __init__(self, x, y, old, new):
+        self.x = x
+        self.y = y
+        self.old = old
+        self.new = new
+
 class State:
 
-    def __init__(self,
-            game,
-            players=None,
-            pieces=None,
-            action=None,
-            turn=Turn(),
-            outcome=Outcome(),
-            previous=lambda: None):
+    def __init__(self, game, players=None, pieces=None, action=None,
+            changes=[], turn=Turn(), outcome=Outcome(), previous=lambda: None):
 
         self.game = game
 
@@ -69,9 +70,9 @@ class State:
             [[None] * game.height] * game.width
 
         self.action = action
+        self.changes = changes
         self.turn = turn
         self.outcome = outcome
-
         self.previous = previous
 
         self.pieces_by_player = {player.order:
@@ -89,6 +90,7 @@ class State:
         state.turn.current = (state.turn.current + skip) % len(state.players)
         state.turn.stage = 0
         state.turn.ply += 1
+        state.turn.new = True
         return state
 
     def end_epoch(self, skip=1):
@@ -108,16 +110,15 @@ class State:
         state.outcome = outcome
         return state
 
-    def set_piece_mode(self, piece, mode):
-        state = copy.deepcopy(self)
-        state.pieces[piece.x][piece.y].mode = mode
-        return state
-
     def set_piece(self, piece, x, y):
         state = copy.deepcopy(self)
         state.pieces[x][y] = piece
-        change = Change(x, y, self.pieces[x][y], piece)
-        state.action = state.action.set_changed(change)
+        return state.set_changed(Change(x, y, self.pieces[x][y], piece))
+
+    def set_piece_mode(self, piece, mode):
+        state = copy.deepcopy(self)
+        state.pieces[piece.x][piece.y] = copy.deepcopy(piece)
+        state.pieces[piece.x][piece.y].mode = mode
         return state
 
     def place_piece(self, piece):
@@ -166,8 +167,10 @@ class State:
 
     def set_changed(self, change):
         state = copy.deepcopy(self)
-        state.action = state.action.set_changed(change)
+        if state.turn.new: state.changes = []
+        state.changes.append(change)
+        state.turn.new = False
         return state
 
     def changed(self, x, y):
-        return self.action and self.action.changed(x, y)
+        return any((c.x, c.y) == (x, y) for c in self.changes)

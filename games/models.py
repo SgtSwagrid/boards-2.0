@@ -45,7 +45,7 @@ class BoardModel(models.Model):
         self.save()
 
     def current(self, player):
-        return player and player.order == self.state.current
+        return player != None and player.order == self.state.current
 
     def players(self):
         return PlayerModel.objects.filter(board=self)
@@ -174,6 +174,9 @@ class StateManager(models.Manager):
             for piece in col:
                 if piece: PieceModel.pieces.create(piece, state_model)
 
+        for change in state.changes:
+            ChangeModel.changes.create(change, state_model)
+
         return state_model
 
 class StateModel(models.Model):
@@ -233,7 +236,8 @@ class StateModel(models.Model):
             current=self.current,
             stage=self.stage,
             ply=self.ply,
-            epoch=self.epoch)
+            epoch=self.epoch,
+            new=not self.previous or self.previous.current != self.current)
 
     def get_outcome(self):
 
@@ -242,6 +246,9 @@ class StateModel(models.Model):
             winner=self.outcome,
             draw=self.outcome == -1)
 
+    def get_changes(self):
+        return [c.get_change() for c in ChangeModel.changes.filter(state=self)]
+
     def get_state(self):
 
         return State(
@@ -249,6 +256,7 @@ class StateModel(models.Model):
             players=self.get_players(),
             pieces=self.get_pieces(),
             action=self.get_action(),
+            changes=self.get_changes(),
             turn=self.get_turn(),
             outcome=self.get_outcome(),
             previous=self.get_previous_state)
@@ -347,9 +355,6 @@ class ActionManager(models.Manager):
                 x_from=action.piece.x,
                 y_from=action.piece.y)
 
-        for change in action.changes:
-            ChangeModel.changes.create(change, action_model)
-
         return action_model
 
 class ActionModel(models.Model):
@@ -368,46 +373,38 @@ class ActionModel(models.Model):
 
     option = models.IntegerField(default=-1)
 
-    def get_changes(self, state):
-        return [c.get_change(state) for c in
-            ChangeModel.changes.filter(action=self)]
-
     def get_action(self, state):
 
-        changes = self.get_changes(state)
-        pieces = state.get_pieces()
-        previous = state.previous.get_pieces()
-
         if self.type == 0:
-            piece = pieces[self.x_to][self.y_to]
-            return PlaceAction(piece, changes)
+            piece = state.get_piece(self.x_to, self.y_to)
+            return PlaceAction(piece)
 
         elif self.type == 1:
-            piece = previous[self.x_from][self.y_from]
-            return MoveAction(piece, self.x_to, self.y_to, changes)
+            piece = state.previous.get_piece(self.x_from, self.y_from)
+            return MoveAction(piece, self.x_to, self.y_to)
 
         elif self.type == 2:
-            piece = previous[self.x_from][self.y_from]
-            return RemoveAction(piece, changes)
+            piece = state.previous.get_piece(self.x_from, self.y_from)
+            return RemoveAction(piece)
 
 class ChangeManager(models.Manager):
 
-    def create(self, change, action):
-        return super().create(action=action, x=change.x, y=change.y)
+    def create(self, change, state):
+        return super().create(state=state, x=change.x, y=change.y)
 
 class ChangeModel(models.Model):
 
     changes = ChangeManager()
 
-    action = models.ForeignKey(ActionModel, on_delete=models.CASCADE)
+    state = models.ForeignKey(StateModel, on_delete=models.CASCADE)
 
     x = models.IntegerField()
 
     y = models.IntegerField()
 
-    def get_change(self, state):
+    def get_change(self):
 
-        old_piece = state.previous.get_piece(self.x, self.y)
-        new_piece = state.get_piece(self.x, self.y)
+        old_piece = self.state.previous.get_piece(self.x, self.y)
+        new_piece = self.state.get_piece(self.x, self.y)
 
         return Change(self.x, self.y, old_piece, new_piece)

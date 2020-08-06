@@ -92,7 +92,7 @@ def board_view(request, board_code):
             notify_board(board)
             state = result
 
-    active &= board.current(player)
+    active = active and board.current(player)
     display = display.set_mode(Mode(player_id, active))
     display = game.display(state, display)
 
