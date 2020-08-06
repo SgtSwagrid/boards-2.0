@@ -10,6 +10,8 @@ class DotsAndBoxes(Game):
     height = 6 * 2 + 1
     players = 2
 
+    player_names = ['Red', 'Blue']
+
     box_size = 5
 
     class EdgePiece(PieceType):

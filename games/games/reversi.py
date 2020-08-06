@@ -9,6 +9,8 @@ class Reversi(Game):
     height = 8
     players = 2
 
+    player_names = ['White', 'Black']
+
     class ReversiPiece(PieceType):
         id = 0
 

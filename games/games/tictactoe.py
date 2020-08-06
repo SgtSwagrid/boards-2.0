@@ -3,12 +3,15 @@ from .common.handler import *
 
 
 class TicTacToe(Game):
+
     name = "Tic Tac Toe"
     id = 1
     width = 3
     height = 3
     players = 2
     target = 3
+
+    player_names = ['Naughts', 'Crosses']
 
     class TicTacToePiece(PieceType):
         id = 0

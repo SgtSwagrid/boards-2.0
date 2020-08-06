@@ -9,6 +9,8 @@ class Amazons(Game):
     height = 8
     players = 2
 
+    player_names = ['White', 'Black']
+
     class AmazonPiece(PieceType):
         id = 0
 

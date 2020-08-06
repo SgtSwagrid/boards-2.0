@@ -116,6 +116,7 @@ def sidebar_view(request, board_code):
     state_model = StateModel.states.filter(
         id=int(request.GET['state'])).first()\
         if 'state' in request.GET else board.state
+    game = board.game()
 
     if board.status == 0: setup(request, board)
 
@@ -144,6 +145,7 @@ def sidebar_view(request, board_code):
                 'user': player.user,
                 'player': player,
                 'state': state,
+                'name': game.player_names[player.order]
             }
             for player, state in
                 zip(board.players(), state_model.get_players())],

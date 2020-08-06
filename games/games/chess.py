@@ -9,6 +9,8 @@ class Chess(Game):
     height = 8
     players = 2
 
+    player_names = ['White', 'Black']
+
     class Pawn(PieceType):
         id = 0
 

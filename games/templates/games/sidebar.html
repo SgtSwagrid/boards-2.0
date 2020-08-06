@@ -12,12 +12,12 @@
         {{ player.user }}
         </h6>
         <h6 class="small-text white-text">
+            {{ player.name }}  &#x2022
             {% if player.state.score == 1 %}
                 {{ player.state.score }} pt
             {% else %}
                 {{ player.state.score }} pts
             {% endif %}
-                &#x2022 {{ player.player.time|time:"i:s" }}
             {% if not state.outcome.finished and player.state.order == state.turn.current %}
                 &#x2022 Playing
             {% elif state.outcome.winner == player.player.order %}

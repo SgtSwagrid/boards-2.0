@@ -5,6 +5,7 @@ class Game:
 
     types = []
     handlers = []
+    player_names = [f'Player {i}' for i in range(1, 17)]
 
     def in_bounds(self, x, y):
         return 0 <= x < self.width and 0 <= y < self.height

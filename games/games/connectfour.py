@@ -12,6 +12,8 @@ class ConnectFour(TicTacToe):
     players = 2
     target = 4
 
+    player_names = ['Yellow', 'Red']
+
     class ConnectFourPiece(PieceType):
         id = 0
 
