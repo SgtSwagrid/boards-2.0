@@ -40,7 +40,7 @@ class Outcome:
     def __init__(self, finished=-1, winner=-2, draw=-1):
 
         if winner != -2: self.winner = winner
-        elif draw: winner = -1
+        elif draw: self.winner = -1
 
         if draw != -1: self.draw = draw
         elif winner != -2: self.draw = winner == -1
