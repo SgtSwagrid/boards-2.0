@@ -50,10 +50,12 @@ class DotsAndBoxes(Game):
                 not state.pieces[piece.x][piece.y]
 
     def place_piece(self, state, piece):
+        player_score = state.player_states[state.turn.current_id].score
         state = state.place_piece(piece)
         state = self.capture(state, piece)
+        player_score_after = state.player_states[state.turn.current_id].score
 
-        return state.end_turn()
+        return state.end_turn() if player_score == player_score_after else state
 
     def capture(self, state, piece):
         adj = self.adjacent_tiles(state, piece)
