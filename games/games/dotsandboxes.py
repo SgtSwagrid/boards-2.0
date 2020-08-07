@@ -6,8 +6,8 @@ class DotsAndBoxes(Game):
 
     name = "Dots and Boxes"
     id = 7
-    width = 6 * 2 + 1
-    height = 6 * 2 + 1
+    width = 3 * 2 + 1
+    height = 3 * 2 + 1
     players = 2
 
     player_names = ['Red', 'Blue']
@@ -55,7 +55,14 @@ class DotsAndBoxes(Game):
         state = self.capture(state, piece)
         player_score_after = state.player_states[state.turn.current_id].score
 
-        return state.end_turn() if player_score == player_score_after else state
+        game_finished = all([state.pieces[x][y]
+                            for x in range(self.width)
+                            for y in range(self.height)
+                            if (x % 2 == 1 and y % 2 == 1)])
+
+        return state.end_game(winner_id=self.get_winner(state)) \
+            if game_finished else (state.end_turn()
+                                   if player_score == player_score_after else state)
 
     def capture(self, state, piece):
         adj = self.adjacent_tiles(state, piece)
@@ -90,3 +97,8 @@ class DotsAndBoxes(Game):
                 for dy in [-1, 0, 1]
                 if (((x+dx) % 2 == 0) ^ ((y+dy) % 2 == 0))
                 and not (dx == 0 and dy == 0)]
+
+    def get_winner(self, state):
+        winner = state.player_states.index(max(state.player_states, key=lambda x:x.score)) if \
+            (state.player_states[0].score != state.player_states[1].score) else -1
+        return winner
