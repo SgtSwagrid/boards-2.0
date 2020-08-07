@@ -5,8 +5,8 @@ class Reversi(Game):
 
     name = "Reversi"
     id = 3
-    width = 8
-    height = 8
+    width = 4
+    height = 4
     players = 2
 
     player_names = ['White', 'Black']
@@ -110,4 +110,6 @@ class Reversi(Game):
         return False
 
     def get_winner(self, state):
-        return state.player_states.index(max(state.players, key=lambda x:x.score))
+        winner = state.player_states.index(max(state.player_states, key=lambda x:x.score)) if \
+            (state.player_states[0].score != state.player_states[1].score) else -1
+        return winner
