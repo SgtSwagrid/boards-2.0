@@ -67,15 +67,9 @@ class DotsAndBoxes(Game):
     def capture(self, state, piece):
         adj = self.adjacent_tiles(state, piece)
 
-        print("Tiles for maybe capture", adj)
-
         for tile in adj:
-            print("Looking at", tile[0], tile[1])
-            print("Tile;;", state.pieces[tile[0]][tile[1]])
-            print("Edges", self.adjacent_edges(state, tile[0], tile[1]))
             if not state.pieces[tile[0]][tile[1]] and\
                     all(self.adjacent_edges(state, tile[0], tile[1])):
-                print("we got one", tile[0], tile[1])
                 cap_piece = Piece(self.types[1], state.turn.current_id, tile[0], tile[1])
                 state = state\
                     .place_piece(cap_piece)\
