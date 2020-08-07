@@ -6,8 +6,8 @@ class DotsAndBoxes(Game):
 
     name = "Dots and Boxes"
     id = 7
-    width = 3 * 2 + 1
-    height = 3 * 2 + 1
+    width = 6 * 2 + 1
+    height = 6 * 2 + 1
     players = 2
 
     player_names = ['Red', 'Blue']
