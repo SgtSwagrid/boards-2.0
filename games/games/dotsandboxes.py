@@ -28,9 +28,9 @@ class DotsAndBoxes(Game):
 
         def texture(self, piece, state, display):
             if piece.owner_id == 0:
-                return Texture('games/img/dotsandboxes/red_edge.png', 0.5)  # Player 1 is Red
+                return Texture('games/img/dotsandboxes/red_edge.png', 0.75)  # Player 1 is Red
             else:
-                return Texture('games/img/dotsandboxes/blue_edge.png', 0.5)  # Player 2 is Blue
+                return Texture('games/img/dotsandboxes/blue_edge.png', 0.75)  # Player 2 is Blue
 
     types = [EdgePiece(), CapturePiece()]
     handlers = [PlaceHandler(EdgePiece())]
