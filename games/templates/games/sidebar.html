@@ -104,7 +104,7 @@
                 <i class="material-icons small white-text right">close</i>
             </a>
         {% else %}
-            {% if players|length < board.game.PLAYERS.1 %}
+            {% if players|length < board.game.MAX_PLAYERS %}
                 <a class="btn waves-effect" onclick="join('{{ user.id }}')">
                     Join Game
                     <i class="material-icons small white-text right">done</i>
@@ -124,7 +124,7 @@
                 <i class="material-icons small white-text right">close</i>
             </a>
             <br><br>
-            {% if players|length >= board.game.PLAYERS.0 %}
+            {% if players|length >= board.game.MIN_PLAYERS %}
                 <a class="btn btn-large green lighten-2 waves-effect" onclick="start()">
                     Start Game
                     <i class="material-icons medium white-text right">play_arrow</i>
@@ -135,7 +135,7 @@
                     <i class="material-icons medium white-text right">play_arrow</i>
                 </a>
                 <h6 class="small-text white-text center">
-                    {{ players|length }} / {{ board.game.PLAYERS.0 }} Players Ready
+                    {{ players|length }} / {{ board.game.MIN_PLAYERS }} Players Ready
                 </h6>
             {% endif %}
             <br><br>

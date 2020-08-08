@@ -6,8 +6,7 @@ class TicTacToe(Game):
 
     ID = 1
     NAME = 'Tic Tac Toe'
-    SIZE = (3, 3)
-    PLAYERS = (2, 2)
+    WIDTH, HEIGHT = 3, 3
     PLAYER_NAMES = ['Naughts', 'Crosses']
 
     TARGET = 3
@@ -34,14 +33,14 @@ class TicTacToe(Game):
         state = state.place_piece(piece)
         game_ended = self.has_run(state, piece)
         game_draw = not game_ended and all([state.pieces[x][y]
-                                           for x in range(0, self.width)
-                                           for y in range(0, self.height)])
+                                           for x in range(0, self.WIDTH)
+                                           for y in range(0, self.HEIGHT)])
 
         return state.end_turn() if not (game_ended or game_draw)\
             else state.end_game(winner_id=state.turn.current_id if not game_draw else -1)
 
-    def colour(self, state, x, y):
-        col = super().colour(state, x, y)
+    def colour(self, state, event, x, y):
+        col = super().colour(state, event, x, y)
 
         if state.action:
             last_piece = state.action.piece
@@ -65,7 +64,7 @@ class TicTacToe(Game):
             sub_runs = []
 
             for mult in [-1, 1]:
-                for i in range(1, max(self.width(0), self.height())):
+                for i in range(1, max(self.WIDTH, self.HEIGHT)):
                     x_next = piece.x + mult * i * dir[0]
                     y_next = piece.y + mult * i * dir[1]
                     if state.friendly(x_next, y_next):

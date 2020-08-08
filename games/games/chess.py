@@ -6,8 +6,7 @@ class Chess(Game):
 
     ID = 2
     NAME = 'Chess'
-    SIZE = (8, 8)
-    PLAYERS = (2, 2)
+    WIDTH, HEIGHT = 8, 8
     PLAYER_NAMES = ['White', 'Black']
 
     class Pawn(PieceType):

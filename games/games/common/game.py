@@ -7,15 +7,15 @@ class Game:
 
     ID = -1
     NAME = f'Game {ID}'
-    SIZE = (-1, -1)
-    PLAYERS = (2, 2)
+    WIDTH, HEIGHT = -1, -1
+    MIN_PLAYERS, MAX_PLAYERS = 2, 2
     PLAYER_NAMES = [f'Player {i}' for i in range(1, 16 + 1)]
 
     PIECES = []
     HANDLERS = []
 
     def in_bounds(self, x, y):
-        return 0 <= y < self.height() and 0 <= x < self.width(y)
+        return 0 <= y < self.HEIGHT and 0 <= x < self.row_size(y)
 
     def place_valid(self, state, piece):
 
@@ -53,8 +53,8 @@ class Game:
     def setup(self, num_players):
 
         pieces = [[self.piece(num_players, x, y)
-            for y in range(0, self.height())]
-                for x in range(0, self.max_width())]
+            for y in range(0, self.HEIGHT)]
+            for x in range(0, self.max_row_size())]
 
         return State(game=self, num_players=num_players, pieces=pieces)
 
@@ -77,9 +77,9 @@ class Game:
     def render(self, state, event):
 
         return Display([Row([self.tile(state, event, x, y)
-            for x in range(0, self.width(y))],
+            for x in range(0, self.row_size(y))],
                 self.tile_height(y), self.t_spacing(y))
-            for y in range(self.height() - 1, -1, -1)])
+            for y in range(self.HEIGHT - 1, -1, -1)])
 
     def tile(self, state, event, x, y):
 
@@ -130,11 +130,10 @@ class Game:
         elif x % 2 == 0 and y % 2 == 0: return colour2
         else: return colour3
 
-    def width(self, y): return self.SIZE[0]
-    def height(self): return self.SIZE[1]
+    def row_size(self, y): return self.WIDTH
 
-    def max_width(self):
-        return max(self.width(y) for y in range(0, self.height()))
+    def max_row_size(self):
+        return max(self.row_size(y) for y in range(0, self.HEIGHT))
 
     def tile_width(self, x, y): return 1
     def tile_height(self, y): return 1

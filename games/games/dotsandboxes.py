@@ -6,8 +6,7 @@ class DotsAndBoxes(Game):
 
     ID = 7
     NAME = 'Dots and Boxes'
-    SIZE = (6 * 2 + 1, 6 * 2 + 1)
-    PLAYERS = (2, 2)
+    WIDTH, HEIGHT = (6 * 2 + 1, 6 * 2 + 1)
     PLAYER_NAMES = ['Red', 'Blue']
 
     BOX_SIZE = 5
@@ -45,8 +44,8 @@ class DotsAndBoxes(Game):
         player_score_after = state.player_states[state.turn.current_id].score
 
         game_finished = all([state.pieces[x][y]
-                            for x in range(self.width)
-                            for y in range(self.height)
+                            for x in range(self.WIDTH)
+                            for y in range(self.HEIGHT)
                             if (x % 2 == 1 and y % 2 == 1)])
 
         return state.end_game(winner_id=self.get_winner(state)) \

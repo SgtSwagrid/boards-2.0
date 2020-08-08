@@ -15,8 +15,7 @@ class Mill(Game):
 
     ID = 4
     NAME = 'Mill'
-    SIZE = (11, 11)
-    PLAYERS = (2, 2)
+    WIDTH, HEIGHT = 11, 11
 
     class Graph:
 
@@ -135,8 +134,8 @@ class Mill(Game):
         return '#FFEAA7'
 
     def display(self, state, display):
-        for x in range(0, self.width):
-            for y in range(0, self.height):
+        for x in range(0, self.WIDTH):
+            for y in range(0, self.HEIGHT):
                 # tests that only connection tiles get to be shown as connections
                 if (x, y) in self.connections:
                     # tests whether a tile needs to be marked as a valid point to be moved one

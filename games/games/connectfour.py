@@ -7,8 +7,7 @@ class ConnectFour(TicTacToe):
 
     ID = 5
     NAME = 'Connect Four'
-    SIZE = (7, 6)
-    PLAYERS = (2, 2)
+    WIDTH, HEIGHT = 7, 6
     PLAYER_NAMES = ['Yellow', 'Red']
 
     TARGET = 4

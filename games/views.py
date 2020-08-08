@@ -170,7 +170,7 @@ def setup(request, board):
     leader = this_player and this_player.leader
 
     if 'start' in request.POST and leader and\
-            len(board.players()) >= board.game().PLAYERS[0]:
+            len(board.players()) >= board.game().MIN_PLAYERS:
         board.start()
         notify_board(board)
 

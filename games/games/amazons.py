@@ -6,8 +6,7 @@ class Amazons(Game):
 
     ID = 6
     NAME = 'Amazons'
-    SIZE = (8, 8)
-    PLAYERS = (2, 2)
+    WIDTH, HEIGHT = 10, 10
     PLAYER_NAMES = ['White', 'Black']
 
     class AmazonPiece(PieceType):
@@ -51,14 +50,14 @@ class Amazons(Game):
 
     def piece(self, num_players, x, y):
         # Top and bottom arrangement
-        tw = self.width(0) // 3
-        th = self.height() // 3
+        tw = self.WIDTH // 3
+        th = self.HEIGHT // 3
 
-        op_tw = self.width(0) - 1 - tw
-        op_th = self.height() - 1 - th
+        op_tw = self.WIDTH - 1 - tw
+        op_th = self.HEIGHT - 1 - th
 
-        white_queens = [[tw, 0], [op_tw, 0], [0, th], [self.width(0)-1, th]]
-        black_queens = [[tw, self.height()-1], [op_tw, self.height()-1], [0, op_th], [self.width(0)-1, op_th]]
+        white_queens = [[tw, 0], [op_tw, 0], [0, th], [self.WIDTH-1, th]]
+        black_queens = [[tw, self.HEIGHT-1], [op_tw, self.HEIGHT-1], [0, op_th], [self.WIDTH-1, op_th]]
 
         if [x, y] in white_queens:
             return Piece(self.AmazonPiece(), 0, x, y)  # White

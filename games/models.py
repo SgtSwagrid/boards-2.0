@@ -13,7 +13,7 @@ class BoardManager(models.Manager):
     def create(self, game):
 
         code = hex(random.randint(0, 1048575))[2:].zfill(5).upper()
-        state = game.setup(game.PLAYERS[1])
+        state = game.setup(game.MAX_PLAYERS)
         state_model = StateModel.states.create(state, previous=None)
         board = super().create(game_id=game.ID, code=code, state=state_model)
         return board
@@ -63,7 +63,7 @@ class BoardModel(models.Model):
             if self.state.outcome > -1 else None
 
     def join(self, user):
-        if len(self.players()) < self.game().PLAYERS[1]\
+        if len(self.players()) < self.game().MAX_PLAYERS\
                 and not any(self.players().filter(user=user)):
             order = self.players().count()
             PlayerModel.objects.create(user=user, board=self,
@@ -222,11 +222,11 @@ class StateModel(models.Model):
         piece_set = PieceModel.pieces.filter(state=self)
         pieces = []
 
-        for x in range(0, game.max_width()):
+        for x in range(0, game.max_row_size()):
             col_set = piece_set.filter(x=x)
             col = []
 
-            for y in range(0, game.height()):
+            for y in range(0, game.HEIGHT):
                 piece = col_set.filter(y=y)
                 col.append(piece.get().get_piece() if piece.exists() else None)
 

@@ -5,8 +5,7 @@ class Reversi(Game):
 
     ID = 3
     NAME = 'Reversi'
-    SIZE = (8, 8)
-    PLAYERS = (2, 2)
+    WIDTH, HEIGHT = 8, 8
     PLAYER_NAMES = ['White', 'Black']
 
     class ReversiPiece(PieceType):
@@ -24,8 +23,8 @@ class Reversi(Game):
             .add_score(1, 2)
 
     def piece(self, num_players, x, y):
-        x_mid = self.width(0) // 2 - 1
-        y_mid = self.height() // 2 - 1
+        x_mid = self.WIDTH // 2 - 1
+        y_mid = self.HEIGHT // 2 - 1
 
         # Centre arrangement 2x2
         if (x == x_mid and y == y_mid) or (x == x_mid + 1 and y == y_mid + 1):
@@ -80,7 +79,7 @@ class Reversi(Game):
         for dir in directions:
             sub_flips = []
 
-            for i in range(1, max(self.width(0), self.height())):
+            for i in range(1, max(self.WIDTH, self.HEIGHT)):
                 x_next = piece.x + i * dir[0]
                 y_next = piece.y + i * dir[1]
                 if state.enemy(x_next, y_next):
@@ -94,8 +93,8 @@ class Reversi(Game):
 
     def has_moves(self, state):
         '''Returns true if the current state's player has a turn they can play'''
-        for x in range(self.width(0)):
-            for y in range(self.height()):
+        for x in range(self.WIDTH):
+            for y in range(self.HEIGHT):
                 if not state.pieces[x][y]:
                     if self.place_valid(state, Piece(self.ReversiPiece(), state.turn.current_id, x, y)):
                         return True
