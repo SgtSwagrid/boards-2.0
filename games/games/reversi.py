@@ -3,37 +3,29 @@ from .common.handler import *
 
 class Reversi(Game):
 
-    name = "Reversi"
-    id = 3
-    width = 8
-    height = 8
-    players = 2
-
-    player_names = ['White', 'Black']
+    ID = 3
+    NAME = 'Reversi'
+    SIZE = (8, 8)
+    PLAYERS = (2, 2)
+    PLAYER_NAMES = ['White', 'Black']
 
     class ReversiPiece(PieceType):
-        id = 0
+        ID = 0
+        TEXTURES = ['misc/white_dot.png', 'misc/black_dot.png']
 
-        def texture(self, piece, state, display):
-            if piece.owner_id == 0:
-                return Texture('games/img/misc/white_dot.png')  # Player 1 is White
-            else:
-                return Texture('games/img/misc/black_dot.png')  # Player 2 is Black
+    PIECES = [ReversiPiece()]
+    HANDLERS = [PlaceHandler(ReversiPiece())]
 
-    types = [ReversiPiece()]
+    MODIFIED_COLOUR = '#16a085'
 
-    handlers = [PlaceHandler(ReversiPiece())]
-
-    modified_colour = '#16a085'
-
-    def setup(self):
-        return super().setup()\
+    def setup(self, num_players):
+        return super().setup(num_players)\
             .add_score(0, 2)\
             .add_score(1, 2)
 
-    def piece(self, x, y):
-        x_mid = self.width // 2 - 1
-        y_mid = self.height // 2 - 1
+    def piece(self, num_players, x, y):
+        x_mid = self.width(0) // 2 - 1
+        y_mid = self.height() // 2 - 1
 
         # Centre arrangement 2x2
         if (x == x_mid and y == y_mid) or (x == x_mid + 1 and y == y_mid + 1):
@@ -88,7 +80,7 @@ class Reversi(Game):
         for dir in directions:
             sub_flips = []
 
-            for i in range(1, max(self.width, self.height)):
+            for i in range(1, max(self.width(0), self.height())):
                 x_next = piece.x + i * dir[0]
                 y_next = piece.y + i * dir[1]
                 if state.enemy(x_next, y_next):
@@ -102,8 +94,8 @@ class Reversi(Game):
 
     def has_moves(self, state):
         '''Returns true if the current state's player has a turn they can play'''
-        for x in range(self.width):
-            for y in range(self.height):
+        for x in range(self.width(0)):
+            for y in range(self.height()):
                 if not state.pieces[x][y]:
                     if self.place_valid(state, Piece(self.ReversiPiece(), state.turn.current_id, x, y)):
                         return True

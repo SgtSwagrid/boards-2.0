@@ -46,6 +46,10 @@
     width: 800px;
 }
 
+.tile {
+    position: relative;
+}
+
 .piece {
     position: absolute;
 }

@@ -12,11 +12,11 @@ from .common.handler import *
 
 
 class Mill(Game):
-    name = "Mill"
-    id = 4
-    width = 11
-    height = 11
-    players = 2
+
+    ID = 4
+    NAME = 'Mill'
+    SIZE = (11, 11)
+    PLAYERS = (2, 2)
 
     class Graph:
 
@@ -108,33 +108,27 @@ class Mill(Game):
 
     # designates every tile which qualifies as a connection, important for assigning the textures in display
     connections = []
-    for x in range(0, width):
-        for y in range(0, height):
-            if x == 0 or x == (width - 1) or y == 0 or y == (height - 1):
-                connections.append((x, y))
-            elif (y == 2 or y == (height - 3)) and 1 < x < (width - 2):
-                connections.append((x, y))
-            elif (x == 2 or x == (width - 3)) and 1 < y < (height - 2):
-                connections.append((x, y))
-            elif (y == 4 or y == (height - 5)) and 3 < x < (width - 4):
-                connections.append((x, y))
-            elif y == 5 and x != 5:
-                connections.append((x, y))
-            elif y != 5 and x == 5:
-                connections.append((x, y))
+    #for x in range(0, width):
+    #    for y in range(0, height):
+    #        if x == 0 or x == (width - 1) or y == 0 or y == (height - 1):
+    #            connections.append((x, y))
+    #        elif (y == 2 or y == (height - 3)) and 1 < x < (width - 2):
+    #            connections.append((x, y))
+    #        elif (x == 2 or x == (width - 3)) and 1 < y < (height - 2):
+    #            connections.append((x, y))
+    #        elif (y == 4 or y == (height - 5)) and 3 < x < (width - 4):
+    #            connections.append((x, y))
+    #        elif y == 5 and x != 5:
+    #            connections.append((x, y))
+    #        elif y != 5 and x == 5:
+    #            connections.append((x, y))
 
     class MillPiece(PieceType):
-        id = 0
+        ID = 0
+        TEXTURES = ['misc/white_dot.png', 'misc/black_dot.png']
 
-        def texture(self, piece, state, display):
-            if piece.owner == 0:
-                return Texture('games/img/misc/white_dot.png')
-            else:
-                return Texture('games/img/misc/black_dot.png')
-
-    types = [MillPiece()]
-
-    handlers = [PlaceHandler(MillPiece()), MoveHandler(), RemoveHandler()]
+    PIECES = [MillPiece()]
+    HANDLERS = [PlaceHandler(MillPiece()), MoveHandler(), RemoveHandler()]
 
     #  drawing colors for (1)tiles/points where pieces can be (2)tiles/lines in between and (3)every other tile
     def background_colour(self, x, y):

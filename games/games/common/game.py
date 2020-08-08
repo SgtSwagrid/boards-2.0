@@ -1,14 +1,21 @@
-from games.games.common.input import *
+from games.games.common.display import *
+from games.games.common.event import *
 from games.games.common.state import *
+
 
 class Game:
 
-    types = []
-    handlers = []
-    player_names = [f'Player {i}' for i in range(1, 17)]
+    ID = -1
+    NAME = f'Game {ID}'
+    SIZE = (-1, -1)
+    PLAYERS = (2, 2)
+    PLAYER_NAMES = [f'Player {i}' for i in range(1, 16 + 1)]
+
+    PIECES = []
+    HANDLERS = []
 
     def in_bounds(self, x, y):
-        return 0 <= x < self.width and 0 <= y < self.height
+        return 0 <= y < self.height() and 0 <= x < self.width(y)
 
     def place_valid(self, state, piece):
 
@@ -43,77 +50,67 @@ class Game:
         return piece and piece.owner_id == state.turn.current_id and\
                piece.type.moveable(state, piece)
 
-    def positions(self, mapper):
-        return [[mapper(x, y)
-            for y in range(0, self.height)]
-            for x in range(0, self.width)]
+    def setup(self, num_players):
 
-    def setup(self):
+        pieces = [[self.piece(num_players, x, y)
+            for y in range(0, self.height())]
+                for x in range(0, self.max_width())]
 
-        pieces = [[self.piece(x, y)
-            for y in range(0, self.height)]
-                for x in range(0, self.width)]
+        return State(game=self, num_players=num_players, pieces=pieces)
 
-        return State(game=self, pieces=pieces)
-
-    def piece(self, x, y):
+    def piece(self, num_players, x, y):
         return None
 
-    def event(self, state, display, event):
+    def event(self, state, event):
 
-        for handler in self.handlers:
+        for handler in self.HANDLERS:
             if isinstance(event, handler.event):
 
-                result, display = handler.apply(state, display, event)
-                if result:
-                    outcome = self.outcome(result)
-                    return result.set_outcome(outcome), display
+                consumed, result, properties = handler.apply(state, event)
+                if consumed: return result, properties
 
-        return None, display
+        return None, DisplayProperties()
 
     def outcome(self, state):
         return state.outcome
 
-    def display(self, state, display):
+    def render(self, state, event):
 
-        colours = self.positions(lambda x, y:
-            self.colour(state, display, x, y))
+        return Display([Row([self.tile(state, event, x, y)
+            for x in range(0, self.width(y))],
+                self.tile_height(y), self.t_spacing(y))
+            for y in range(self.height() - 1, -1, -1)])
 
-        textures = self.positions(lambda x, y:
-            self.texture(state, display, x, y))
+    def tile(self, state, event, x, y):
 
-        widths = [self.h_scale(x) for x in range(0, self.width)]
-        heights = [self.v_scale(y) for y in range(0, self.height)]
+        colour = self.colour(state, event, x, y)
+        texture = self.texture(state, event, x, y)
+        width = self.tile_width(x, y)
+        l_spacing = self.l_spacing(x, y)
 
-        display = display.set_colours(colours)\
-            .add_textures(textures)\
-            .set_widths(widths)\
-            .set_heights(heights)
+        return Tile(x, y, colour, texture, width, l_spacing)
 
-        if display.mode.active:
-            for handler in self.handlers:
-                display = handler.display(state, display)
-
-        return display
-
-    def colour(self, state, display, x, y):
+    def colour(self, state, event, x, y):
 
         piece_colour = state.pieces[x][y].type.colour(
-            state.pieces[x][y], state, display)\
+            state.pieces[x][y], state)\
             if state.pieces[x][y] else None
 
         if piece_colour: return piece_colour
-        elif display.tiles[x][y].selected: return self.selected_colour
-        elif state.changed(x, y): return self.modified_colour
+        elif event.properties.selected(x, y): return self.SELECTED_COLOUR
+        elif state.changed(x, y): return self.MODIFIED_COLOUR
         else: return self.background_colour(x, y)
 
-    def texture(self, state, display, x, y):
+    def texture(self, state, event, x, y):
 
         textures = self.background_texture(x, y)
         piece = state.pieces[x][y]
-        if piece:
-            texture = piece.type.texture(piece, state, display)
-            if texture: textures.append(texture)
+        if piece: textures.extend(piece.type.texture(piece, state))
+
+        if event.active:
+            for handler in self.HANDLERS:
+                textures.extend(handler.texture(state, event, x, y))
+
         return textures
 
     def background_colour(self, x, y):
@@ -133,24 +130,33 @@ class Game:
         elif x % 2 == 0 and y % 2 == 0: return colour2
         else: return colour3
 
-    def h_scale(self, x):
-        return 1
+    def width(self, y): return self.SIZE[0]
+    def height(self): return self.SIZE[1]
 
-    def v_scale(self, y):
-        return 1
+    def max_width(self):
+        return max(self.width(y) for y in range(0, self.height()))
 
-    attack_icon = Texture('games/img/common/attack.png', 0.8)
-    place_icon = Texture('games/img/common/place.png', 0.8)
-    selected_colour = '#6A89CC'
-    modified_colour = '#74B9FF'
+    def tile_width(self, x, y): return 1
+    def tile_height(self, y): return 1
+    def l_spacing(self, x, y): return 0
+    def t_spacing(self, y): return 0
+
+    SELECTED_COLOUR = '#6A89CC'
+    MODIFIED_COLOUR = '#74B9FF'
 
 class PieceType:
 
-    def texture(self, piece, state, display):
-        return None
+    TEXTURES = [None] * 16
+    COLOURS = [None] * 16
 
-    def colour(self, piece, state, display):
-        return None
+    def texture(self, piece, state):
+        texture = self.TEXTURES[piece.owner_id]
+        if not texture: return []
+        elif isinstance(texture, Texture): return [texture]
+        else: return [Texture(texture)]
+
+    def colour(self, piece, state):
+        return self.COLOURS[piece.owner_id]
 
     def place_valid(self, state, piece):
         return False

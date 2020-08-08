@@ -3,23 +3,17 @@ from .common.handler import *
 
 
 class Amazons(Game):
-    name = "Amazons"
-    id = 6
-    width = 8
-    height = 8
-    players = 2
 
-    player_names = ['White', 'Black']
+    ID = 6
+    NAME = 'Amazons'
+    SIZE = (8, 8)
+    PLAYERS = (2, 2)
+    PLAYER_NAMES = ['White', 'Black']
 
     class AmazonPiece(PieceType):
-        id = 0
 
-        # White is player 1, black player 2
-        def texture(self, piece, state, display):
-            if piece.owner_id == 0:
-                return Texture('games/img/chess/white_queen.png')
-            else:
-                return Texture('games/img/chess/black_queen.png')
+        ID = 0
+        TEXTURES = ['chess/white_queen.png', 'chess/black_queen.png']
 
         def move_valid(self, state, piece, x_to, y_to):
             return state.turn.stage == 0 and \
@@ -32,13 +26,9 @@ class Amazons(Game):
                 .end_stage()
 
     class ArrowPiece(PieceType):
-        id = 1
 
-        def texture(self, piece, state, display):
-            if piece.owner_id == 0:
-                return Texture('games/img/chess/white_pawn.png')
-            else:
-                return Texture('games/img/chess/black_pawn.png')
+        ID = 1
+        TEXTURES = ['misc/white_dot.png', 'misc/black_dot.png']
 
         def place_valid(self, state, piece):
             if state.turn.stage == 0: return False
@@ -56,19 +46,19 @@ class Amazons(Game):
             return state_next_turn if state.game.can_move(state_next_turn) \
                 else state_next_turn.end_game(winner_id=state.turn.current_id)
 
-    types = [AmazonPiece(), ArrowPiece()]
-    handlers = [MoveHandler(), PlaceHandler(ArrowPiece())]
+    PIECES = [AmazonPiece(), ArrowPiece()]
+    HANDLERS = [MoveHandler(), PlaceHandler(ArrowPiece())]
 
-    def piece(self, x, y):
+    def piece(self, num_players, x, y):
         # Top and bottom arrangement
-        tw = self.width // 3
-        th = self.height // 3
+        tw = self.width(0) // 3
+        th = self.height() // 3
 
-        op_tw = self.width - 1 - tw
-        op_th = self.height - 1 - th
+        op_tw = self.width(0) - 1 - tw
+        op_th = self.height() - 1 - th
 
-        white_queens = [[tw, 0], [op_tw, 0], [0, th], [self.width-1, th]]
-        black_queens = [[tw, self.height-1], [op_tw, self.height-1], [0, op_th], [self.width-1, op_th]]
+        white_queens = [[tw, 0], [op_tw, 0], [0, th], [self.width(0)-1, th]]
+        black_queens = [[tw, self.height()-1], [op_tw, self.height()-1], [0, op_th], [self.width(0)-1, op_th]]
 
         if [x, y] in white_queens:
             return Piece(self.AmazonPiece(), 0, x, y)  # White
@@ -83,7 +73,7 @@ class Amazons(Game):
                     for dx in range(-1, 2)
                     for dy in range(-1, 2)
                     for piece in state.find_pieces(state.turn.current_id)
-                    if piece.type.id == self.AmazonPiece().id])
+                    if isinstance(piece.type, self.AmazonPiece)])
 
     def is_queen_move(self, state, x_from, y_from, x_to, y_to):
         dx, dy = delta(x_from, y_from, x_to, y_to)

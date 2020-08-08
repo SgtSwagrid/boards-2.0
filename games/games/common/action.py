@@ -1,12 +1,10 @@
-import copy
-
 class Action:
 
     def validate(self, state):
         return False
 
     def apply(self, state):
-        return state.push_action(self)
+        return state
 
 class PlaceAction(Action):
 
@@ -17,7 +15,9 @@ class PlaceAction(Action):
         return state.game.place_valid(state, self.piece)
 
     def apply(self, state):
-        return state.game.place_piece(super().apply(state), self.piece)
+        state = state.push_action(self)
+        state = state.game.place_piece(state, self.piece)
+        return state.set_outcome(state.game.outcome(state))
 
 class MoveAction(Action):
 
@@ -31,8 +31,9 @@ class MoveAction(Action):
             self.piece, self.x_to, self.y_to)
 
     def apply(self, state):
-        return state.game.move_piece(super().apply(state),
-            self.piece, self.x_to, self.y_to)
+        state = state.push_action(self)
+        state = state.game.move_piece(state, self.piece, self.x_to, self.y_to)
+        return state.set_outcome(state.game.outcome(state))
 
 class RemoveAction(Action):
 
@@ -43,4 +44,6 @@ class RemoveAction(Action):
         return state.game.remove_valid(state, self.piece)
 
     def apply(self, state):
-        return state.game.remove_piece(super().apply(state), self.piece)
+        state = state.push_action(self)
+        state = state.game.remove_piece(state, self.piece)
+        return state.set_outcome(state.game.outcome(state))

@@ -1,24 +1,26 @@
 {% load static %}
 <table class="board z-depth-3"><tbody>
-    {% for row in tiles %}
-    <tr class="board-row">
-        {% for tile in row %}
-        <td class="tile" style="
-        --aspect-ratio: 1/1 /*{{ tile.width }}/{{ tile.height }}*/;
-        background: {{ tile.colour }};"
-            {% if active %}
-            onclick="clickBoard({{ tile.x }}, {{ tile.y }}, {{ selected.x }}, {{ selected.y }})"
-            {% endif %}>
-            {% for texture in tile.textures %}
-            <img class="piece waves-effect" src="{% static texture.image %}"}
-                style="opacity: {{ texture.opacity }};
-                    left: {{ texture.x }}%;
-                    top: {{ texture.y }}%;
-                    width: 100%;
-                    height: 100%;">
+    {% for row in display.rows %}
+        <tr class="board-row" style="height: {{ row.height }}px;">
+            {% for tile in row.tiles %}
+                <td class="tile" style="
+                        width: {{ tile.width }}px;
+                        background: {{ tile.colour }};"
+                    {% if event.active %}
+                        onclick="clickBoard({{ tile.x }}, {{ tile.y }},
+                            {{ event.properties.first_selection.0 }},
+                            {{ event.properties.first_selection.1 }})"
+                    {% endif %}>
+                    {% for texture in tile.textures %}
+                        <img class="piece waves-effect"
+                                src="{% static 'games/img/' %}{{ texture.image }}"}
+                            style="opacity: {{ texture.opacity }};
+                                left: {{ texture.x }}%;
+                                top: {{ texture.y }}%;
+                                width: 100%;">
+                    {% endfor %}
+                </td>
             {% endfor %}
-        </td>
-        {% endfor %}
-    </tr>
+        </tr>
     {% endfor %}
 </tbody></table>

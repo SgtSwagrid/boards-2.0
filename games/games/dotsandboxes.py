@@ -4,45 +4,33 @@ from .common.handler import *
 
 class DotsAndBoxes(Game):
 
-    name = "Dots and Boxes"
-    id = 7
-    width = 6 * 2 + 1
-    height = 6 * 2 + 1
-    players = 2
+    ID = 7
+    NAME = 'Dots and Boxes'
+    SIZE = (6 * 2 + 1, 6 * 2 + 1)
+    PLAYERS = (2, 2)
+    PLAYER_NAMES = ['Red', 'Blue']
 
-    player_names = ['Red', 'Blue']
-
-    box_size = 5
+    BOX_SIZE = 5
 
     class EdgePiece(PieceType):
-        id = 0
-
-        def texture(self, piece, state, display):
-            if piece.owner_id == 0:
-                return Texture('games/img/dotsandboxes/red_edge.png')  # Player 1 is Red
-            else:
-                return Texture('games/img/dotsandboxes/blue_edge.png')  # Player 2 is Blue
+        ID = 0
+        COLOURS = ['#E74C3C', '#3498DB']
 
     class CapturePiece(PieceType):
-        id = 1
+        ID = 1
+        COLOURS = ['#FAB1A0', '#74B9FF']
 
-        def texture(self, piece, state, display):
-            if piece.owner_id == 0:
-                return Texture('games/img/dotsandboxes/red_edge.png', 0.5)  # Player 1 is Red
-            else:
-                return Texture('games/img/dotsandboxes/blue_edge.png', 0.5)  # Player 2 is Blue
-
-    types = [EdgePiece(), CapturePiece()]
-    handlers = [PlaceHandler(EdgePiece())]
+    PIECES = [EdgePiece(), CapturePiece()]
+    HANDLERS = [PlaceHandler(EdgePiece(), hints=False)]
 
     def background_colour(self, x, y):
-        return self.gingham('#FDCB6E', '#000000', '#FFEAA7', x, y)
+        return self.gingham('#FDCB6E', '#2F3640', '#FFEAA7', x, y)
 
-    def h_scale(self, x):
-        return 1 if x % 2 == 0 else self.box_size
+    def tile_width(self, x, y):
+        return 1 if x % 2 == 0 else self.BOX_SIZE
 
-    def v_scale(self, y):
-        return 1 if y % 2 == 0 else self.box_size
+    def tile_height(self, y):
+        return 1 if y % 2 == 0 else self.BOX_SIZE
 
     def place_valid(self, state, piece):
         return ((piece.x % 2 == 0) ^ (piece.y % 2 == 0)) and\
@@ -67,7 +55,7 @@ class DotsAndBoxes(Game):
             if not state.pieces[tile[0]][tile[1]] and\
                     all(self.adjacent_edges(state, tile[0], tile[1])):
                 print("we got one", tile[0], tile[1])
-                cap_piece = Piece(self.types[1], state.turn.current_id, tile[0], tile[1])
+                cap_piece = Piece(self.CapturePiece(), state.turn.current_id, tile[0], tile[1])
                 state = state\
                     .place_piece(cap_piece)\
                     .add_score(state.turn.current_id, 1)

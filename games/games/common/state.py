@@ -55,13 +55,16 @@ class Change:
 
 class State:
 
-    def __init__(self, game, player_states=None, pieces=None, action=None,
+    def __init__(self, game, num_players=0, player_states=None, pieces=None, action=None,
             changes=[], turn=Turn(), outcome=Outcome(), previous=lambda: None):
 
         self.game = game
 
+        self.num_players = num_players if (num_players > 0)\
+            else len(player_states)
+
         self.player_states = player_states if player_states else\
-            [PlayerState(i) for i in range(0, game.players)]
+            [PlayerState(i) for i in range(0, num_players)]
 
         self.pieces = pieces if pieces else\
             [[None] * game.height] * game.width

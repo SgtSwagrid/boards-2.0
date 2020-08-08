@@ -1,22 +1,19 @@
 from .common.game import *
 from .common.handler import *
 
+
 class Chess(Game):
 
-    name = "Chess"
-    id = 2
-    width = 8
-    height = 8
-    players = 2
-
-    player_names = ['White', 'Black']
+    ID = 2
+    NAME = 'Chess'
+    SIZE = (8, 8)
+    PLAYERS = (2, 2)
+    PLAYER_NAMES = ['White', 'Black']
 
     class Pawn(PieceType):
-        id = 0
 
-        def texture(self, piece, state, display):
-            if piece.owner_id == 0: return Texture('games/img/chess/white_pawn.png')
-            else: return Texture('games/img/chess/black_pawn.png')
+        ID = 0
+        TEXTURES = ['chess/white_pawn.png', 'chess/black_pawn.png']
 
         def move_valid(self, state, piece, x_to, y_to):
 
@@ -29,16 +26,14 @@ class Chess(Game):
                 not state.pieces[piece.x][piece.y + dir]
 
             capture = abs(x_to - piece.x) == 1 and state.pieces[x_to][y_to] and\
-                      y_to - piece.y == dir
+                y_to - piece.y == dir
 
             return normal or double or capture
 
     class Rook(PieceType):
-        id = 1
 
-        def texture(self, piece, state, display):
-            if piece.owner_id == 0: return Texture('games/img/chess/white_rook.png')
-            else: return Texture('games/img/chess/black_rook.png')
+        ID = 0
+        TEXTURES = ['chess/white_rook.png', 'chess/black_rook.png']
 
         def move_valid(self, state, piece, x_to, y_to):
 
@@ -46,14 +41,12 @@ class Chess(Game):
             d = distance(piece.x, piece.y, x_to, y_to)
 
             return ((sx == 0) ^ (sy == 0)) and\
-                   path(piece.x, piece.y, sx, sy, d, state.pieces)
+                path(piece.x, piece.y, sx, sy, d, state.pieces)
 
     class Knight(PieceType):
-        id = 2
 
-        def texture(self, piece, state, display):
-            if piece.owner_id == 0: return Texture('games/img/chess/white_knight.png')
-            else: return Texture('games/img/chess/black_knight.png')
+        ID = 2
+        TEXTURES = ['chess/white_knight.png', 'chess/black_knight.png']
 
         def move_valid(self, state, piece, x_to, y_to):
 
@@ -61,11 +54,9 @@ class Chess(Game):
             return (dx == 1 and dy == 2) or (dx == 2 and dy == 1)
 
     class Bishop(PieceType):
-        id = 3
 
-        def texture(self, piece, state, display):
-            if piece.owner_id == 0: return Texture('games/img/chess/white_bishop.png')
-            else: return Texture('games/img/chess/black_bishop.png')
+        ID = 3
+        TEXTURES = ['chess/white_bishop.png', 'chess/black_bishop.png']
 
         def move_valid(self, state, piece, x_to, y_to):
 
@@ -77,11 +68,9 @@ class Chess(Game):
                    path(piece.x, piece.y, sx, sy, d, state.pieces)
 
     class Queen(PieceType):
-        id = 4
 
-        def texture(self, piece, state, display):
-            if piece.owner_id == 0: return Texture('games/img/chess/white_queen.png')
-            else: return Texture('games/img/chess/black_queen.png')
+        ID = 4
+        TEXTURES = ['chess/white_queen.png', 'chess/black_queen.png']
 
         def move_valid(self, state, piece, x_to, y_to):
 
@@ -93,20 +82,17 @@ class Chess(Game):
                    path(piece.x, piece.y, sx, sy, d, state.pieces)
 
     class King(PieceType):
-        id = 5
 
-        def texture(self, piece, state, display):
-            if piece.owner_id == 0: return Texture('games/img/chess/white_king.png')
-            else: return Texture('games/img/chess/black_king.png')
+        ID = 5
+        TEXTURES = ['chess/white_king.png', 'chess/black_king.png']
 
         def move_valid(self, state, piece, x_to, y_to):
             return distance(piece.x, piece.y, x_to, y_to) == 1
 
-    types = [Pawn(), Rook(), Knight(), Bishop(), Queen(), King()]
+    PIECES = [Pawn(), Rook(), Knight(), Bishop(), Queen(), King()]
+    HANDLERS = [MoveHandler()]
 
-    handlers = [MoveHandler()]
-
-    def piece(self, x, y):
+    def piece(self, num_players, x, y):
 
         if y in (0, 7):
             player_id = 0 if y == 0 else 1

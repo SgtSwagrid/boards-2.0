@@ -4,32 +4,26 @@ from .common.handler import *
 
 class TicTacToe(Game):
 
-    name = "Tic Tac Toe"
-    id = 1
-    width = 3
-    height = 3
-    players = 2
-    target = 3
+    ID = 1
+    NAME = 'Tic Tac Toe'
+    SIZE = (3, 3)
+    PLAYERS = (2, 2)
+    PLAYER_NAMES = ['Naughts', 'Crosses']
 
-    player_names = ['Naughts', 'Crosses']
+    TARGET = 3
 
     class TicTacToePiece(PieceType):
-        id = 0
+        ID = 0
+        TEXTURES = ['misc/naught.png', 'misc/cross.png']
 
-        def texture(self, piece, state, display):
-            if piece.owner_id == 0:
-                return Texture('games/img/misc/naught.png')  # Player 1 is Naughts
-            else:
-                return Texture('games/img/misc/cross.png')  # Player 2 is Crosses
+    PIECES = [TicTacToePiece()]
+    HANDLERS = [PlaceHandler(TicTacToePiece())]
 
-    types = [TicTacToePiece()]
-    handlers = [PlaceHandler(TicTacToePiece())]
+    RUN_COLOUR = '#16A085'
 
-    run_colour = '#16a085'
-
-    def setup(self):
-        return super().setup() \
-            .set_score(0, 0) \
+    def setup(self, num_players):
+        return super().setup(num_players)\
+            .set_score(0, 0)\
             .set_score(1, 0)
 
     def place_valid(self, state, piece):
@@ -43,8 +37,8 @@ class TicTacToe(Game):
         return state.end_turn() if not game_ended \
             else state.end_game(winner_id=state.turn.current_id)
 
-    def colour(self, state, display, x, y):
-        col = super().colour(state, display, x, y)
+    def colour(self, state, x, y):
+        col = super().colour(state, x, y)
 
         if state.action:
             last_piece = state.action.piece
@@ -53,7 +47,7 @@ class TicTacToe(Game):
             if state.outcome.finished and not state.outcome.draw:
                 for sub_run in runs:
                     if [x, y] in sub_run:
-                        col = self.run_colour
+                        col = self.RUN_COLOUR
 
         return col
 
@@ -68,7 +62,7 @@ class TicTacToe(Game):
             sub_runs = []
 
             for mult in [-1, 1]:
-                for i in range(1, max(self.width, self.height)):
+                for i in range(1, max(self.width(0), self.height())):
                     x_next = piece.x + mult * i * dir[0]
                     y_next = piece.y + mult * i * dir[1]
                     if state.friendly(x_next, y_next):
@@ -76,5 +70,5 @@ class TicTacToe(Game):
                     else:
                         break
 
-            if len(sub_runs) >= self.target - 1: runs.append(sub_runs)
+            if len(sub_runs) >= self.TARGET - 1: runs.append(sub_runs)
         return runs

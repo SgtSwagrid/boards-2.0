@@ -1,92 +1,116 @@
 from games.games.common.action import *
-from games.games.common.input import *
+from games.games.common.display import *
+from games.games.common.event import *
 from games.games.common.state import *
+
+
+ATTACK_ICON = [Texture('common/attack.png', 0.8)]
+PLACE_ICON = [Texture('common/place.png', 0.8)]
 
 class Handler:
 
     event = BoardEvent
 
-    def apply(self, state, display, event):
-        return None, display
+    def apply(self, state, event):
+        return False, None, DisplayProperties()
 
-    def display(self, state, display):
-
-        return display.add_textures([[self.texture(state, display, x, y)
-            for y in range(0, state.game.height)]
-            for x in range(0, state.game.width)])
+    def texture(self, state, display, x, y):
+        return []
 
 class PlaceHandler(Handler):
 
-    def __init__(self, type):
+    def __init__(self, type, hints=True, icon=PLACE_ICON):
         self.type = type
+        self.hints = hints
+        self.icon = icon
 
-    def apply(self, state, display, event):
+    def apply(self, state, event):
 
         clicked = Piece(self.type, state.turn.current_id, event.x, event.y)
         action = PlaceAction(clicked)
 
         if action.validate(state):
-            return action.apply(state), display
+            result = action.apply(state)
+            return True, result, DisplayProperties()
 
-        return None, display
+        return False, None, DisplayProperties()
 
-    def texture(self, state, display, x, y):
+    def texture(self, state, event, x, y):
 
-        piece = Piece(self.type, state.turn.current_id, x, y)
+        if self.hints:
 
-        if PlaceAction(piece).validate(state):
-            texture = self.type.texture(piece, state, display)
-            return [texture.set_opacity(0.2), state.game.place_icon]
+            piece = Piece(self.type, state.turn.current_id, x, y)
+
+            if PlaceAction(piece).validate(state):
+                return [t.set_opacity(0.2) for t in
+                    piece.type.texture(piece, state)] + self.icon
 
         return []
 
 class MoveHandler(Handler):
 
-    def apply(self, state, display, event):
+    def __init__(self, hints=True, icon=ATTACK_ICON):
+        self.hints = hints
+        self.icon = icon
+
+    def apply(self, state, event):
 
         clicked = state.pieces[event.x][event.y]
 
-        if len(display.selections) > 0:
-            pos = display.selections[0]
+        if len(event.properties.selections) > 0:
+            pos = event.properties.selections[0]
             selected = state.pieces[pos[0]][pos[1]]
 
             action = MoveAction(selected, event.x, event.y)
             if action.validate(state):
-                return action.apply(state), display.clear_selections()
+                result = action.apply(state)
+                return True, result, DisplayProperties()
 
         if state.game.moveable(state, clicked):
-            return None, display.clear_selections().select(event.x, event.y)
+            selections = [(event.x, event.y)]
+            return True, None, DisplayProperties(selections)
 
-        return None, display.clear_selections()
+        return False, None, DisplayProperties()
 
-    def texture(self, state, display, x, y):
+    def texture(self, state, event, x, y):
 
-        if len(display.selections) > 0:
+        if self.hints:
 
-            pos = display.selections[0]
-            selected = state.pieces[pos[0]][pos[1]]
+            if len(event.properties.selections) > 0:
 
-            if MoveAction(selected, x, y).validate(state):
+                pos = event.properties.first_selection()
+                selected = state.pieces[pos[0]][pos[1]]
 
-                if state.enemy(x, y): return [state.game.attack_icon]
-                else:
-                    return [selected.type.texture(selected, state, display).set_opacity(0.2)]
+                if MoveAction(selected, x, y).validate(state):
+
+                    if state.enemy(x, y): return self.icon
+                    else: return [t.set_opacity(0.2) for t in
+                        selected.type.texture(selected, state)]
 
         return []
 
 class RemoveHandler(Handler):
 
-    def apply(self, state, display, event):
+    def __init__(self, hints=False, icon=ATTACK_ICON):
+        self.hints = hints
+        self.icon = icon
+
+    def apply(self, state, event):
 
         clicked = state.pieces[event.x][event.y]
         action = RemoveAction(clicked)
 
         if action.validate(state):
-            return action.apply(state), display
+            result = action.apply(state)
+            return True, result, DisplayProperties()
 
-        return None, display
+        return False, None, DisplayProperties()
 
-    def texture(self, state, display, x, y):
+    def texture(self, state, event, x, y):
 
-        if RemoveAction(state.pieces[x][y]).validate(state):
-            return [state.game.attack_icon]
+        if self.hints:
+
+            if RemoveAction(state.pieces[x][y]).validate(state):
+                return self.icon
+
+        return []

@@ -7,11 +7,11 @@ from games.games.amazons import Amazons
 from games.games.dotsandboxes import DotsAndBoxes
 
 games = {
-    TicTacToe().id: TicTacToe(),
-    Chess().id: Chess(),
-    Reversi().id: Reversi(),
-    Mill().id: Mill(),
-    ConnectFour().id: ConnectFour(),
-    Amazons().id: Amazons(),
-    DotsAndBoxes().id: DotsAndBoxes()
+    TicTacToe().ID: TicTacToe(),
+    Chess().ID: Chess(),
+    Reversi().ID: Reversi(),
+    Mill().ID: Mill(),
+    ConnectFour().ID: ConnectFour(),
+    Amazons().ID: Amazons(),
+    DotsAndBoxes().ID: DotsAndBoxes()
 }

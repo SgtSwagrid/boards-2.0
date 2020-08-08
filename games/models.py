@@ -13,8 +13,9 @@ class BoardManager(models.Manager):
     def create(self, game):
 
         code = hex(random.randint(0, 1048575))[2:].zfill(5).upper()
-        state = StateModel.states.create(game.setup(), previous=None)
-        board = super().create(game_id=game.id, code=code, state=state)
+        state = game.setup(game.PLAYERS[1])
+        state_model = StateModel.states.create(state, previous=None)
+        board = super().create(game_id=game.ID, code=code, state=state_model)
         return board
 
 class BoardModel(models.Model):
@@ -45,7 +46,7 @@ class BoardModel(models.Model):
         self.save()
 
     def current(self, player):
-        return player != None and player.order == self.state.current
+        return player is not None and player.order == self.state.current
 
     def players(self):
         return PlayerModel.objects.filter(board=self)
@@ -62,12 +63,17 @@ class BoardModel(models.Model):
             if self.state.outcome > -1 else None
 
     def join(self, user):
-        order = self.players().count()
-        PlayerModel.objects.create(user=user, board=self,
-            order=order, leader=order == 0)
+        if len(self.players()) < self.game().PLAYERS[1]\
+                and not any(self.players().filter(user=user)):
+            order = self.players().count()
+            PlayerModel.objects.create(user=user, board=self,
+                order=order, leader=order == 0)
 
     def start(self):
         self.status = 1
+        self.state.delete()
+        state = self.game().setup(len(self.players()))
+        self.state = StateModel.states.create(state, previous=None)
         self.save()
 
     def join_rematch(self, user):
@@ -156,7 +162,7 @@ class StateManager(models.Manager):
             if state.action else None
 
         state_model = super().create(
-            game_id=state.game.id,
+            game_id=state.game.ID,
             action=action,
             current=state.turn.current_id,
             stage=state.turn.stage,
@@ -216,11 +222,11 @@ class StateModel(models.Model):
         piece_set = PieceModel.pieces.filter(state=self)
         pieces = []
 
-        for x in range(0, game.width):
+        for x in range(0, game.max_width()):
             col_set = piece_set.filter(x=x)
             col = []
 
-            for y in range(0, game.height):
+            for y in range(0, game.height()):
                 piece = col_set.filter(y=y)
                 col.append(piece.get().get_piece() if piece.exists() else None)
 
@@ -301,7 +307,7 @@ class PieceManager(models.Manager):
 
         return super().create(
             state=state,
-            type=piece.type.id,
+            type=piece.type.ID,
             owner=piece.owner_id,
             x=piece.x,
             y=piece.y,
@@ -328,7 +334,7 @@ class PieceModel(models.Model):
     def get_piece(self):
 
         return Piece(
-            type=games[self.state.game_id].types[self.type],
+            type=games[self.state.game_id].PIECES[self.type],
             owner_id=self.owner,
             x=self.x,
             y=self.y,

@@ -4,7 +4,8 @@ import math
 from .models import *
 from .consumers import *
 from .games.common.games import *
-from .games.common.input import *
+from .games.common.event import *
+
 
 def browse_view(request):
 
@@ -52,8 +53,7 @@ def game_view(request, board_code):
     board = BoardModel.boards.get(code=board_code)
 
     return render(request, 'games/game.html', {
-        'board': board,
-        'state': board.state
+        'board': board
     })
 
 def board_view(request, board_code):
@@ -82,29 +82,25 @@ def board_view(request, board_code):
         and state_model == board.state
     player_id = player.order if player else -1
 
-    display = Display(game.width, game.height, Mode(player_id, active))
-    if sx != -1: display = display.select(sx, sy)
+    selections = [(sx, sy)] if sx != -1 else []
+    properties = DisplayProperties(selections)
 
     if cx != -1 and active:
-        result, display = game.event(state, display, BoardEvent(cx, cy))
+        event = BoardEvent(properties, player_id, active, cx, cy)
+        result, properties = game.event(state, event)
+
         if result:
             board.set_state(result)
             notify_board(board)
             state = result
 
     active = active and board.current(player)
-    display = display.set_mode(Mode(player_id, active))
-    display = game.display(state, display)
+    event = RenderEvent(properties, player_id, active)
+    display = game.render(state, event).scale(800, 800)
 
     return render(request, 'games/board.html', {
-        'tiles': reversed(list(map(list, zip(*display.tiles)))),
-        'selected': {
-            'x': display.selections[0][0]
-                if len(display.selections) > 0 else -1,
-            'y': display.selections[0][1]
-                if len(display.selections) > 0 else -1
-        },
-        'active': active
+        'display': display,
+        'event': event
     })
 
 def sidebar_view(request, board_code):
@@ -113,12 +109,13 @@ def sidebar_view(request, board_code):
         return HttpResponse('')
 
     board = BoardModel.boards.filter(code=board_code).get()
-    state_model = StateModel.states.filter(
-        id=int(request.GET['state'])).first()\
-        if 'state' in request.GET else board.state
     game = board.game()
 
     if board.status == 0: setup(request, board)
+
+    state_model = StateModel.states.filter(
+        id=int(request.GET['state'])).first() \
+        if 'state' in request.GET else board.state
 
     player = board.player(request.user)
     if board.status == 1 and 'forfeit' in request.POST and player:
@@ -145,7 +142,7 @@ def sidebar_view(request, board_code):
                 'user': player.user,
                 'player': player,
                 'state': state,
-                'name': game.player_names[player.order]
+                'name': game.PLAYER_NAMES[player.order]
             }
             for player, state in
                 zip(board.players(), state_model.get_player_states())],
@@ -173,7 +170,7 @@ def setup(request, board):
     leader = this_player and this_player.leader
 
     if 'start' in request.POST and leader and\
-            len(board.players()) == board.game().players:
+            len(board.players()) >= board.game().PLAYERS[0]:
         board.start()
         notify_board(board)
 
@@ -183,8 +180,7 @@ def setup(request, board):
         other_player = board.players().filter(user=other_user).first()
         me = this_user == other_user
 
-        if 'join' in request.POST and not other_player and (leader or me) and\
-                len(board.players()) < board.game().players:
+        if 'join' in request.POST and not other_player and (leader or me):
             board.join(other_user)
             notify_board(board)
 
