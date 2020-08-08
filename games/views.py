@@ -118,8 +118,8 @@ def sidebar_view(request, board_code):
         if 'state' in request.GET else board.state
 
     player = board.player(request.user)
-    if board.status == 1 and 'forfeit' in request.POST and player:
-        player.forfeit()
+    if board.status == 1 and 'resign' in request.POST and player:
+        player.resign()
         notify_board(board)
 
     if 'cancel' in request.POST and player and player.leader and board.status != 1:

@@ -59,8 +59,8 @@ function cancel() {
     $('#sidebar').load('sidebar/', {'cancel': true});
 }
 
-function forfeit() {
-    $('#sidebar').load('sidebar/', {'forfeit': true});
+function resign() {
+    $('#sidebar').load('sidebar/', {'resign': true});
 }
 
 $(() => {

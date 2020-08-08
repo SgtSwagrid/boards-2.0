@@ -45,6 +45,9 @@ class Amazons(Game):
             return state_next_turn if state.game.can_move(state_next_turn) \
                 else state_next_turn.end_game(winner_id=state.turn.current_id)
 
+        def moveable(self, state, piece):
+            return False
+
     PIECES = [AmazonPiece(), ArrowPiece()]
     HANDLERS = [MoveHandler(), PlaceHandler(ArrowPiece())]
 

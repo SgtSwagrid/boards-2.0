@@ -98,7 +98,7 @@ class PlayerModel(models.Model):
 
     time = models.TimeField(default=time(0, 0, 0))
 
-    forfeited = models.BooleanField(default=False)
+    resigned = models.BooleanField(default=False)
 
     class Meta: ordering = ['board', 'order']
 
@@ -143,11 +143,11 @@ class PlayerModel(models.Model):
         self.leader = True
         self.save()
 
-    def forfeit(self):
+    def resign(self):
 
-        self.forfeited = True
+        self.resigned = True
         self.save()
-        remaining = self.board.players().filter(forfeited=False)
+        remaining = self.board.players().filter(resigned=False)
         if len(remaining) == 1:
             self.board.state.outcome = remaining.get().order
             self.board.state.save()

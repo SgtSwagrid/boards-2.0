@@ -144,14 +144,14 @@
         {% endif %}
 
     {% elif board.status == 1 %}
-        {% if not this_player.forfeited %}
-            <a class="btn red lighten-2 waves-effect" onclick="forfeit()">
-                Forfeit
+        {% if not this_player.resigned %}
+            <a class="btn red lighten-2 waves-effect" onclick="resign()">
+                Resign
                 <i class="material-icons small white-text right">close</i>
             </a>
         {% else %}
             <a class="btn grey">
-                Forfeit
+                Resign
                 <i class="material-icons small white-text right">close</i>
             </a>
         {% endif %}
