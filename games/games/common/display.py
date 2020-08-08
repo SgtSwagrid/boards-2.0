@@ -5,22 +5,24 @@ class Display:
     def __init__(self, rows):
         self.rows = rows
         self.width = max(r.width for r in rows)
-        self.height = sum(r.t_spacing + r.height for r in rows)
+        self.height = sum(r.height for r in rows)
 
     def scale(self, width, height):
 
         display = copy.deepcopy(self)
+        sf = min(width / self.width, height / self.height)
 
-        display.width = min(width, height * self.width / self.height)
-        display.height = min(height, width * self.height / self.width)
+        display.width *= sf
+        display.height *= sf
 
         for row in display.rows:
-            row.height *= display.height / self.height
-            row.t_spacing *= display.height / self.height
+            row.width *= sf
+            row.height *= sf
+            row.offset *= sf
 
             for tile in row.tiles:
-                tile.width *= display.width / row.width
-                tile.l_spacing *= display.width / row.width
+                tile.width *= sf
+                tile.offset *= sf
 
         return display
 
@@ -30,22 +32,22 @@ class Display:
 
 class Row:
 
-    def __init__(self, tiles, height=1, t_spacing=0):
+    def __init__(self, tiles, height=1, offset=0):
         self.tiles = tiles
-        self.width = sum(t.l_spacing + t.width for t in tiles)
+        self.width = tiles[-1].offset + tiles[-1].width
         self.height = height
-        self.t_spacing = t_spacing
+        self.offset = offset
 
 class Tile:
 
     def __init__(self, x, y, colour='#FFFFFF', textures=[],
-            width=1, l_spacing=0, selected=False):
+            width=1, offset=0, selected=False):
         self.x = x
         self.y = y
         self.colour = colour
         self.textures = textures
         self.width = width
-        self.l_spacing = l_spacing
+        self.offset = offset
         self.selected = selected
 
 class Texture:

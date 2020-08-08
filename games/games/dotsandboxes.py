@@ -29,7 +29,7 @@ class DotsAndBoxes(Game):
     def tile_width(self, x, y):
         return 1 if x % 2 == 0 else self.BOX_SIZE
 
-    def tile_height(self, y):
+    def row_height(self, y):
         return 1 if y % 2 == 0 else self.BOX_SIZE
 
     def place_valid(self, state, piece):

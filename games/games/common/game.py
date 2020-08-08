@@ -14,6 +14,9 @@ class Game:
     PIECES = []
     HANDLERS = []
 
+    SELECTED_COLOUR = '#6A89CC'
+    MODIFIED_COLOUR = '#74B9FF'
+
     def in_bounds(self, x, y):
         return 0 <= y < self.HEIGHT and 0 <= x < self.row_size(y)
 
@@ -78,7 +81,7 @@ class Game:
 
         return Display([Row([self.tile(state, event, x, y)
             for x in range(0, self.row_size(y))],
-                self.tile_height(y), self.t_spacing(y))
+                self.row_height(y), self.row_offset(y))
             for y in range(self.HEIGHT - 1, -1, -1)])
 
     def tile(self, state, event, x, y):
@@ -86,9 +89,10 @@ class Game:
         colour = self.colour(state, event, x, y)
         texture = self.texture(state, event, x, y)
         width = self.tile_width(x, y)
-        l_spacing = self.l_spacing(x, y)
+        offset = sum(self.tile_width(xx, y)
+            for xx in range(0, x)) + self.row_offset(y)
 
-        return Tile(x, y, colour, texture, width, l_spacing)
+        return Tile(x, y, colour, texture, width, offset)
 
     def colour(self, state, event, x, y):
 
@@ -136,12 +140,8 @@ class Game:
         return max(self.row_size(y) for y in range(0, self.HEIGHT))
 
     def tile_width(self, x, y): return 1
-    def tile_height(self, y): return 1
-    def l_spacing(self, x, y): return 0
-    def t_spacing(self, y): return 0
-
-    SELECTED_COLOUR = '#6A89CC'
-    MODIFIED_COLOUR = '#74B9FF'
+    def row_height(self, y): return 1
+    def row_offset(self, y): return 0
 
 class PieceType:
 

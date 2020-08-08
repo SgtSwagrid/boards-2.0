@@ -1,10 +1,16 @@
 {% load static %}
-<table class="board z-depth-3"><tbody>
+<div class="board teal lighten-5 z-depth-3" style="
+        width: {{ display.width }}px;
+        height: {{ display.height }}px;">
     {% for row in display.rows %}
-        <tr class="board-row" style="height: {{ row.height }}px;">
+        <div class="board-row" style="
+                width: {{ row.width }}px;
+                height: {{ row.height }}px;">
             {% for tile in row.tiles %}
-                <td class="tile" style="
+                <div class="tile" style="
                         width: {{ tile.width }}px;
+                        height: {{ row.height }}px;
+                        left: {{ tile.offset }}px;
                         background: {{ tile.colour }};"
                     {% if event.active %}
                         onclick="clickBoard({{ tile.x }}, {{ tile.y }},
@@ -19,8 +25,8 @@
                                 top: {{ texture.y }}%;
                                 width: 100%;">
                     {% endfor %}
-                </td>
+                </div>
             {% endfor %}
-        </tr>
+        </div>
     {% endfor %}
-</tbody></table>
+</div>
