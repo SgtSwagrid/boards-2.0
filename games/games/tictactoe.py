@@ -33,9 +33,12 @@ class TicTacToe(Game):
     def place_piece(self, state, piece):
         state = state.place_piece(piece)
         game_ended = self.has_run(state, piece)
+        game_draw = not game_ended and all([state.pieces[x][y]
+                                           for x in range(0, self.width)
+                                           for y in range(0, self.height)])
 
-        return state.end_turn() if not game_ended \
-            else state.end_game(winner_id=state.turn.current_id)
+        return state.end_turn() if not (game_ended or game_draw)\
+            else state.end_game(winner_id=state.turn.current_id if not game_draw else -1)
 
     def colour(self, state, x, y):
         col = super().colour(state, x, y)

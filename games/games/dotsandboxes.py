@@ -17,6 +17,7 @@ class DotsAndBoxes(Game):
         COLOURS = ['#E74C3C', '#3498DB']
 
     class CapturePiece(PieceType):
+
         ID = 1
         COLOURS = ['#FAB1A0', '#74B9FF']
 
@@ -38,23 +39,26 @@ class DotsAndBoxes(Game):
                 not state.pieces[piece.x][piece.y]
 
     def place_piece(self, state, piece):
+        player_score = state.player_states[state.turn.current_id].score
         state = state.place_piece(piece)
         state = self.capture(state, piece)
+        player_score_after = state.player_states[state.turn.current_id].score
 
-        return state.end_turn()
+        game_finished = all([state.pieces[x][y]
+                            for x in range(self.width)
+                            for y in range(self.height)
+                            if (x % 2 == 1 and y % 2 == 1)])
+
+        return state.end_game(winner_id=self.get_winner(state)) \
+            if game_finished else (state.end_turn()
+                                   if player_score == player_score_after else state)
 
     def capture(self, state, piece):
         adj = self.adjacent_tiles(state, piece)
 
-        print("Tiles for maybe capture", adj)
-
         for tile in adj:
-            print("Looking at", tile[0], tile[1])
-            print("Tile;;", state.pieces[tile[0]][tile[1]])
-            print("Edges", self.adjacent_edges(state, tile[0], tile[1]))
             if not state.pieces[tile[0]][tile[1]] and\
                     all(self.adjacent_edges(state, tile[0], tile[1])):
-                print("we got one", tile[0], tile[1])
                 cap_piece = Piece(self.CapturePiece(), state.turn.current_id, tile[0], tile[1])
                 state = state\
                     .place_piece(cap_piece)\
@@ -76,3 +80,8 @@ class DotsAndBoxes(Game):
                 for dy in [-1, 0, 1]
                 if (((x+dx) % 2 == 0) ^ ((y+dy) % 2 == 0))
                 and not (dx == 0 and dy == 0)]
+
+    def get_winner(self, state):
+        winner = state.player_states.index(max(state.player_states, key=lambda x:x.score)) if \
+            (state.player_states[0].score != state.player_states[1].score) else -1
+        return winner
