@@ -46,7 +46,8 @@ class Tile:
         self.x = x
         self.y = y
         self.colour = colour
-        self.textures = textures
+        self.textures = [texture if isinstance(texture, Texture)
+            else Texture(texture) for texture in textures]
         self.width = width
         self.offset = offset
         self.selected = selected

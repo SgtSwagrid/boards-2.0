@@ -1,12 +1,14 @@
 from .common.game import *
-from .common.shapes import *
 from .common.handlers import *
+from .common.backgrounds import Gingham
+from .common.shapes import Table
 
 
 class DotsAndBoxes(Game):
 
     ID = 7
     NAME = 'Dots and Boxes'
+    BACKGROUND = Gingham(['#FDCB6E', '#2F3640', '#FFEAA7'])
     SHAPE = Table(6, 6, cell_width=5, cell_height=5)
     PLAYER_NAMES = ['Red', 'Blue']
 
@@ -20,9 +22,6 @@ class DotsAndBoxes(Game):
 
     PIECES = [EdgePiece(), CapturePiece()]
     HANDLERS = [PlaceHandler(EdgePiece(), hints=False)]
-
-    def background_colour(self, x, y):
-        return self.gingham('#FDCB6E', '#2F3640', '#FFEAA7', x, y)
 
     def place_valid(self, state, piece):
         return ((piece.x % 2 == 0) ^ (piece.y % 2 == 0)) and\

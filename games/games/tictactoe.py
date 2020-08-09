@@ -1,6 +1,6 @@
 from .common.game import *
-from .common.shapes import *
 from .common.handlers import *
+from .common.shapes import Rectangle
 
 
 class TicTacToe(Game):

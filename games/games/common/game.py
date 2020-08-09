@@ -1,12 +1,14 @@
-from games.games.common.state import *
-from games.games.common.display import *
-from games.games.common.event import *
+from .state import *
+from .display import *
+from .event import *
+from .backgrounds import *
 
 
 class Game:
 
     ID = -1
-    NAME = f'Game {ID}'
+    NAME = 'Game'
+    BACKGROUND = Checkerboard(['#FDCB6E', '#FFEAA7'])
     SHAPE = None
     MIN_PLAYERS, MAX_PLAYERS = 2, 2
     PLAYER_NAMES = [f'Player {i}' for i in range(1, 16 + 1)]
@@ -106,11 +108,13 @@ class Game:
         if piece_colour: return piece_colour
         elif event.properties.selected(x, y): return self.SELECTED_COLOUR
         elif state.changed(x, y): return self.MODIFIED_COLOUR
-        else: return self.background_colour(x, y)
+        else: return self.BACKGROUND.colour(
+            x + self.SHAPE.pattern_offset(x, y), y)
 
     def texture(self, state, event, x, y):
 
-        textures = self.background_texture(x, y)
+        textures = self.BACKGROUND.texture(
+            y + self.SHAPE.pattern_offset(x, y), y)
         piece = state.pieces[x][y]
         if piece: textures.extend(piece.type.texture(piece, state))
 
@@ -119,23 +123,6 @@ class Game:
                 textures.extend(handler.texture(state, event, x, y))
 
         return textures
-
-    def background_colour(self, x, y):
-        return self.checkerboard('#FDCB6E', '#FFEAA7', x, y)
-
-    def background_texture(self, x, y):
-        return []
-
-    def checkerboard(self, colour1, colour2, x, y):
-        return colour1 if (x + y) % 2 == 0 else colour2
-
-    def table(self, colour1, colour2, x, y):
-        return colour1 if x % 2 == 1 and y % 2 == 1 else colour2
-
-    def gingham(self, colour1, colour2, colour3, x, y):
-        if (x % 2 == 0) ^ (y % 2 == 0): return colour1
-        elif x % 2 == 0 and y % 2 == 0: return colour2
-        else: return colour3
 
 class PieceType:
 

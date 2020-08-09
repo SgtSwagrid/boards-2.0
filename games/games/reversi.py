@@ -1,12 +1,14 @@
 from .common.game import *
-from .common.shapes import *
 from .common.handlers import *
+from .common.backgrounds import Checkerboard
+from .common.shapes import Rectangle
 
 
 class Reversi(Game):
 
     ID = 3
     NAME = 'Reversi'
+    BACKGROUND = Checkerboard(['#27AE60', '#2ECC71'])
     SHAPE = Rectangle(8, 8)
     PLAYER_NAMES = ['White', 'Black']
 
@@ -34,9 +36,6 @@ class Reversi(Game):
         if (x == x_mid and y == y_mid + 1) or (x == x_mid + 1 and y == y_mid):
             return Piece(self.ReversiPiece(), 1, x, y)  # Black
         return None
-
-    def background_colour(self, x, y):
-        return self.checkerboard('#27AE60', '#2ECC71', x, y)
 
     def place_valid(self, state, piece):
         return self.SHAPE.in_bounds(piece.x, piece.y) and\

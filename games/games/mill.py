@@ -1,6 +1,6 @@
 from .common.game import *
-from .common.shapes import *
 from .common.handlers import *
+from .common.shapes import Rectangle
 
 
 # note to self: phase 1 through 3 are hardcoded conditionals rather than actual variables

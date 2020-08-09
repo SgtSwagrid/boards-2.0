@@ -33,6 +33,9 @@ class Shape:
     def row_size(self, y):
         return self.width
 
+    def pattern_offset(self, x, y):
+        return 0
+
     def in_bounds(self, x, y):
         return 0 <= y < self.height and 0 <= x < self.row_size(y)
 
@@ -52,10 +55,11 @@ class Table(Rectangle):
     def tile_width(self, x, y):
         return 1 if x % 2 == 0 else self.cell_width
 
-class HexagonalBase(Shape):
+class Hexagonal(Shape):
 
-    def __init__(self, width, height):
+    def __init__(self, width, height, slanted=False):
         super().__init__(width, height, True)
+        self.slanted = slanted
 
     def tile_width(self, x, y):
         return math.sqrt(3)
@@ -63,12 +67,9 @@ class HexagonalBase(Shape):
     def row_spacing(self, y):
         return 0.5
 
-class SlantedHexagonal(HexagonalBase):
-
     def row_indent(self, y):
-        return (self.height - y - 1) * math.sqrt(3) / 2
+        if not self.slanted: return math.sqrt(3) / 2 if y % 2 == 0 else 0
+        else: return (self.height - y - 1) * math.sqrt(3) / 2
 
-class StaggeredHexagonal(HexagonalBase):
-
-    def row_indent(self, y):
-        return math.sqrt(3) / 2 if (self.height - y) % 2 == 0 else 0
+    def pattern_offset(self, x, y):
+        return -(y // 2) if self.slanted else 0
