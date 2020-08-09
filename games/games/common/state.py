@@ -24,8 +24,10 @@ class Piece:
 
 class Turn:
 
-    def __init__(self, current_id=0, stage=0, ply=0, epoch=0, new=True):
+    def __init__(self, current_id=0, next_id=1,
+            stage=0, ply=0, epoch=0, new=True):
         self.current_id = current_id
+        self.next_id = next_id
         self.stage = stage
         self.ply = ply
         self.epoch = epoch
@@ -89,6 +91,8 @@ class State:
         state = copy.deepcopy(self)
         state.turn.current_id = (state.turn.current_id + skip)\
             % len(state.player_states)
+        state.turn.next_id = (state.turn.current_id + 1)\
+            % len(state.player_states)
         state.turn.stage = 0
         state.turn.ply += 1
         state.turn.new = True
@@ -99,8 +103,9 @@ class State:
         state.turn.epoch += skip
         return state
 
-    def end_game(self, winner_id=-1):
+    def end_game(self, winner_id=-2):
         state = copy.deepcopy(self)
+        if winner_id == -2: winner_id = self.highest_scorer()
         state.outcome.finished = True
         state.outcome.winner_id = winner_id
         state.outcome.draw = winner_id == -1
@@ -141,6 +146,10 @@ class State:
     def add_score(self, player_id, score):
         total = self.player_states[player_id].score + score
         return self.set_score(player_id, total)
+
+    def highest_scorer(self):
+        players = self.player_states.sorted(key=lambda p: p.score)
+        return players[-1].order if players[-1].score > players[-2].score else -1
 
     def set_player_mode(self, player_id, mode):
         state = copy.deepcopy(self)

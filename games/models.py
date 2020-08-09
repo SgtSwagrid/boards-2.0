@@ -240,6 +240,7 @@ class StateModel(models.Model):
 
         return Turn(
             current_id=self.current,
+            next_id=(self.current + 1) % len(self.get_player_states()),
             stage=self.stage,
             ply=self.ply,
             epoch=self.epoch,
