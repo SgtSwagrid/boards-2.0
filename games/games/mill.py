@@ -1,6 +1,7 @@
 from .common.game import *
 from .common.handlers import *
 from .common.shapes import Rectangle
+from .common.backgrounds import Background
 
 
 # note to self: phase 1 through 3 are hardcoded conditionals rather than actual variables
@@ -12,11 +13,56 @@ from .common.shapes import Rectangle
 # TODO add mill recognition
 
 
-class Mill(Game):
+class MillBoardBackground(Background):
 
+    def __init__(self, colours, graph, width, height):
+        super().__init__(colours)
+        self.GRAPH = graph
+        # designates every tile which qualifies as a connection, important for assigning the textures in display
+        self.connections = []
+        for x in range(0, width):
+            for y in range(0, height):
+                if x == 0 or x == (width - 1) or y == 0 or y == (height - 1):
+                    self.connections.append((x, y))
+                elif (y == 2 or y == (height - 3)) and 1 < x < (width - 2):
+                    self.connections.append((x, y))
+                elif (x == 2 or x == (width - 3)) and 1 < y < (height - 2):
+                    self.connections.append((x, y))
+                elif (y == 4 or y == (height - 5)) and 3 < x < (width - 4):
+                    self.connections.append((x, y))
+                elif y == 5 and x != 5:
+                    self.connections.append((x, y))
+                elif y != 5 and x == 5:
+                    self.connections.append((x, y))
+
+    def colour(self, x, y):
+        return '#FFEAA7'
+
+    def texture(self, x, y):
+        textures = []
+        # tests that only connection tiles get to be shown as connections
+        if (x, y) in self.connections:
+            # tests whether a tile needs to be marked as a valid point to be moved one
+            if self.GRAPH.is_node(x, y):
+                textures.append('mill/dot.png')
+            # tests whether a tile has neighbours it needs to be connected to
+            if (x + 1, y) in self.connections:
+                textures.append('mill/half_line_right.png')
+            if (x - 1, y) in self.connections:
+                textures.append('mill/half_line_left.png')
+            if (x, y + 1) in self.connections:
+                textures.append('mill/half_line_up.png')
+            if (x, y - 1) in self.connections:
+                textures.append('mill/half_line_down.png')
+        print('(' + str(x) + ', ' + str(y) + '):  ')
+        return textures
+
+
+class Mill(Game):
     ID = 4
     NAME = 'Mill'
     SHAPE = Rectangle(11, 11)
+    PLAYER_NAMES = ['White', 'Black']
 
     class Graph:
 
@@ -54,19 +100,22 @@ class Mill(Game):
             return self.fetch_node(x, y) in self.nodes
 
         def is_mill(self, state, piece):
+            pass
             # if the current player owns all pieces alongside the respective y-axis or the x-axis they achieved a mill
-            print([piece.x, piece.y])
-            print([state.pieces[point.x][point.y] and state.turn.current_id == state.pieces[point.x][point.y].owner_id
-                   for point in self.nodes if point.x == piece.x])
-            print([state.pieces[point.x][point.y] and state.turn.current_id == state.pieces[point.x][point.y].owner_id
-                   for point in self.nodes if point.y == piece.y])
-            if all([state.pieces[point.x][point.y] and state.turn.current_id == state.pieces[point.x][point.y].owner_id
-                    for point in self.nodes if point.x == piece.x]) \
-                    or all(
-                [state.pieces[point.x][point.y] and state.turn.current_id == state.pieces[point.x][point.y].owner_id
-                 for point in self.nodes if point.y == piece.y]):
-                print('MILL!')
-                return True
+            # former piece of work taken commented out cos it didn't work
+            # print([piece.x, piece.y])
+            # print([state.pieces[point.x][point.y] and state.turn.current_id == state.pieces[point.x][point.y].owner_id
+            #        for point in self.nodes if point.x == piece.x])
+            # print([state.pieces[point.x][point.y] and state.turn.current_id == state.pieces[point.x][point.y].owner_id
+            #        for point in self.nodes if point.y == piece.y])
+            # if all([state.pieces[point.x][point.y] and state.turn.current_id == state.pieces[point.x][point.y].owner_
+            # id
+            #         for point in self.nodes if point.x == piece.x]) \
+            #         or all(
+            #     [state.pieces[point.x][point.y] and state.turn.current_id == state.pieces[point.x][point.y].owner_id
+            #      for point in self.nodes if point.y == piece.y]):
+            #     print('MILL!')
+            #     return True
 
     graph = Graph()
 
@@ -106,58 +155,44 @@ class Mill(Game):
     graph.add_edge(graph.fetch_node(8, 5), [graph.fetch_node(8, 2), graph.fetch_node(10, 5)])
     graph.add_edge(graph.fetch_node(10, 5), [graph.fetch_node(10, 0)])
 
-    # designates every tile which qualifies as a connection, important for assigning the textures in display
-    connections = []
-    #for x in range(0, width):
-    #    for y in range(0, height):
-    #        if x == 0 or x == (width - 1) or y == 0 or y == (height - 1):
-    #            connections.append((x, y))
-    #        elif (y == 2 or y == (height - 3)) and 1 < x < (width - 2):
-    #            connections.append((x, y))
-    #        elif (x == 2 or x == (width - 3)) and 1 < y < (height - 2):
-    #            connections.append((x, y))
-    #        elif (y == 4 or y == (height - 5)) and 3 < x < (width - 4):
-    #            connections.append((x, y))
-    #        elif y == 5 and x != 5:
-    #            connections.append((x, y))
-    #        elif y != 5 and x == 5:
-    #            connections.append((x, y))
-
     class MillPiece(PieceType):
         ID = 0
         TEXTURES = ['misc/white_dot.png', 'misc/black_dot.png']
 
     PIECES = [MillPiece()]
     HANDLERS = [PlaceHandler(MillPiece()), MoveHandler(), RemoveHandler()]
+    # needs to be here so it can take "graph" as an argument
+    BACKGROUND = MillBoardBackground(['#FFEAA7'], graph, 11, 11)
 
     #  drawing colors for (1)tiles/points where pieces can be (2)tiles/lines in between and (3)every other tile
-    def background_colour(self, x, y):
-        return '#FFEAA7'
-
-    def display(self, state, display):
-        for x in range(0, self.WIDTH):
-            for y in range(0, self.HEIGHT):
-                # tests that only connection tiles get to be shown as connections
-                if (x, y) in self.connections:
-                    # tests whether a tile needs to be marked as a valid point to be moved one
-                    if self.graph.is_node(x, y):
-                        texture = 'games/img/mill/dot.png'
-                        display = display.add_texture(x, y, Texture(texture))
-                    # tests whether a tile has neighbours it needs to be connected to
-                    if (x + 1, y) in self.connections:
-                        texture = 'games/img/mill/half_line_right.png'
-                        display = display.add_texture(x, y, Texture(texture))
-                    if (x - 1, y) in self.connections:
-                        texture = 'games/img/mill/half_line_left.png'
-                        display = display.add_texture(x, y, Texture(texture))
-                    if (x, y + 1) in self.connections:
-                        texture = 'games/img/mill/half_line_up.png'
-                        display = display.add_texture(x, y, Texture(texture))
-                    if (x, y - 1) in self.connections:
-                        texture = 'games/img/mill/half_line_down.png'
-                        display = display.add_texture(x, y, Texture(texture))
-        display = super().display(state, display)
-        return display
+    #  TODO Background cos engine update
+    # def background.colour(self, x, y):
+    #     return '#FFEAA7' TODO DONE
+    #
+    # def display(self, state, display):
+    #     for x in range(0, self.WIDTH):
+    #         for y in range(0, self.HEIGHT):
+    #             # tests that only connection tiles get to be shown as connections
+    #             if (x, y) in self.connections:
+    #                 # tests whether a tile needs to be marked as a valid point to be moved one
+    #                 if self.graph.is_node(x, y):
+    #                     texture = 'games/img/mill/dot.png'
+    #                     display = display.add_texture(x, y, Texture(texture))
+    #                 # tests whether a tile has neighbours it needs to be connected to
+    #                 if (x + 1, y) in self.connections:
+    #                     texture = 'games/img/mill/half_line_right.png'
+    #                     display = display.add_texture(x, y, Texture(texture))
+    #                 if (x - 1, y) in self.connections:
+    #                     texture = 'games/img/mill/half_line_left.png'
+    #                     display = display.add_texture(x, y, Texture(texture))
+    #                 if (x, y + 1) in self.connections:
+    #                     texture = 'games/img/mill/half_line_up.png'
+    #                     display = display.add_texture(x, y, Texture(texture))
+    #                 if (x, y - 1) in self.connections:
+    #                     texture = 'games/img/mill/half_line_down.png'
+    #                     display = display.add_texture(x, y, Texture(texture))
+    #     # display = super().display(state, display)
+    #     return display TODO DONE
 
     # a piece of the active player can be placed iff not all pieces have been placed yet
     def place_valid(self, state, piece):
@@ -171,7 +206,8 @@ class Mill(Game):
     # shall be placed
     def place_piece(self, state, piece):
         state = state.place_piece(piece).add_score(state.turn.current_id, 1)
-        if state.player_states[state.turn.current_id].score == state.player_states[1 - state.turn.current_id].score >= 9:
+        if state.player_states[state.turn.current_id].score == state.player_states[
+                1 - state.turn.current_id].score >= 9:
             state = state.end_epoch()
         return state.end_turn()
 
@@ -201,3 +237,4 @@ class Mill(Game):
     #  a piece may only removed IFF a mill has been formed before(state.stage == 1) and it's an opponent's
     def remove_valid(self, state, piece):
         return state.turn.stage == 1 and state.enemy(piece.x, piece.y)
+
