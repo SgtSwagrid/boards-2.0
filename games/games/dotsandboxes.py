@@ -1,22 +1,20 @@
 from .common.game import *
-from .common.handler import *
+from .common.shapes import *
+from .common.handlers import *
 
 
 class DotsAndBoxes(Game):
 
     ID = 7
     NAME = 'Dots and Boxes'
-    WIDTH, HEIGHT = (6 * 2 + 1, 6 * 2 + 1)
+    SHAPE = Table(6, 6, cell_width=5, cell_height=5)
     PLAYER_NAMES = ['Red', 'Blue']
-
-    BOX_SIZE = 5
 
     class EdgePiece(PieceType):
         ID = 0
         COLOURS = ['#E74C3C', '#3498DB']
 
     class CapturePiece(PieceType):
-
         ID = 1
         COLOURS = ['#FAB1A0', '#74B9FF']
 
@@ -26,15 +24,9 @@ class DotsAndBoxes(Game):
     def background_colour(self, x, y):
         return self.gingham('#FDCB6E', '#2F3640', '#FFEAA7', x, y)
 
-    def tile_width(self, x, y):
-        return 1 if x % 2 == 0 else self.BOX_SIZE
-
-    def row_height(self, y):
-        return 1 if y % 2 == 0 else self.BOX_SIZE
-
     def place_valid(self, state, piece):
         return ((piece.x % 2 == 0) ^ (piece.y % 2 == 0)) and\
-               state.game.in_bounds(piece.x, piece.y) and\
+               state.game.SHAPE.in_bounds(piece.x, piece.y) and\
                 not state.pieces[piece.x][piece.y]
 
     def place_piece(self, state, piece):
@@ -44,9 +36,9 @@ class DotsAndBoxes(Game):
         player_score_after = state.player_states[state.turn.current_id].score
 
         game_finished = all([state.pieces[x][y]
-                            for x in range(self.WIDTH)
-                            for y in range(self.HEIGHT)
-                            if (x % 2 == 1 and y % 2 == 1)])
+            for x in range(self.SHAPE.width)
+            for y in range(self.SHAPE.height)
+            if (x % 2 == 1 and y % 2 == 1)])
 
         return state.end_game(winner_id=self.get_winner(state)) \
             if game_finished else (state.end_turn()

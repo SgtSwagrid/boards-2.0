@@ -2,10 +2,11 @@ import copy
 
 class Display:
 
-    def __init__(self, rows):
+    def __init__(self, rows, hexagonal=False):
         self.rows = rows
         self.width = max(r.width for r in rows)
-        self.height = sum(r.height for r in rows)
+        self.height = rows[0].offset + rows[0].height
+        self.hexagonal = hexagonal
 
     def scale(self, width, height):
 

@@ -1,5 +1,6 @@
 from .common.game import *
-from .common.handler import *
+from .common.shapes import *
+from .common.handlers import *
 
 
 # note to self: phase 1 through 3 are hardcoded conditionals rather than actual variables
@@ -15,7 +16,7 @@ class Mill(Game):
 
     ID = 4
     NAME = 'Mill'
-    WIDTH, HEIGHT = 11, 11
+    SHAPE = Rectangle(11, 11)
 
     class Graph:
 

@@ -1,5 +1,6 @@
 from .common.game import *
-from .common.handler import *
+from .common.shapes import *
+from .common.handlers import *
 from .tictactoe import TicTacToe
 
 
@@ -7,7 +8,7 @@ class ConnectFour(TicTacToe):
 
     ID = 5
     NAME = 'Connect Four'
-    WIDTH, HEIGHT = 7, 6
+    SHAPE = Rectangle(7, 6)
     PLAYER_NAMES = ['Yellow', 'Red']
 
     TARGET = 4
@@ -20,7 +21,7 @@ class ConnectFour(TicTacToe):
     HANDLERS = [PlaceHandler(ConnectFourPiece())]
 
     def place_valid(self, state, piece):
-        return self.in_bounds(piece.x, piece.y) and\
+        return self.SHAPE.in_bounds(piece.x, piece.y) and\
                 not state.pieces[piece.x][piece.y] and\
                 self.on_floor(state, piece)
 

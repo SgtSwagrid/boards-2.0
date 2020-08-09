@@ -1,13 +1,13 @@
+from games.games.common.state import *
 from games.games.common.display import *
 from games.games.common.event import *
-from games.games.common.state import *
 
 
 class Game:
 
     ID = -1
     NAME = f'Game {ID}'
-    WIDTH, HEIGHT = -1, -1
+    SHAPE = None
     MIN_PLAYERS, MAX_PLAYERS = 2, 2
     PLAYER_NAMES = [f'Player {i}' for i in range(1, 16 + 1)]
 
@@ -17,12 +17,9 @@ class Game:
     SELECTED_COLOUR = '#6A89CC'
     MODIFIED_COLOUR = '#74B9FF'
 
-    def in_bounds(self, x, y):
-        return 0 <= y < self.HEIGHT and 0 <= x < self.row_size(y)
-
     def place_valid(self, state, piece):
 
-        return piece and self.in_bounds(piece.x, piece.y) and\
+        return piece and self.SHAPE.in_bounds(piece.x, piece.y) and\
             piece.owner_id == state.turn.current_id and\
             not state.pieces[piece.x][piece.y] and\
             piece.type.place_valid(state, piece)
@@ -32,8 +29,8 @@ class Game:
 
     def move_valid(self, state, piece, x_to, y_to):
 
-        return piece and self.in_bounds(piece.x, piece.y) and \
-            self.in_bounds(x_to, y_to) and \
+        return piece and self.SHAPE.in_bounds(piece.x, piece.y) and \
+            self.SHAPE.in_bounds(x_to, y_to) and \
             piece.owner_id == state.turn.current_id and\
             (x_to != piece.x or y_to != piece.y) and\
             not state.friendly(x_to, y_to) and\
@@ -43,7 +40,7 @@ class Game:
         return piece.type.move_piece(state, piece, x_to, y_to)
 
     def remove_valid(self, state, piece):
-        return piece and self.in_bounds(piece.x, piece.y) and\
+        return piece and self.SHAPE.in_bounds(piece.x, piece.y) and\
             piece.type.remove_valid(state, piece)
 
     def remove_piece(self, state, piece):
@@ -56,8 +53,8 @@ class Game:
     def setup(self, num_players):
 
         pieces = [[self.piece(num_players, x, y)
-            for y in range(0, self.HEIGHT)]
-            for x in range(0, self.max_row_size())]
+            for y in range(0, self.SHAPE.height)]
+            for x in range(0, self.SHAPE.width)]
 
         return State(game=self, num_players=num_players, pieces=pieces)
 
@@ -79,18 +76,24 @@ class Game:
 
     def render(self, state, event):
 
-        return Display([Row([self.tile(state, event, x, y)
-            for x in range(0, self.row_size(y))],
-                self.row_height(y), self.row_offset(y))
-            for y in range(self.HEIGHT - 1, -1, -1)])
+        return Display([self.row(state, event, y)
+            for y in range(0, self.SHAPE.height)], self.SHAPE.hexagonal)
+
+    def row(self, state, event, y):
+
+        tiles = [self.tile(state, event, x, y)
+            for x in range(0, self.SHAPE.row_size(y))]
+        height = self.SHAPE.row_height(y)
+        offset = self.SHAPE.row_offset(y)
+
+        return Row(tiles, height, offset)
 
     def tile(self, state, event, x, y):
 
         colour = self.colour(state, event, x, y)
         texture = self.texture(state, event, x, y)
-        width = self.tile_width(x, y)
-        offset = sum(self.tile_width(xx, y)
-            for xx in range(0, x)) + self.row_offset(y)
+        width = self.SHAPE.tile_width(x, y)
+        offset = self.SHAPE.tile_offset(x, y)
 
         return Tile(x, y, colour, texture, width, offset)
 
@@ -134,15 +137,6 @@ class Game:
         elif x % 2 == 0 and y % 2 == 0: return colour2
         else: return colour3
 
-    def row_size(self, y): return self.WIDTH
-
-    def max_row_size(self):
-        return max(self.row_size(y) for y in range(0, self.HEIGHT))
-
-    def tile_width(self, x, y): return 1
-    def row_height(self, y): return 1
-    def row_offset(self, y): return 0
-
 class PieceType:
 
     TEXTURES = [None] * 16
@@ -177,3 +171,6 @@ class PieceType:
 
     def moveable(self, state, piece):
         return True
+
+class Background:
+    pass

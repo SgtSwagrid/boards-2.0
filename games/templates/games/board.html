@@ -1,32 +1,72 @@
 {% load static %}
-<div class="board teal lighten-5 z-depth-3" style="
+{% load mathfilters %}
+
+<div class="board {% if not display.hexagonal %} z-depth-3 {% endif %}" style="
         width: {{ display.width }}px;
         height: {{ display.height }}px;">
+
     {% for row in display.rows %}
+
         <div class="board-row" style="
                 width: {{ row.width }}px;
-                height: {{ row.height }}px;">
+                height: {{ row.height }}px;
+                top: {{ row.offset }}px;">
+
             {% for tile in row.tiles %}
-                <div class="tile" style="
-                        width: {{ tile.width }}px;
-                        height: {{ row.height }}px;
-                        left: {{ tile.offset }}px;
-                        background: {{ tile.colour }};"
-                    {% if event.active %}
+
+                <div {% if event.active %}
                         onclick="clickBoard({{ tile.x }}, {{ tile.y }},
                             {{ event.properties.first_selection.0 }},
                             {{ event.properties.first_selection.1 }})"
-                    {% endif %}>
-                    {% for texture in tile.textures %}
-                        <img class="piece waves-effect"
-                                src="{% static 'games/img/' %}{{ texture.image }}"}
-                            style="opacity: {{ texture.opacity }};
-                                left: {{ texture.x }}%;
-                                top: {{ texture.y }}%;
-                                width: 100%;">
-                    {% endfor %}
+                        {% endif %}>
+
+                    {% if display.hexagonal %}
+                        <div class="tile" style="
+                                width: 0;
+                                left: {{ tile.offset }}px;
+                                top: -{{ row.height|div:2 }}px;
+                                border-bottom: {{ row.height|div:2 }}px solid {{ tile.colour }};
+                                border-left: {{ tile.width|div:2 }}px solid transparent;
+                                border-right: {{ tile.width|div:2 }}px solid transparent;">
+                        </div>
+                    {% endif %}
+
+                    <div class="tile" style="
+                            width: {{ tile.width }}px;
+                            height: {{ row.height }}px;
+                            left: {{ tile.offset }}px;
+                            background: {{ tile.colour }};">
+
+                        {% for texture in tile.textures %}
+                            <img class="piece waves-effect"
+                                    src="{% static 'games/img/' %}{{ texture.image }}"}
+                                style="opacity: {{ texture.opacity }};
+                                    left: {{ texture.x }}%;
+                                    {% if display.hexagonal %}
+                                        top: -{{ row.height|div:2 }}px;
+                                    {% endif %}
+                                    width: 100%;">
+                        {% endfor %}
+
+                    </div>
+
+                    {% if display.hexagonal %}
+                        <div class="tile" style="
+                                width: 0;
+                                left: {{ tile.offset }}px;
+                                top: {{ row.height }}px;
+                                border-top: {{ row.height|div:2 }}px solid {{ tile.colour }};
+                                border-left: {{ tile.width|div:2 }}px solid transparent;
+                                border-right: {{ tile.width|div:2 }}px solid transparent;">
+                        </div>
+                    {% endif %}
+
                 </div>
+
             {% endfor %}
+
         </div>
+
     {% endfor %}
+
 </div>

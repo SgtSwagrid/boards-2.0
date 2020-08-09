@@ -48,7 +48,7 @@
 }
 
 .board-row {
-    position: relative;
+    position: absolute;
     display: block;
 }
 

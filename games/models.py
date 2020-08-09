@@ -222,11 +222,11 @@ class StateModel(models.Model):
         piece_set = PieceModel.pieces.filter(state=self)
         pieces = []
 
-        for x in range(0, game.max_row_size()):
+        for x in range(0, game.SHAPE.width):
             col_set = piece_set.filter(x=x)
             col = []
 
-            for y in range(0, game.HEIGHT):
+            for y in range(0, game.SHAPE.height):
                 piece = col_set.filter(y=y)
                 col.append(piece.get().get_piece() if piece.exists() else None)
 

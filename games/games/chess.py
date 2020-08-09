@@ -1,12 +1,13 @@
 from .common.game import *
-from .common.handler import *
+from .common.shapes import *
+from .common.handlers import *
 
 
 class Chess(Game):
 
     ID = 2
     NAME = 'Chess'
-    WIDTH, HEIGHT = 8, 8
+    SHAPE = Rectangle(8, 8)
     PLAYER_NAMES = ['White', 'Black']
 
     class Pawn(PieceType):

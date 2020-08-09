@@ -1,12 +1,13 @@
 from .common.game import *
-from .common.handler import *
+from .common.shapes import *
+from .common.handlers import *
 
 
 class Amazons(Game):
 
     ID = 6
     NAME = 'Amazons'
-    WIDTH, HEIGHT = 10, 10
+    SHAPE = Rectangle(10, 10)
     PLAYER_NAMES = ['White', 'Black']
 
     class AmazonPiece(PieceType):
@@ -53,14 +54,25 @@ class Amazons(Game):
 
     def piece(self, num_players, x, y):
         # Top and bottom arrangement
-        tw = self.WIDTH // 3
-        th = self.HEIGHT // 3
+        tw = self.SHAPE.width // 3
+        th = self.SHAPE.height // 3
 
-        op_tw = self.WIDTH - 1 - tw
-        op_th = self.HEIGHT - 1 - th
+        op_tw = self.SHAPE.width - 1 - tw
+        op_th = self.SHAPE.height - 1 - th
 
-        white_queens = [[tw, 0], [op_tw, 0], [0, th], [self.WIDTH-1, th]]
-        black_queens = [[tw, self.HEIGHT-1], [op_tw, self.HEIGHT-1], [0, op_th], [self.WIDTH-1, op_th]]
+        white_queens = [
+            [tw, 0],
+            [op_tw, 0],
+            [0, th],
+            [self.SHAPE.width-1, th]
+        ]
+
+        black_queens = [
+            [tw, self.SHAPE.height-1],
+            [op_tw, self.SHAPE.height-1],
+            [0, op_th],
+            [self.SHAPE.width-1, op_th]
+        ]
 
         if [x, y] in white_queens:
             return Piece(self.AmazonPiece(), 0, x, y)  # White

@@ -148,10 +148,10 @@ class State:
         return state
 
     def exists(self, x, y):
-        return self.game.in_bounds(x, y) and self.pieces[x][y]
+        return self.game.SHAPE.in_bounds(x, y) and self.pieces[x][y]
 
     def open(self, x, y):
-        return self.game.in_bounds(x, y) and not self.pieces[x][y]
+        return self.game.SHAPE.in_bounds(x, y) and not self.pieces[x][y]
 
     def friendly(self, x, y):
         return self.exists(x, y) and\

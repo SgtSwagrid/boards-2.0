@@ -1,11 +1,13 @@
 from .common.game import *
-from .common.handler import *
+from .common.shapes import *
+from .common.handlers import *
+
 
 class Reversi(Game):
 
     ID = 3
     NAME = 'Reversi'
-    WIDTH, HEIGHT = 8, 8
+    SHAPE = Rectangle(8, 8)
     PLAYER_NAMES = ['White', 'Black']
 
     class ReversiPiece(PieceType):
@@ -23,8 +25,8 @@ class Reversi(Game):
             .add_score(1, 2)
 
     def piece(self, num_players, x, y):
-        x_mid = self.WIDTH // 2 - 1
-        y_mid = self.HEIGHT // 2 - 1
+        x_mid = self.SHAPE.width // 2 - 1
+        y_mid = self.SHAPE.height // 2 - 1
 
         # Centre arrangement 2x2
         if (x == x_mid and y == y_mid) or (x == x_mid + 1 and y == y_mid + 1):
@@ -37,7 +39,7 @@ class Reversi(Game):
         return self.checkerboard('#27AE60', '#2ECC71', x, y)
 
     def place_valid(self, state, piece):
-        return self.in_bounds(piece.x, piece.y) and\
+        return self.SHAPE.in_bounds(piece.x, piece.y) and\
                 not state.pieces[piece.x][piece.y] and\
                 len(self.flips(state, piece)) > 0
 
@@ -79,7 +81,7 @@ class Reversi(Game):
         for dir in directions:
             sub_flips = []
 
-            for i in range(1, max(self.WIDTH, self.HEIGHT)):
+            for i in range(1, max(self.SHAPE.width, self.SHAPE.height)):
                 x_next = piece.x + i * dir[0]
                 y_next = piece.y + i * dir[1]
                 if state.enemy(x_next, y_next):
@@ -93,8 +95,8 @@ class Reversi(Game):
 
     def has_moves(self, state):
         '''Returns true if the current state's player has a turn they can play'''
-        for x in range(self.WIDTH):
-            for y in range(self.HEIGHT):
+        for x in range(self.SHAPE.width):
+            for y in range(self.SHAPE.height):
                 if not state.pieces[x][y]:
                     if self.place_valid(state, Piece(self.ReversiPiece(), state.turn.current_id, x, y)):
                         return True

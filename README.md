@@ -11,6 +11,7 @@ virtualenv .
 pip install channels_redis
 pip install mysqlclient
 pip install python-dotenv
+pip install django-mathfilters
 ```
 /boards/boards/.env:
 ```python
