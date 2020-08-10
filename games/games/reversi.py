@@ -54,6 +54,9 @@ class Reversi(Game):
                 .add_score(state.turn.current_id, 1)\
                 .place_piece(Piece(self.ReversiPiece(), state.turn.current_id, pos[0], pos[1]))
 
+        return state
+
+    def action(self, state, action):
         skipped_turns = 1
         game_ended = False
 
@@ -66,11 +69,11 @@ class Reversi(Game):
                 skipped_turns += 1
                 if state_next_turn.turn.current_id == state.turn.current_id:
                     game_ended = True
-            else:   # This player has a turn at 'skip' skips
+            else:  # This player has a turn at 'skip' skips
                 break
 
         # if skip > 1: print("Game ended" if game_ended else (str(skip-1)) + " turns skipped")
-        return state.end_turn(skipped_turns) if not game_ended\
+        return state.end_turn(skipped_turns) if not game_ended \
             else state.end_game()
 
     def flips(self, state, piece):

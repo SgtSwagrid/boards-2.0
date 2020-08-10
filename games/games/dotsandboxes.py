@@ -44,7 +44,6 @@ class DotsAndBoxes(Game):
 
         return state if not game_finished else state.end_game()
 
-
     def capture(self, state, piece):
         adj = self.adjacent_tiles(state, piece)
 

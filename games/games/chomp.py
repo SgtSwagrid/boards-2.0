@@ -35,7 +35,7 @@ class Chomp(Game):
                 not state.pieces[piece.x][piece.y]
 
     def action(self, state, action):
-        l_piece = action.piece
+        l_piece = state.action.piece
         # Eaten the poison
         game_finished = (l_piece.x == 0 and l_piece.y == 0)
 

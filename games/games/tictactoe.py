@@ -34,7 +34,7 @@ class TicTacToe(Game):
         return state.place_piece(piece)
 
     def action(self, state, action):
-        game_ended = self.has_run(state, action.piece)
+        game_ended = self.has_run(state, state.action.piece)
         game_draw = not game_ended and all([state.pieces[x][y]
             for x in range(0, self.SHAPE.width)
             for y in range(0, self.SHAPE.height)])

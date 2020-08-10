@@ -48,11 +48,10 @@ class Amazons(Game):
     HANDLERS = [MoveHandler(), PlaceHandler(ArrowPiece())]
 
     def action(self, state, action):
-        if isinstance(action, MoveAction):
+        if isinstance(state.action, MoveAction):
             return state.end_stage()
         else:
             state_next_turn = state.end_turn()
-
             return state_next_turn if state.game.can_move(state_next_turn) \
                 else state_next_turn.end_game(winner_id=state.turn.current_id)
 
