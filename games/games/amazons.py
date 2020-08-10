@@ -22,8 +22,7 @@ class Amazons(Game):
 
         def move_piece(self, state, piece, x_to, y_to):
             return state \
-                .move_piece(piece, x_to, y_to) \
-                .end_stage()
+                .move_piece(piece, x_to, y_to)
 
     class ArrowPiece(PieceType):
 
@@ -40,17 +39,21 @@ class Amazons(Game):
                 state.game.is_queen_move(state, x_from, y_from, piece.x, piece.y)
 
         def place_piece(self, state, piece):
-            piece = Piece(self, state.turn.current_id, piece.x, piece.y)
-            state_next_turn = state.place_piece(piece).end_turn()
-
-            return state_next_turn if state.game.can_move(state_next_turn) \
-                else state_next_turn.end_game(winner_id=state.turn.current_id)
+            return state.place_piece(piece)
 
         def moveable(self, state, piece):
             return False
 
     PIECES = [AmazonPiece(), ArrowPiece()]
     HANDLERS = [MoveHandler(), PlaceHandler(ArrowPiece())]
+
+    def action(self, state, action):
+        if isinstance(state.action, MoveAction):
+            return state.end_stage()
+        else:
+            state_next_turn = state.end_turn()
+            return state_next_turn if state.game.can_move(state_next_turn) \
+                else state_next_turn.end_game(winner_id=state.turn.current_id)
 
     def piece(self, num_players, x, y):
         # Top and bottom arrangement

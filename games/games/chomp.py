@@ -34,6 +34,14 @@ class Chomp(Game):
         return state.game.SHAPE.in_bounds(piece.x, piece.y) and\
                 not state.pieces[piece.x][piece.y]
 
+    def action(self, state, action):
+        l_piece = state.action.piece
+        # Eaten the poison
+        game_finished = (l_piece.x == 0 and l_piece.y == 0)
+
+        return state.end_turn() if not game_finished \
+            else state.end_game(winner_id=state.turn.next_id)
+
     def place_piece(self, state, piece):
         state = state.place_piece(piece)
 
@@ -44,6 +52,4 @@ class Chomp(Game):
                 if not state.pieces[x][y]:
                     state = state.place_piece(fill_piece.at(x, y))
 
-        game_finished = (piece.x == 0 and piece.y == 0)
-
-        return state.end_turn() if not game_finished else state.end_game(winner_id=state.turn.next_id)
+        return state

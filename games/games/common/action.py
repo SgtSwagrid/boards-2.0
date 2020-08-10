@@ -1,6 +1,3 @@
-from games.games.common.display import *
-
-
 class Action:
 
     def validate(self, state):
@@ -23,7 +20,7 @@ class PlaceAction(Action):
 
         state = state.push_action(self)
         state = state.game.place_piece(state, self.piece)
-        return state.set_outcome(state.game.outcome(state))
+        return state.game.action(state, self)
 
 
 class MoveAction(Action):
