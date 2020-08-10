@@ -39,7 +39,7 @@ class DotsAndBoxes(Game):
             for y in range(self.SHAPE.height)
             if (x % 2 == 1 and y % 2 == 1)])
 
-        return state.end_game(winner_id=self.get_winner(state)) \
+        return state.end_game() \
             if game_finished else (state.end_turn()
                                    if player_score == player_score_after else state)
 
@@ -70,8 +70,3 @@ class DotsAndBoxes(Game):
                 for dy in [-1, 0, 1]
                 if (((x+dx) % 2 == 0) ^ ((y+dy) % 2 == 0))
                 and not (dx == 0 and dy == 0)]
-
-    def get_winner(self, state):
-        winner = state.player_states.index(max(state.player_states, key=lambda x:x.score)) if \
-            (state.player_states[0].score != state.player_states[1].score) else -1
-        return winner

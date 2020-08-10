@@ -71,7 +71,7 @@ class Reversi(Game):
 
         # if skip > 1: print("Game ended" if game_ended else (str(skip-1)) + " turns skipped")
         return state.end_turn(skipped_turns) if not game_ended\
-            else state.end_game(winner_id=self.get_winner(state))
+            else state.end_game()
 
     def flips(self, state, piece):
         directions = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, -1], [-1, 1]]
@@ -100,8 +100,3 @@ class Reversi(Game):
                     if self.place_valid(state, Piece(self.ReversiPiece(), state.turn.current_id, x, y)):
                         return True
         return False
-
-    def get_winner(self, state):
-        winner = state.player_states.index(max(state.player_states, key=lambda x:x.score)) if \
-            (state.player_states[0].score != state.player_states[1].score) else -1
-        return winner

@@ -5,6 +5,7 @@ from games.games.mill import Mill
 from games.games.connectfour import ConnectFour
 from games.games.amazons import Amazons
 from games.games.dotsandboxes import DotsAndBoxes
+from games.games.chomp import Chomp
 
 games = {
     TicTacToe().ID: TicTacToe(),
@@ -13,5 +14,6 @@ games = {
     Mill().ID: Mill(),
     ConnectFour().ID: ConnectFour(),
     Amazons().ID: Amazons(),
-    DotsAndBoxes().ID: DotsAndBoxes()
+    DotsAndBoxes().ID: DotsAndBoxes(),
+    Chomp().ID: Chomp()
 }
