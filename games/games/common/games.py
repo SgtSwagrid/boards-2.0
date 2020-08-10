@@ -19,5 +19,5 @@ games = {
     DotsAndBoxes().ID: DotsAndBoxes(),
     Chomp().ID: Chomp(),
     Clobber().ID: Clobber(),
-    Shogi().ID: Shogi
+    Shogi().ID: Shogi()
 }
