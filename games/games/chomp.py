@@ -37,13 +37,10 @@ class Chomp(Game):
     def action(self, state, action):
         l_piece = action.piece
         # Eaten the poison
-        if l_piece:
-            game_finished = (l_piece.x == 0 and l_piece.y == 0)
+        game_finished = (l_piece.x == 0 and l_piece.y == 0)
 
-            return state.end_turn() if not game_finished \
-                else state.end_game(winner_id=state.turn.next_id)
-        else:
-            return state
+        return state.end_turn() if not game_finished \
+            else state.end_game(winner_id=state.turn.next_id)
 
     def place_piece(self, state, piece):
         state = state.place_piece(piece)

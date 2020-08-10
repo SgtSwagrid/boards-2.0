@@ -37,8 +37,9 @@ class Clobber(Game):
             state.pieces[x_to][y_to].owner_id != piece.owner_id
 
     def move_piece(self, state, piece, x_to, y_to):
-        state = state.move_piece(piece, x_to, y_to)
+       return state.move_piece(piece, x_to, y_to)
 
+    def action(self, state, action):
         game_finished = not any(self.has_move(state, piece_e)
                                 for piece_e in state.find_pieces(player_id=state.turn.next_id))
 

@@ -34,14 +34,16 @@ class DotsAndBoxes(Game):
         state = self.capture(state, piece)
         player_score_after = state.player_states[state.turn.current_id].score
 
+        return state.end_turn() if player_score == player_score_after else state
+
+    def action(self, state, action):
         game_finished = all([state.pieces[x][y]
             for x in range(self.SHAPE.width)
             for y in range(self.SHAPE.height)
             if (x % 2 == 1 and y % 2 == 1)])
 
-        return state.end_game() \
-            if game_finished else (state.end_turn()
-                                   if player_score == player_score_after else state)
+        return state if not game_finished else state.end_game()
+
 
     def capture(self, state, piece):
         adj = self.adjacent_tiles(state, piece)
