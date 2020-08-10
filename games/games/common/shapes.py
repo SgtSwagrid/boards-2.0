@@ -58,7 +58,7 @@ class Table(Rectangle):
 class Hexagonal(Shape):
 
     def __init__(self, width, height, slanted=False):
-        super().__init__(width, height, True)
+        super().__init__(width, height, hexagonal=True)
         self.slanted = slanted
 
     def tile_width(self, x, y):
