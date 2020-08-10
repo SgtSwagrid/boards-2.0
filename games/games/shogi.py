@@ -66,7 +66,7 @@ class Shogi(Game):
 
     PIECES = [OshoGyokusho(), HishaRyuo(), KakugyoRyuma(), Kinsho(), GinshoNarigin(), KeimaNarikei(),
               KyoshaNarikyo(), FuhyoTokin()]
-    # TODO place pieces when engine feature
+    # TODO drop pieces rule when engine feature
     HANDLERS = [MoveHandler()]
 
     def piece(self, num_players, x, y):
