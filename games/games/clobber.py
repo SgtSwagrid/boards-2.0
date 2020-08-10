@@ -2,12 +2,6 @@ from .common.game import *
 from .common.handlers import *
 from .common.shapes import Rectangle
 
-import math
-
-from .common.game import *
-from .common.handlers import *
-from .common.shapes import Rectangle
-
 
 class Clobber(Game):
 
