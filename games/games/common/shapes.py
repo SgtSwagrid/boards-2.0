@@ -17,6 +17,9 @@ class Shape:
         return sum(self.row_spacing(yy) + self.row_height(yy)
             for yy in range(y + 1, self.height)) + self.row_spacing(y)
 
+    def row_centre(self, y):
+        return self.row_offset(y) + self.row_height(y) / 2
+
     def row_indent(self, y):
         return 0
 
@@ -30,6 +33,9 @@ class Shape:
         return sum(self.tile_spacing(xx, y) + self.tile_width(xx, y)
             for xx in range(0, x)) + self.tile_spacing(x, y) + self.row_indent(y)
 
+    def tile_centre(self, x, y):
+        return self.tile_offset(x, y) + self.tile_width(x, y) / 2
+
     def row_size(self, y):
         return self.width
 
@@ -38,6 +44,15 @@ class Shape:
 
     def in_bounds(self, x, y):
         return 0 <= y < self.height and 0 <= x < self.row_size(y)
+
+    def display_width(self):
+        return max(sum(self.tile_spacing(x, y) + self.tile_width(x, y)
+            for x in range(0, self.row_size(y)))
+            for y in range(0, self.height))
+
+    def display_height(self):
+        return sum(self.row_spacing(y) + self.row_height(y)
+            for y in range(0, self.height))
 
 class Rectangle(Shape):
     pass

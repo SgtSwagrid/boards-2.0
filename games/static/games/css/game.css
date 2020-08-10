@@ -46,18 +46,3 @@
     width: 800px;
     display: block;
 }
-
-.board-row {
-    position: absolute;
-    display: block;
-}
-
-.tile {
-    position: absolute;
-    display: block;
-}
-
-.piece {
-    position: absolute;
-    display: block;
-}

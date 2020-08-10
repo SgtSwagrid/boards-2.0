@@ -12,6 +12,12 @@ class BoardEvent(Event):
         self.x = x
         self.y = y
 
+class SelectEvent(Event):
+
+    def __init__(self, properties, player_id, active, option_id):
+        super().__init__(properties, player_id, active)
+        self.option_id = option_id
+
 class RenderEvent(Event):
 
     def __init__(self, properties, player_id, active):
