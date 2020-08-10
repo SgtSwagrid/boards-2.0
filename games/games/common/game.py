@@ -114,7 +114,7 @@ class Game:
     def texture(self, state, event, x, y):
 
         textures = self.BACKGROUND.texture(
-            y + self.SHAPE.pattern_offset(x, y), y)
+            x + self.SHAPE.pattern_offset(x, y), y)
         piece = state.pieces[x][y]
         if piece: textures.extend(piece.type.texture(piece, state))
 
