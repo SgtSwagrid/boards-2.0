@@ -3,17 +3,29 @@ from .common.handlers import *
 from .common.shapes import Rectangle
 
 
+class ChompBoard(Checkerboard):
+
+    def texture(self, x, y):
+        if x == 0 and y == 0:
+            return ['misc/poison.png']
+        else:
+            return super().texture(x, y)
+
+
 class Chomp(Game):
 
     ID = 8
     NAME = 'Chomp'
-    BACKGROUND = Background('#FDCB6E')
-    SHAPE = Rectangle(4, 5)
-    PLAYER_NAMES = ['Red', 'Blue']
+    BACKGROUND = ChompBoard(['#5D4037', '#8D6E63'])
+    SHAPE = Rectangle(6, 5)
+    PLAYER_NAMES = ['Purple', 'Yellow']
 
     class ChompPiece(PieceType):
         ID = 0
-        COLOURS = ['#E74C3C', '#3498DB']
+        COLOURS = ['#8c7ae6', '#9c88ff', '#e1b12c', '#fbc531']
+
+        def colour(self, piece, state):
+            return self.COLOURS[2*piece.owner_id] if (piece.x + piece.y) % 2 == 0 else self.COLOURS[piece.owner_id*2+1]
 
     PIECES = [ChompPiece()]
     HANDLERS = [PlaceHandler(ChompPiece(), hints=False)]
@@ -23,16 +35,15 @@ class Chomp(Game):
                 not state.pieces[piece.x][piece.y]
 
     def place_piece(self, state, piece):
-        player_score = state.player_states[state.turn.current_id].score
         state = state.place_piece(piece)
-        state = self.capture(state, piece)
-        player_score_after = state.player_states[state.turn.current_id].score
 
-        game_finished = all([state.pieces[x][y]
-            for x in range(self.SHAPE.width)
-            for y in range(self.SHAPE.height)
-            if (x % 2 == 1 and y % 2 == 1)])
+        fill_piece = Piece(self.ChompPiece(), owner_id=piece.owner_id, x=piece.x, y=piece.y)
 
-        return state.end_game() \
-            if game_finished else (state.end_turn()
-                                   if player_score == player_score_after else state)
+        for x in range(piece.x, state.game.SHAPE.width):
+            for y in range(piece.y, state.game.SHAPE.height):
+                if not state.pieces[x][y]:
+                    state = state.place_piece(fill_piece.at(x, y))
+
+        game_finished = (piece.x == 0 and piece.y == 0)
+
+        return state.end_turn() if not game_finished else state.end_game(winner_id=state.turn.next_id)

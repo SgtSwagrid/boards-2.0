@@ -14,6 +14,6 @@ games = {
     Mill().ID: Mill(),
     ConnectFour().ID: ConnectFour(),
     Amazons().ID: Amazons(),
-    DotsAndBoxes().ID: DotsAndBoxes(,
-    Chomp().ID, Chomp()
+    DotsAndBoxes().ID: DotsAndBoxes(),
+    Chomp().ID: Chomp()
 }
