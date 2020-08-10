@@ -78,8 +78,13 @@ class Game:
 
     def render(self, state, event):
 
-        return Display([self.row(state, event, y)
+        display = Display([self.row(state, event, y)
             for y in range(0, self.SHAPE.height)], self.SHAPE.hexagonal)
+
+        for handler in self.HANDLERS:
+            display = handler.render(state, event, display)
+
+        return display
 
     def row(self, state, event, y):
 

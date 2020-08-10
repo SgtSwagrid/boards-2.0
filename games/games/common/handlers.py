@@ -17,6 +17,9 @@ class Handler:
     def texture(self, state, display, x, y):
         return []
 
+    def render(self, state, event, display):
+        return display
+
 class PlaceHandler(Handler):
 
     def __init__(self, type, hints=True, icon=PLACE_ICON):
@@ -114,3 +117,8 @@ class RemoveHandler(Handler):
                 return self.icon
 
         return []
+
+class OptionHandler(Handler):
+
+    def __init__(self, options=[]):
+        self.options = options
