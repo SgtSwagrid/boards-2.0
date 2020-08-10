@@ -9,6 +9,11 @@ class Background:
     def texture(self, x, y):
         return []
 
+class Solid(Background):
+
+    def colour(self, x, y):
+        return self.colours[0]
+
 class Checkerboard(Background):
 
     def colour(self, x, y):
