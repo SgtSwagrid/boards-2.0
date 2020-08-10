@@ -52,9 +52,18 @@ class Game:
         return piece and piece.owner_id == state.turn.current_id and\
                piece.type.moveable(state, piece)
 
+    def selector(self, state):
+        return None
+
+    def option(self, state, selector, option):
+        return state
+
     def setup(self, num_players):
 
-        pieces = [[self.piece(num_players, x, y)
+        def piece_at(piece, x, y):
+            return piece.at(x, y) if piece else None
+
+        pieces = [[piece_at(self.piece(num_players, x, y), x, y)
             for y in range(0, self.SHAPE.height)]
             for x in range(0, self.SHAPE.width)]
 
@@ -69,17 +78,23 @@ class Game:
             if isinstance(event, handler.event):
 
                 consumed, result, properties = handler.apply(state, event)
-                if consumed: return result, properties
+                if consumed:
+                    return result, properties
 
         return None, DisplayProperties()
 
-    def outcome(self, state):
-        return state.outcome
+    def action(self, state, action):
+        return state.end_turn()
 
     def render(self, state, event):
 
-        return Display([self.row(state, event, y)
+        display = Display([self.row(state, event, y)
             for y in range(0, self.SHAPE.height)], self.SHAPE.hexagonal)
+
+        for handler in self.HANDLERS:
+            display = handler.render(state, event, display)
+
+        return display
 
     def row(self, state, event, y):
 
@@ -124,6 +139,7 @@ class Game:
 
         return textures
 
+
 class PieceType:
 
     TEXTURES = [None] * 16
@@ -142,22 +158,19 @@ class PieceType:
         return False
 
     def place_piece(self, state, piece):
-        return state.place_piece(piece).end_turn()
+        return state.place_piece(piece)
 
     def move_valid(self, state, piece, x_to, y_to):
         return False
 
     def move_piece(self, state, piece, x_to, y_to):
-        return state.move_piece(piece, x_to, y_to).end_turn()
+        return state.move_piece(piece, x_to, y_to)
 
     def remove_valid(self, state, piece):
         return False
 
     def remove_piece(self, state, piece):
-        return state.remove_piece(piece).end_turn()
+        return state.remove_piece(piece)
 
     def moveable(self, state, piece):
         return True
-
-class Background:
-    pass

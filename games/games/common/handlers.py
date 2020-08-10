@@ -7,6 +7,7 @@ from games.games.common.state import *
 ATTACK_ICON = [Texture('common/attack.png', 0.8)]
 PLACE_ICON = [Texture('common/place.png', 0.8)]
 
+
 class Handler:
 
     event = BoardEvent
@@ -16,6 +17,10 @@ class Handler:
 
     def texture(self, state, display, x, y):
         return []
+
+    def render(self, state, event, display):
+        return display
+
 
 class PlaceHandler(Handler):
 
@@ -46,6 +51,7 @@ class PlaceHandler(Handler):
                     piece.type.texture(piece, state)] + self.icon
 
         return []
+
 
 class MoveHandler(Handler):
 
@@ -89,6 +95,7 @@ class MoveHandler(Handler):
 
         return []
 
+
 class RemoveHandler(Handler):
 
     def __init__(self, hints=False, icon=ATTACK_ICON):
@@ -114,3 +121,26 @@ class RemoveHandler(Handler):
                 return self.icon
 
         return []
+
+
+class SelectHandler(Handler):
+
+    event = SelectEvent
+
+    def apply(self, state, event):
+
+        action = SelectAction(event.option_id)
+
+        if action.validate(state):
+            result = action.apply(state)
+            return True, result, DisplayProperties()
+
+        return False, None, DisplayProperties()
+
+    def render(self, state, event, display):
+
+        if event.active:
+            selector = state.game.selector(state)
+            if selector: return display.show_selector(selector)
+
+        return display

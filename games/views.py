@@ -85,8 +85,18 @@ def board_view(request, board_code):
     selections = [(sx, sy)] if sx != -1 else []
     properties = DisplayProperties(selections)
 
-    if cx != -1 and active:
+    if cx != -1 and active and not game.selector(state):
         event = BoardEvent(properties, player_id, active, cx, cy)
+        result, properties = game.event(state, event)
+
+        if result:
+            board.set_state(result)
+            notify_board(board)
+            state = result
+
+    if 'option' in request.POST and active and game.selector(state):
+        option_id = int(request.POST['option'])
+        event = SelectEvent(properties, player_id, active, option_id)
         result, properties = game.event(state, event)
 
         if result:

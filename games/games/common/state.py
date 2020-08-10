@@ -9,7 +9,7 @@ class PlayerState:
 
 class Piece:
 
-    def __init__(self, type, owner_id, x, y, mode=0):
+    def __init__(self, type, owner_id, x=-1, y=-1, mode=0):
         self.type = type
         self.owner_id = owner_id
         self.x = x
@@ -77,10 +77,11 @@ class State:
         self.outcome = outcome
         self.previous = previous
 
-    def find_pieces(self, player_id=-1, type=-1):
+    def find_pieces(self, player_id=-1, type=-1, x=-1, y=-1):
         return [piece for col in self.pieces for piece in col if piece and\
             (type == -1 or isinstance(piece.type, type)) and\
-            (player_id == -1 or piece.owner_id == player_id)]
+            (player_id == -1 or piece.owner_id == player_id) and\
+            (x == -1 or piece.x == x) and (y == -1 or piece.y == y)]
 
     def end_stage(self, skip=1):
         state = copy.deepcopy(self)

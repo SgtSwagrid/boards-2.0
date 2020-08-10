@@ -7,21 +7,23 @@
 
     {% for row in display.rows %}
 
-        <div class="board-row" style="
+        <div style="
+                position: absolute;
                 width: {{ row.width }}px;
                 height: {{ row.height }}px;
                 top: {{ row.offset }}px;">
 
             {% for tile in row.tiles %}
 
-                <div {% if event.active %}
+                <div {% if event.active and not display.selector %}
                         onclick="clickBoard({{ tile.x }}, {{ tile.y }},
                             {{ event.properties.first_selection.0 }},
                             {{ event.properties.first_selection.1 }})"
                         {% endif %}>
 
                     {% if display.hexagonal %}
-                        <div class="tile" style="
+                        <div style="
+                                position: absolute;
                                 width: 0;
                                 left: {{ tile.offset }}px;
                                 top: -{{ row.height|div:2 }}px;
@@ -31,27 +33,26 @@
                         </div>
                     {% endif %}
 
-                    <div class="tile" style="
+                    <div style="
+                            position: absolute;
                             width: {{ tile.width }}px;
                             height: {{ row.height }}px;
                             left: {{ tile.offset }}px;
                             background: {{ tile.colour }};">
 
                         {% for texture in tile.textures %}
-                            <img class="piece waves-effect"
-                                    src="{% static 'games/img/' %}{{ texture.image }}"}
-                                style="opacity: {{ texture.opacity }};
-                                    left: {{ texture.x }}%;
-                                    {% if display.hexagonal %}
-                                        top: -{{ row.height|div:2 }}px;
-                                    {% endif %}
-                                    width: 100%;">
+                            <img src="{% static 'games/img/' %}{{ texture.image }}"} style="
+                                position: absolute;
+                                opacity: {{ texture.opacity }};
+                                left: {{ texture.x }}%;
+                                width: 100%;">
                         {% endfor %}
 
                     </div>
 
                     {% if display.hexagonal %}
-                        <div class="tile" style="
+                        <div style="
+                                position: absolute;
                                 width: 0;
                                 left: {{ tile.offset }}px;
                                 top: {{ row.height }}px;
@@ -68,5 +69,41 @@
         </div>
 
     {% endfor %}
+
+    {% if display.selector %}
+        <div style="
+                position: absolute;
+                width: {{ display.selector.width }}px;
+                height: {{ display.selector.height }}px;
+                left: {{ display.selector.x }}px;
+                top: {{ display.selector.y }}px;
+                background: {{ display.selector.colour }};
+                opacity: {{ display.selector.opacity }};
+                z-index: 1000;
+                border-radius: 15px;">
+
+            {% for option in display.selector.options %}
+                <div onclick="clickSelector({{ option.id }})" style="
+                        position: absolute;
+                        width: {{ display.selector.height }}px;
+                        height: {{ display.selector.height }}px;
+                        left: {{ display.selector.height|mul:option.id }}px;
+                        background: {{ display.selector.colour }};
+                        border-radius: 15px;
+                        padding: 0px;">
+
+                    {% for texture in option.textures %}
+                        <img src="{% static 'games/img/' %}{{ texture.image }}"} style="
+                                position: absolute;
+                                opacity: {{ texture.opacity }};
+                                left: {{ texture.x }}%;
+                                width: 100%;">
+                    {% endfor %}
+
+                </div>
+            {% endfor %}
+
+        </div>
+    {% endif %}
 
 </div>
