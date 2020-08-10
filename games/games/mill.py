@@ -98,15 +98,15 @@ class Mill(Game):
             mill_x_friend = None
             mill_y_friend = None
             for neighbour in self.fetch_node(piece=piece).neighbours:
-                print(str(neighbour.x) + ' | ' + str(neighbour.y))
+                # print(str(neighbour.x) + ' | ' + str(neighbour.y))
                 if state.pieces[neighbour.x][neighbour.y]:
                     neighbour_piece = state.pieces[neighbour.x][neighbour.y]
                     if neighbour_piece.owner_id == state.turn.current_id:
-                        print('True')
+                        # print('True')
                         # these so called duplicates are actually not duplicates at all ...
                         if not mill_x_friend:
                             if neighbour_piece.x == piece.x:
-                                print('Make a friend in x')
+                                # print('Make a friend in x')
                                 mill_x_friend = neighbour_piece
                         elif neighbour_piece is not piece and mill_x_friend.x == neighbour_piece.x:
                             print([[mill_x_friend.x, mill_x_friend.y], [neighbour_piece.x, neighbour_piece.y]])
@@ -114,30 +114,30 @@ class Mill(Game):
 
                         if not mill_y_friend:
                             if neighbour_piece.y == piece.y:
-                                print('Make a friend in y')
+                                # print('Make a friend in y')
                                 mill_y_friend = neighbour_piece
                         elif neighbour_piece is not piece and mill_y_friend.y == neighbour_piece.y:
                             print([[mill_y_friend.x, mill_y_friend.y], [neighbour_piece.x, neighbour_piece.y]])
                             return True
 
                         for more_neighbour in self.fetch_node(piece=neighbour_piece).neighbours:
-                            print(str(more_neighbour.x) + ' | ' + str(more_neighbour.y))
+                            # print(str(more_neighbour.x) + ' | ' + str(more_neighbour.y))
                             if state.pieces[more_neighbour.x][more_neighbour.y]:
                                 neighbour_piece = state.pieces[more_neighbour.x][more_neighbour.y]
                                 if neighbour_piece.owner_id == state.turn.current_id and \
                                         (piece.x == neighbour_piece.x or piece.y == neighbour_piece.y) and \
                                         (neighbour_piece is not piece):
                                     print([[piece.x, piece.y], [neighbour_piece.x, neighbour_piece.y]])
-                                    print('True')
+                                    # print('True')
                                     return True
-                                else:
-                                    print('False')
-                            else:
-                                print('False')
-                    else:
-                        print('False')
-                else:
-                    print('False')
+                #                 else:
+                #                     print('False')
+                #             else:
+                #                 print('False')
+                #     else:
+                #         print('False')
+                # else:
+                #     print('False')
             return False
 
     graph = Graph()
@@ -240,13 +240,14 @@ class Mill(Game):
 
     def remove_piece(self, state, piece):
         state = state.remove_piece(piece)
-        state = state.add_score(state.turn.current_id, -1)
+        state = state.add_score(state.turn.next_id, -1)
         return state.end_turn()
 
     def action(self, state, action):
-        print([state.player_states[state.turn.next_id].score, state.player_states[state.turn.current_id].score],
+        print([state.turn.next_id, state.player_states[state.turn.next_id].score],
+              [state.turn.current_id, state.player_states[state.turn.current_id].score],
               state.turn.epoch)
-        if state.player_states[state.turn.next_id].score < 3 and state.turn.epoch > 0:
-            state = state.end_game(state.turn.current_id)
+        if state.player_states[state.turn.current_id].score < 3 and state.turn.epoch > 0:
+            state = state.end_game(state.turn.next_id)
 
         return state
