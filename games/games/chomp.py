@@ -19,6 +19,7 @@ class Chomp(Game):
     BACKGROUND = ChompBoard(['#5D4037', '#8D6E63'])
     SHAPE = Rectangle(6, 5)
     PLAYER_NAMES = ['Purple', 'Yellow']
+    INFO = 'https://en.wikipedia.org/wiki/Chomp'
 
     class ChompPiece(PieceType):
         ID = 0

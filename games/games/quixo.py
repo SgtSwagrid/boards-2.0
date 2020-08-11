@@ -9,6 +9,7 @@ class Quixo(TicTacToe):
     ID = 10
     NAME = 'Quixo'
     SHAPE = Rectangle(5, 5)
+    INFO = 'https://en.wikipedia.org/wiki/Tic-tac-toe_variants#Quixo'
 
     TARGET = 5
 

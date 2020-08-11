@@ -53,6 +53,7 @@ class Mill(Game):
     NAME = 'Mill'
     SHAPE = Rectangle(11, 11)
     PLAYER_NAMES = ['White', 'Black']
+    INFO = 'https://en.wikipedia.org/wiki/Nine_men%27s_morris'
 
     class Graph:
 

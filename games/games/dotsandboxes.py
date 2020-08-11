@@ -11,6 +11,7 @@ class DotsAndBoxes(Game):
     BACKGROUND = Gingham(['#FDCB6E', '#2F3640', '#FFEAA7'])
     SHAPE = Table(6, 6, cell_width=5, cell_height=5)
     PLAYER_NAMES = ['Red', 'Blue']
+    INFO = 'https://en.wikipedia.org/wiki/Dots_and_Boxes'
 
     class EdgePiece(PieceType):
         ID = 0

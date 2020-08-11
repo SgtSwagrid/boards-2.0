@@ -9,6 +9,7 @@ class TicTacToe(Game):
     NAME = 'Tic Tac Toe'
     SHAPE = Rectangle(3, 3)
     PLAYER_NAMES = ['Naughts', 'Crosses']
+    INFO = 'https://en.wikipedia.org/wiki/Tic-tac-toe'
 
     TARGET = 3
 

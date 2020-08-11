@@ -12,6 +12,7 @@ class Game:
     SHAPE = None
     MIN_PLAYERS, MAX_PLAYERS = 2, 2
     PLAYER_NAMES = [f'Player {i}' for i in range(1, 16 + 1)]
+    INFO = ''
 
     PIECES = []
     HANDLERS = []

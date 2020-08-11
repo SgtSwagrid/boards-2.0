@@ -11,6 +11,7 @@ class Reversi(Game):
     BACKGROUND = Checkerboard(['#27AE60', '#2ECC71'])
     SHAPE = Rectangle(8, 8)
     PLAYER_NAMES = ['White', 'Black']
+    INFO = 'https://en.wikipedia.org/wiki/Reversi'
 
     class ReversiPiece(PieceType):
         ID = 0

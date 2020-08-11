@@ -10,6 +10,7 @@ class Clobber(Game):
     BACKGROUND = Checkerboard(['#FFFFFF', '#F0F0F0'])
     SHAPE = Rectangle(5, 6)
     PLAYER_NAMES = ['White', 'Black']
+    INFO = 'https://en.wikipedia.org/wiki/Clobber'
 
     class ClobberDot(PieceType):
         ID = 0

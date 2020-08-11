@@ -10,6 +10,7 @@ class ConnectFour(TicTacToe):
     NAME = 'Connect Four'
     SHAPE = Rectangle(7, 6)
     PLAYER_NAMES = ['Yellow', 'Red']
+    INFO = 'https://en.wikipedia.org/wiki/Connect_Four'
 
     TARGET = 4
 

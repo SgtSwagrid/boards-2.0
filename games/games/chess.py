@@ -135,6 +135,7 @@ class Chess(Game):
     NAME = 'Chess'
     SHAPE = Rectangle(8, 8)
     PLAYER_NAMES = ['White', 'Black']
+    INFO = 'https://en.wikipedia.org/wiki/Chess'
 
     PIECES = [Pawn(), Rook(), Knight(), Bishop(), Queen(), King()]
     HANDLERS = [ChessMoveHandler(PIECES), PromotionHandler()]

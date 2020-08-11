@@ -23,6 +23,7 @@ class Shogi(Game):
     SHAPE = Rectangle(9, 9)
     # TODO if git problem replace Kanji with unicode
     PLAYER_NAMES = ['Sente 先手', 'Gote 後手']
+    INFO = 'https://en.wikipedia.org/wiki/Shogi'
 
     class OshoGyokusho(ShogiPieceType):
         # osho means King General; Gyokusho means Jeweled General
