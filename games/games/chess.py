@@ -21,8 +21,7 @@ class Pawn(PieceType):
         capture = abs(x_to - piece.x) == 1 and state.pieces[x_to][y_to] and \
                   y_to - piece.y == dir
 
-        return (normal or double or capture) and\
-            super().move_valid(state, piece, x_to, y_to)
+        return normal or double or capture
 
 
 class Rook(PieceType):
@@ -36,8 +35,7 @@ class Rook(PieceType):
         d = distance(piece.x, piece.y, x_to, y_to)
 
         return ((sx == 0) ^ (sy == 0)) and\
-            path(piece.x, piece.y, sx, sy, d, state.pieces) and\
-            super().move_valid(state, piece, x_to, y_to)
+            path(piece.x, piece.y, sx, sy, d, state.pieces)
 
 
 class Knight(PieceType):
@@ -48,8 +46,7 @@ class Knight(PieceType):
     def move_valid(self, state, piece, x_to, y_to):
 
         dx, dy = delta(piece.x, piece.y, x_to, y_to)
-        return ((dx == 1 and dy == 2) or (dx == 2 and dy == 1)) and\
-            super().move_valid(state, piece, x_to, y_to)
+        return (dx == 1 and dy == 2) or (dx == 2 and dy == 1)
 
 
 class Bishop(PieceType):
@@ -64,8 +61,7 @@ class Bishop(PieceType):
         d = distance(piece.x, piece.y, x_to, y_to)
 
         return (abs(dx) == abs(dy)) and\
-            path(piece.x, piece.y, sx, sy, d, state.pieces) and\
-            super().move_valid(state, piece, x_to, y_to)
+            path(piece.x, piece.y, sx, sy, d, state.pieces)
 
 
 class Queen(PieceType):
@@ -80,8 +76,7 @@ class Queen(PieceType):
         d = distance(piece.x, piece.y, x_to, y_to)
 
         return (((sx == 0) ^ (sy == 0)) or (abs(dx) == abs(dy))) and\
-            path(piece.x, piece.y, sx, sy, d, state.pieces) and\
-            super().move_valid(state, piece, x_to, y_to)
+            path(piece.x, piece.y, sx, sy, d, state.pieces)
 
 
 class King(PieceType):
@@ -91,8 +86,7 @@ class King(PieceType):
 
     def move_valid(self, state, piece, x_to, y_to):
 
-        return distance(piece.x, piece.y, x_to, y_to) == 1 and\
-            super().move_valid(state, piece, x_to, y_to)
+        return distance(piece.x, piece.y, x_to, y_to) == 1
 
 
 class ChessMoveHandler(MoveHandler):
@@ -105,11 +99,11 @@ class ChessMoveHandler(MoveHandler):
 
 class PromotionHandler(SelectHandler):
 
-    def show(self, state):
+    def show(self, state, event):
 
         return self.promotion(state) is not None
 
-    def selector(self, state):
+    def selector(self, state, event):
 
         promotion = self.promotion(state)
 
@@ -120,7 +114,7 @@ class PromotionHandler(SelectHandler):
             Piece(Queen(), state.turn.current_id)
         ], state, promotion.x, promotion.y, Chess().SHAPE)
 
-    def select(self, state, option):
+    def select(self, state, event, option):
 
         promotion = self.promotion(state)
         piece = Piece(Chess().PIECES[option.value],
@@ -147,7 +141,7 @@ class Chess(Game):
 
     def on_action(self, state):
 
-        if PromotionHandler().show(state): return state
+        if PromotionHandler().show(state, None): return state
         else: return state.end_turn()
 
     def initial_piece(self, num_players, x, y):

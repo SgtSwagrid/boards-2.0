@@ -89,6 +89,9 @@ class Selector:
         self.width = len(self.options) * size
         self.height = size
 
+        self.target_x = target_x
+        self.target_y = target_y
+
         target_y = shape.height - target_y - 1
 
         min_x = 0

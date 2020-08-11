@@ -15,7 +15,7 @@
 
             {% for tile in row.tiles %}
 
-                <div {% if event.active and not display.selector %}
+                <div {% if event.active %}
                         onclick="clickBoard({{ tile.x }}, {{ tile.y }},
                             {{ event.properties.first_selection.0 }},
                             {{ event.properties.first_selection.1 }})"
@@ -83,7 +83,9 @@
                 border-radius: 15px;">
 
             {% for option in display.selector.options %}
-                <div onclick="clickSelector({{ option.id }})" style="
+                <div onclick="clickSelector({{ option.id }},
+                            {{ display.selector.target_x }},
+                            {{ display.selector.target_y }})" style="
                         position: absolute;
                         width: {{ display.selector.height }}px;
                         height: {{ display.selector.height }}px;

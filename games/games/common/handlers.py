@@ -19,13 +19,13 @@ class Handler:
     def render(self, state, event, display):
         return display
 
-    def board_enabled(self, state):
-        return True
+    def disable_board(self, state, event):
+        return False
 
 
 class PlaceHandler(Handler):
 
-    EVENT = BoardEvent
+    EVENTS = [BoardEvent]
 
     def __init__(self, type, hints=True, icon=PLACE_ICON,
             can_capture_self=False, can_capture_enemy=False):
@@ -37,8 +37,6 @@ class PlaceHandler(Handler):
         self.can_capture_enemy = can_capture_enemy
 
     def apply(self, state, event):
-
-        if not state.game.board_enabled(state): return False, None, None
 
         in_bounds = state.game.SHAPE.in_bounds(event.x, event.y)
         piece = Piece(self.type, state.turn.current_id, event.x, event.y)
@@ -53,7 +51,7 @@ class PlaceHandler(Handler):
 
     def texture(self, state, event, x, y):
 
-        if self.hints and event.active and state.game.board_enabled(state):
+        if self.hints and event.active and state.game.board_enabled(state, event):
 
             piece = Piece(self.type, state.turn.current_id, x, y)
 
@@ -65,7 +63,8 @@ class PlaceHandler(Handler):
 
     def place_valid(self, state, piece):
 
-        return piece.owner_id == state.turn.current_id and\
+        return state.game.SHAPE.in_bounds(piece.x, piece.y) and\
+            piece.owner_id == state.turn.current_id and\
             not state.pieces[piece.x][piece.y] and \
             (self.can_capture_self or not state.friendly(piece.x, piece.y)) and\
             (self.can_capture_enemy or not state.enemy(piece.x, piece.y)) and\
@@ -78,7 +77,7 @@ class PlaceHandler(Handler):
 
 class MoveHandler(Handler):
 
-    EVENT = BoardEvent
+    EVENTS = [BoardEvent]
 
     def __init__(self, types=[], hints=True, icon=ATTACK_ICON,
             can_capture_self=False, can_capture_enemy=True):
@@ -90,8 +89,6 @@ class MoveHandler(Handler):
         self.can_capture_enemy=can_capture_enemy
 
     def apply(self, state, event):
-
-        if not state.game.board_enabled(state): return False, None, None
 
         in_bounds = state.game.SHAPE.in_bounds(event.x, event.y)
         clicked = state.pieces[event.x][event.y] if in_bounds else None
@@ -115,7 +112,7 @@ class MoveHandler(Handler):
 
     def texture(self, state, event, x, y):
 
-        if self.hints and event.active and state.game.board_enabled(state):
+        if self.hints and event.active and state.game.board_enabled(state, event):
 
             selected = event.properties.get_selection(state, 0)
 
@@ -129,7 +126,8 @@ class MoveHandler(Handler):
 
     def move_valid(self, state, piece, x_to, y_to):
 
-        return piece.owner_id == state.turn.current_id and\
+        return state.game.SHAPE.in_bounds(x_to, y_to) and\
+            piece.owner_id == state.turn.current_id and\
             (x_to != piece.x or y_to != piece.y) and\
             (self.can_capture_self or not state.friendly(x_to, y_to)) and\
             (self.can_capture_enemy or not state.enemy(x_to, y_to)) and\
@@ -148,7 +146,7 @@ class MoveHandler(Handler):
 
 class RemoveHandler(Handler):
 
-    EVENT = BoardEvent
+    EVENTS = [BoardEvent]
 
     def __init__(self, types=[], hints=True, icon=ATTACK_ICON,
             can_capture_self=True, can_capture_enemy=True):
@@ -160,8 +158,6 @@ class RemoveHandler(Handler):
         self.can_capture_enemy = can_capture_enemy
 
     def apply(self, state, event):
-
-        if not state.game.board_enabled(state): return False, None, None
 
         in_bounds = state.game.SHAPE.in_bounds(event.x, event.y)
         piece = state.pieces[event.x][event.y] if in_bounds else None
@@ -178,7 +174,7 @@ class RemoveHandler(Handler):
 
     def texture(self, state, event, x, y):
 
-        if self.hints and event.active and state.game.board_enabled(state):
+        if self.hints and event.active and state.game.board_enabled(state, event):
 
             piece = state.pieces[x][y]
 
@@ -200,34 +196,100 @@ class RemoveHandler(Handler):
 
 class SelectHandler(Handler):
 
-    EVENT = SelectEvent
+    EVENTS = [SelectEvent]
 
     def apply(self, state, event):
 
-        if self.show(state) and 0 <= event.option_id\
-                < len((selector := self.selector(state)).options):
+        if self.show(state, event) and 0 <= event.option_id\
+                < len((selector := self.selector(state, event)).options):
 
             state = state.push_action(SelectAction(event.option_id))
-            state = self.select(state, selector.options[event.option_id])
+            state = self.select(state, event, selector.options[event.option_id])
             return True, state, DisplayProperties()
 
         return False, None, None
 
     def render(self, state, event, display):
 
-        if event.active and self.show(state):
-            return display.show_selector(self.selector(state))
+        if event.active and self.show(state, event):
+            return display.show_selector(self.selector(state, event))
 
         return display
 
-    def board_enabled(self, state):
-        return not self.show(state)
+    def disable_board(self, state, event):
+        return self.show(state, event)
 
-    def show(self, state):
+    def show(self, state, event):
         return False
 
-    def selector(self, state):
+    def selector(self, state, event):
         return None
 
-    def select(self, state, option):
+    def select(self, state, event, option):
         return state
+
+
+class MultiPlaceHandler(PlaceHandler, SelectHandler):
+
+    EVENTS = [BoardEvent, SelectEvent]
+
+    def __init__(self, types, shape, hints=True, icon=PLACE_ICON,
+            can_capture_self=False, can_capture_enemy=False):
+
+        super().__init__(None, hints, icon,
+            can_capture_self, can_capture_enemy)
+        self.types = types
+        self.shape = shape
+
+    def apply(self, state, event):
+
+        if isinstance(event, BoardEvent):
+
+            in_bounds = state.game.SHAPE.in_bounds(event.x, event.y)
+            placeable = self.placeable(state, event.x, event.y)
+
+            if event.properties.first_selection() == (event.x, event.y):
+                return True, None, DisplayProperties()
+
+            elif in_bounds and event.active and any(placeable):
+                return True, None, DisplayProperties([(event.x, event.y)])
+
+        elif isinstance(event, SelectEvent):
+            return SelectHandler.apply(self, state, event)
+
+        return False, None, None
+
+    def texture(self, state, event, x, y):
+
+        if self.hints and event.active and state.game.board_enabled(state, event):
+
+            if any(self.placeable(state, x, y)):
+                return self.icon
+
+        return []
+
+    def placeable(self, state, x, y):
+
+        pieces = [Piece(t, state.turn.current_id, x, y) for t in self.types]
+        return [p for p in pieces if self.place_valid(state, p)]
+
+    def show(self, state, event):
+
+        x, y = event.properties.first_selection()
+        return any(self.placeable(state, x, y))
+
+    def selector(self, state, event):
+
+        x, y = event.properties.first_selection()
+        placeable = self.placeable(state, x, y)
+        return PieceSelector(placeable, state, x, y, self.shape)
+
+    def select(self, state, event, option):
+
+        x, y = event.properties.first_selection()
+        type = state.game.PIECES[option.value]
+        piece = Piece(type, state.turn.current_id, x, y)
+        return self.place_piece(state, piece)
+
+    def disable_board(self, state, event):
+        return False

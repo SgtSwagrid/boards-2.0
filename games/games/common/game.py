@@ -21,10 +21,10 @@ class Game:
 
     def on_setup(self, num_players):
 
-        def piece_at(piece, x, y):
+        def at(piece, x, y):
             return piece.at(x, y) if piece else None
 
-        pieces = [[piece_at(self.initial_piece(num_players, x, y), x, y)
+        pieces = [[at(self.initial_piece(num_players, x, y), x, y)
             for y in range(0, self.SHAPE.height)]
             for x in range(0, self.SHAPE.width)]
 
@@ -35,8 +35,11 @@ class Game:
 
     def on_event(self, state, event):
 
+        if not self.board_enabled(state, event) and isinstance(event, BoardEvent):
+            return None, DisplayProperties()
+
         for handler in self.HANDLERS:
-            if isinstance(event, handler.EVENT):
+            if any(isinstance(event, e) for e in handler.EVENTS):
 
                 consumed, result, properties = handler.apply(state, event)
                 if consumed:
@@ -101,8 +104,8 @@ class Game:
 
         return textures
 
-    def board_enabled(self, state):
-        return all(h.board_enabled(state) for h in self.HANDLERS)
+    def board_enabled(self, state, event):
+        return not any(h.disable_board(state, event) for h in self.HANDLERS)
 
 
 class PieceType:
@@ -120,8 +123,7 @@ class PieceType:
         return self.COLOURS[piece.owner_id]
 
     def place_valid(self, state, piece):
-        return piece.owner_id == state.turn.current_id and\
-            not state.pieces[piece.x][piece.y]
+        return True
 
     def place_piece(self, state, piece):
         return state.place_piece(piece)
