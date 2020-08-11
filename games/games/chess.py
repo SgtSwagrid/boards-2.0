@@ -125,7 +125,7 @@ class PromotionHandler(SelectHandler):
 
         player_id = state.turn.current_id
         row = [7, 0][player_id]
-        pawns = state.find_pieces(player_id, Pawn, y=row)
+        pawns = state.find_pieces(player_id, Pawn(), y=row)
         return pawns[0] if pawns else None
 
 
@@ -160,7 +160,7 @@ class Chess(Game):
 
     def check(self, state):
 
-        king = state.find_pieces(state.turn.current_id, King)[0]
+        king = state.find_pieces(state.turn.current_id, King())[0]
         next_state = state.end_turn()
         return any(piece.type.move_valid(next_state, piece, king.x, king.y)
             for piece in state.find_pieces(state.turn.next_id))

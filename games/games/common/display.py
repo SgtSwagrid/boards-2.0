@@ -1,4 +1,5 @@
 import copy
+import math
 
 class Display:
 
@@ -66,13 +67,9 @@ class Tile:
 
 class Texture:
 
-    def __init__(self, image, opacity=1.0, x=0, y=0, width=100, height=100):
+    def __init__(self, image, opacity=1.0):
         self.image = image
         self.opacity = opacity
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
 
     def set_opacity(self, opacity):
         texture = copy.deepcopy(self)

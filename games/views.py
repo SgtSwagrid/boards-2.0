@@ -13,7 +13,7 @@ def browse_view(request):
 
     page = int(request.GET['page']) if 'page' in request.GET else 1
     start = (page - 1) * boards_per_page
-    end = start + boards_per_page - 1
+    end = start + boards_per_page
 
     boards = BoardModel.boards.all()
     pages = math.ceil(len(boards) / boards_per_page)

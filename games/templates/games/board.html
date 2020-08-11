@@ -44,8 +44,11 @@
                             <img src="{% static 'games/img/' %}{{ texture.image }}"} style="
                                 position: absolute;
                                 opacity: {{ texture.opacity }};
-                                left: {{ texture.x }}%;
-                                width: 100%;">
+                                width: 100%;
+                                z-index: 900;
+                                {% if display.hexagonal %}
+                                    top: -{{ row.height|div:2 }}px;
+                                {% endif %}">
                         {% endfor %}
 
                     </div>

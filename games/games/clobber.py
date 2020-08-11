@@ -19,7 +19,7 @@ class Clobber(Game):
     PIECES = [ClobberDot()]
     HANDLERS = [MoveHandler()]
 
-    def piece(self, num_players, x, y):
+    def initial_piece(self, num_players, x, y):
         if (x+y) % 2 == 0:
             return Piece(self.ClobberDot(), 0, x, y)  # White
         else:
@@ -36,11 +36,12 @@ class Clobber(Game):
 
     def action(self, state, action):
         game_finished = not any(self.has_move(state, piece_e)
-                                for piece_e in state.find_pieces(player_id=state.turn.next_id))
+            for piece_e in state.find_pieces(state.turn.next_id))
 
-        return state.end_turn() if not game_finished else state.end_game(winner_id=state.turn.current_id)
+        return state.end_turn() if not game_finished else\
+            state.end_game(state.turn.current_id)
 
     def has_move(self, state, piece):
         return any(self.move_valid(state, piece, piece.x + dx, piece.y + dy)
-                   for dx in [-1, 0, 1]
-                   for dy in [-1, 0, 1])
+            for dx in [-1, 0, 1]
+            for dy in [-1, 0, 1])

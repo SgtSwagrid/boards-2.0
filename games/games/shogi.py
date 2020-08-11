@@ -17,6 +17,7 @@ class ShogiPieceType(PieceType):
 
 
 class Shogi(Game):
+
     ID = 11
     NAME = 'Shogi'
     BACKGROUND = Checkerboard(['#FDCB6E', '#FFEAA7'])
@@ -70,7 +71,7 @@ class Shogi(Game):
     # TODO drop pieces rule when engine feature
     HANDLERS = [MoveHandler()]
 
-    def piece(self, num_players, x, y):
+    def initial_piece(self, num_players, x, y):
         if y in (0, 8):
             player_id = 0 if y == 0 else 1
 

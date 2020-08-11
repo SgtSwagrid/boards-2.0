@@ -27,7 +27,7 @@ class Reversi(Game):
             .add_score(0, 2)\
             .add_score(1, 2)
 
-    def piece(self, num_players, x, y):
+    def initial_piece(self, num_players, x, y):
         x_mid = self.SHAPE.width // 2 - 1
         y_mid = self.SHAPE.height // 2 - 1
 

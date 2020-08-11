@@ -79,7 +79,7 @@ class State:
 
     def find_pieces(self, player_id=-1, type=-1, x=-1, y=-1):
         return [piece for col in self.pieces for piece in col if piece and\
-            (type == -1 or isinstance(piece.type, type)) and\
+            (type == -1 or piece.type.ID == type.ID) and\
             (player_id == -1 or piece.owner_id == player_id) and\
             (x == -1 or piece.x == x) and (y == -1 or piece.y == y)]
 

@@ -56,7 +56,7 @@ class Amazons(Game):
             return state_next_turn if state.game.can_move(state_next_turn) \
                 else state_next_turn.end_game(winner_id=state.turn.current_id)
 
-    def piece(self, num_players, x, y):
+    def initial_piece(self, num_players, x, y):
         # Top and bottom arrangement
         tw = self.SHAPE.width // 3
         th = self.SHAPE.height // 3

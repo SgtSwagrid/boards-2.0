@@ -27,7 +27,7 @@ class Quixo(TicTacToe):
     PIECES = [PlayerPiece(), EmptyPiece()]
     HANDLERS = [MoveHandler(hints=True)]
 
-    def piece(self, num_players, x, y):
+    def initial_piece(self, num_players, x, y):
         return Piece(self.EmptyPiece(), owner_id=-1)
 
     def move_valid(self, state, piece, x_to, y_to):
