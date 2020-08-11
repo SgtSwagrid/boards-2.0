@@ -3,154 +3,127 @@ from .common.handlers import *
 from .common.shapes import *
 
 
-class Chess(Game):
+class Pawn(PieceType):
+
+    ID = 0
+    TEXTURES = ['chess/white_pawn.png', 'chess/black_pawn.png']
+
+    def move_valid(self, state, piece, x_to, y_to):
+
+        dir = [1, -1][piece.owner_id]
+        home = piece.y == [1, 6][piece.owner_id]
+
+        straight = x_to == piece.x and not state.pieces[x_to][y_to]
+        normal = straight and y_to - piece.y == dir
+        double = straight and y_to - piece.y == 2 * dir and home and \
+                 not state.pieces[piece.x][piece.y + dir]
+
+        capture = abs(x_to - piece.x) == 1 and state.pieces[x_to][y_to] and \
+                  y_to - piece.y == dir
+
+        return (normal or double or capture) and\
+            super().move_valid(state, piece, x_to, y_to)
+
+
+class Rook(PieceType):
+
+    ID = 1
+    TEXTURES = ['chess/white_rook.png', 'chess/black_rook.png']
+
+    def move_valid(self, state, piece, x_to, y_to):
+
+        sx, sy = direction(piece.x, piece.y, x_to, y_to)
+        d = distance(piece.x, piece.y, x_to, y_to)
+
+        return ((sx == 0) ^ (sy == 0)) and\
+            path(piece.x, piece.y, sx, sy, d, state.pieces) and\
+            super().move_valid(state, piece, x_to, y_to)
+
+
+class Knight(PieceType):
 
     ID = 2
-    NAME = 'Chess'
-    SHAPE = Rectangle(8, 8)
-    PLAYER_NAMES = ['White', 'Black']
+    TEXTURES = ['chess/white_knight.png', 'chess/black_knight.png']
 
-    class Pawn(PieceType):
+    def move_valid(self, state, piece, x_to, y_to):
 
-        ID = 0
-        TEXTURES = ['chess/white_pawn.png', 'chess/black_pawn.png']
+        dx, dy = delta(piece.x, piece.y, x_to, y_to)
+        return ((dx == 1 and dy == 2) or (dx == 2 and dy == 1)) and\
+            super().move_valid(state, piece, x_to, y_to)
 
-        def move_valid(self, state, piece, x_to, y_to):
 
-            dir = [1, -1][piece.owner_id]
-            home = piece.y == [1, 6][piece.owner_id]
+class Bishop(PieceType):
 
-            straight = x_to == piece.x and not state.pieces[x_to][y_to]
-            normal = straight and y_to - piece.y == dir
-            double = straight and y_to - piece.y == 2 * dir and home and\
-                not state.pieces[piece.x][piece.y + dir]
+    ID = 3
+    TEXTURES = ['chess/white_bishop.png', 'chess/black_bishop.png']
 
-            capture = abs(x_to - piece.x) == 1 and state.pieces[x_to][y_to] and\
-                y_to - piece.y == dir
+    def move_valid(self, state, piece, x_to, y_to):
 
-            return normal or double or capture
+        dx, dy = delta(piece.x, piece.y, x_to, y_to)
+        sx, sy = direction(piece.x, piece.y, x_to, y_to)
+        d = distance(piece.x, piece.y, x_to, y_to)
 
-    class Rook(PieceType):
+        return (abs(dx) == abs(dy)) and\
+            path(piece.x, piece.y, sx, sy, d, state.pieces) and\
+            super().move_valid(state, piece, x_to, y_to)
 
-        ID = 1
-        TEXTURES = ['chess/white_rook.png', 'chess/black_rook.png']
 
-        def move_valid(self, state, piece, x_to, y_to):
+class Queen(PieceType):
 
-            sx, sy = direction(piece.x, piece.y, x_to, y_to)
-            d = distance(piece.x, piece.y, x_to, y_to)
+    ID = 4
+    TEXTURES = ['chess/white_queen.png', 'chess/black_queen.png']
 
-            return ((sx == 0) ^ (sy == 0)) and\
-                path(piece.x, piece.y, sx, sy, d, state.pieces)
+    def move_valid(self, state, piece, x_to, y_to):
 
-    class Knight(PieceType):
+        dx, dy = delta(piece.x, piece.y, x_to, y_to)
+        sx, sy = direction(piece.x, piece.y, x_to, y_to)
+        d = distance(piece.x, piece.y, x_to, y_to)
 
-        ID = 2
-        TEXTURES = ['chess/white_knight.png', 'chess/black_knight.png']
+        return (((sx == 0) ^ (sy == 0)) or (abs(dx) == abs(dy))) and\
+            path(piece.x, piece.y, sx, sy, d, state.pieces) and\
+            super().move_valid(state, piece, x_to, y_to)
 
-        def move_valid(self, state, piece, x_to, y_to):
 
-            dx, dy = delta(piece.x, piece.y, x_to, y_to)
-            return (dx == 1 and dy == 2) or (dx == 2 and dy == 1)
+class King(PieceType):
 
-    class Bishop(PieceType):
+    ID = 5
+    TEXTURES = ['chess/white_king.png', 'chess/black_king.png']
 
-        ID = 3
-        TEXTURES = ['chess/white_bishop.png', 'chess/black_bishop.png']
+    def move_valid(self, state, piece, x_to, y_to):
 
-        def move_valid(self, state, piece, x_to, y_to):
+        return distance(piece.x, piece.y, x_to, y_to) == 1 and\
+            super().move_valid(state, piece, x_to, y_to)
 
-            dx, dy = delta(piece.x, piece.y, x_to, y_to)
-            sx, sy = direction(piece.x, piece.y, x_to, y_to)
-            d = distance(piece.x, piece.y, x_to, y_to)
 
-            return (abs(dx) == abs(dy)) and\
-                   path(piece.x, piece.y, sx, sy, d, state.pieces)
-
-    class Queen(PieceType):
-
-        ID = 4
-        TEXTURES = ['chess/white_queen.png', 'chess/black_queen.png']
-
-        def move_valid(self, state, piece, x_to, y_to):
-
-            dx, dy = delta(piece.x, piece.y, x_to, y_to)
-            sx, sy = direction(piece.x, piece.y, x_to, y_to)
-            d = distance(piece.x, piece.y, x_to, y_to)
-
-            return (((sx == 0) ^ (sy == 0)) or (abs(dx) == abs(dy))) and\
-                   path(piece.x, piece.y, sx, sy, d, state.pieces)
-
-    class King(PieceType):
-
-        ID = 5
-        TEXTURES = ['chess/white_king.png', 'chess/black_king.png']
-
-        def move_valid(self, state, piece, x_to, y_to):
-            return distance(piece.x, piece.y, x_to, y_to) == 1
-
-    PIECES = [Pawn(), Rook(), Knight(), Bishop(), Queen(), King()]
-    HANDLERS = [MoveHandler(), SelectHandler()]
-
-    def piece(self, num_players, x, y):
-
-        if y in (0, 7):
-            player_id = 0 if y == 0 else 1
-
-            if x in (0, 7): return Piece(self.Rook(), player_id)
-            elif x in (1, 6): return Piece(self.Knight(), player_id)
-            elif x in (2, 5): return Piece(self.Bishop(), player_id)
-            elif x == 3: return Piece(self.Queen(), player_id)
-            elif x == 4: return Piece(self.King(), player_id)
-
-        elif y == 1: return Piece(self.Pawn(), 0)
-        elif y == 6: return Piece(self.Pawn(), 1)
-
-        else: return None
+class ChessMoveHandler(MoveHandler):
 
     def move_valid(self, state, piece, x_to, y_to):
 
         return super().move_valid(state, piece, x_to, y_to) and\
-            not self.check(self.move_piece(state, piece, x_to, y_to),
-                state.turn.current_id)
+            not Chess().check(self.move_piece(state, piece, x_to, y_to))
 
-    def check(self, state, player_id):
-        king = state.find_pieces(player_id, self.King)[0]
-        return self.attacking(state, (player_id + 1) % 2, king.x, king.y)
 
-    #def check_mate(self, state, player):
-    #    return not any(self.move_valid(state, piece, x, y)
-    #        for x in range(0, self.width)
-    #        for y in range(0, self.height)
-    #        for piece in state.find_pieces(player_id))
+class PromotionHandler(SelectHandler):
 
-    def attacking(self, state, player_id, x, y):
-        return any(piece.type.move_valid(state, piece, x, y)
-            for piece in state.find_pieces(player_id))
+    def show(self, state):
 
-    def action(self, state, action):
-
-        promotion = self.promotion(state)
-
-        if not promotion or state.turn.stage == 1:
-            return state.end_turn()
-        else: return state.end_stage()
+        return self.promotion(state) is not None
 
     def selector(self, state):
 
-        if promotion := self.promotion(state):
+        promotion = self.promotion(state)
 
-            return PieceSelector([
-                Piece(self.Rook(), state.turn.current_id),
-                Piece(self.Knight(), state.turn.current_id),
-                Piece(self.Bishop(), state.turn.current_id),
-                Piece(self.Queen(), state.turn.current_id)
-            ], state, promotion.x, promotion.y, self.SHAPE)
+        return PieceSelector([
+            Piece(Rook(), state.turn.current_id),
+            Piece(Knight(), state.turn.current_id),
+            Piece(Bishop(), state.turn.current_id),
+            Piece(Queen(), state.turn.current_id)
+        ], state, promotion.x, promotion.y, Chess().SHAPE)
 
-    def option(self, state, selector, option):
+    def select(self, state, option):
 
         promotion = self.promotion(state)
-        piece = Piece(self.PIECES[option.value],
+        piece = Piece(Chess().PIECES[option.value],
             state.turn.current_id, promotion.x, promotion.y)
         return state.place_piece(piece)
 
@@ -158,8 +131,51 @@ class Chess(Game):
 
         player_id = state.turn.current_id
         row = [7, 0][player_id]
-        pawns = state.find_pieces(player_id, self.Pawn, y=row)
+        pawns = state.find_pieces(player_id, Pawn, y=row)
         return pawns[0] if pawns else None
+
+
+class Chess(Game):
+
+    ID = 2
+    NAME = 'Chess'
+    SHAPE = Rectangle(8, 8)
+    PLAYER_NAMES = ['White', 'Black']
+
+    PIECES = [Pawn(), Rook(), Knight(), Bishop(), Queen(), King()]
+    HANDLERS = [ChessMoveHandler(PIECES), PromotionHandler()]
+
+    def on_action(self, state):
+
+        if PromotionHandler().show(state): return state
+        else: return state.end_turn()
+
+    def initial_piece(self, num_players, x, y):
+
+        if y in (0, 7):
+            player_id = 0 if y == 0 else 1
+
+            if x in (0, 7): return Piece(Rook(), player_id)
+            elif x in (1, 6): return Piece(Knight(), player_id)
+            elif x in (2, 5): return Piece(Bishop(), player_id)
+            elif x == 3: return Piece(Queen(), player_id)
+            elif x == 4: return Piece(King(), player_id)
+
+        elif y in (1, 6): return Piece(Pawn(), 0 if y == 1 else 1)
+
+    def check(self, state):
+
+        king = state.find_pieces(state.turn.current_id, King)[0]
+        next_state = state.end_turn()
+        return any(piece.type.move_valid(next_state, piece, king.x, king.y)
+            for piece in state.find_pieces(state.turn.next_id))
+
+    #def check_mate(self, state, player):
+    #    return not any(self.move_valid(state, piece, x, y)
+    #        for x in range(0, self.width)
+    #        for y in range(0, self.height)
+    #        for piece in state.find_pieces(player_id))
+
 
 def distance(x_from, y_from, x_to, y_to):
     return max(abs(x_to - x_from), abs(y_to - y_from))

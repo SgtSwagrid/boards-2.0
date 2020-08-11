@@ -1,8 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-
-from games.games.common.action import *
-from games.games.common.games import games
+from games.games.common.actions import *
+from games.games.common.games import *
 from datetime import time
 import random
 
@@ -13,7 +12,7 @@ class BoardManager(models.Manager):
     def create(self, game):
 
         code = hex(random.randint(0, 1048575))[2:].zfill(5).upper()
-        state = game.setup(game.MAX_PLAYERS)
+        state = game.on_setup(game.MAX_PLAYERS)
         state_model = StateModel.states.create(state, previous=None)
         board = super().create(game_id=game.ID, code=code, state=state_model)
         return board
@@ -38,7 +37,7 @@ class BoardModel(models.Model):
 
     class Meta: ordering = ['-time']
 
-    def __str__(self): return self.code + " " + self.game().name
+    def __str__(self): return self.code + " " + self.game().NAME
 
     def set_state(self, state):
         self.state = StateModel.states.create(state, previous=self.state)
@@ -72,7 +71,7 @@ class BoardModel(models.Model):
     def start(self):
         self.status = 1
         self.state.delete()
-        state = self.game().setup(len(self.players()))
+        state = self.game().on_setup(len(self.players()))
         self.state = StateModel.states.create(state, previous=None)
         self.save()
 

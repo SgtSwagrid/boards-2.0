@@ -33,3 +33,10 @@ class DisplayProperties:
 
     def selected(self, x, y):
         return any((x, y) == s for s in self.selections)
+
+    def get_selection(self, state, id):
+
+        if 0 <= id < len(self.selections):
+            pos = self.selections[id]
+            if state.game.SHAPE.in_bounds(pos[0], pos[1]):
+                return state.pieces[pos[0]][pos[1]]

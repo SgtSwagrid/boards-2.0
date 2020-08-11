@@ -4,7 +4,7 @@ import math
 from .models import *
 from .consumers import *
 from .games.common.games import *
-from .games.common.event import *
+from .games.common.events import *
 
 
 def browse_view(request):
@@ -85,19 +85,19 @@ def board_view(request, board_code):
     selections = [(sx, sy)] if sx != -1 else []
     properties = DisplayProperties(selections)
 
-    if cx != -1 and active and not game.selector(state):
+    if cx != -1 and active:
         event = BoardEvent(properties, player_id, active, cx, cy)
-        result, properties = game.event(state, event)
+        result, properties = game.on_event(state, event)
 
         if result:
             board.set_state(result)
             notify_board(board)
             state = result
 
-    if 'option' in request.POST and active and game.selector(state):
+    if 'option' in request.POST and active:
         option_id = int(request.POST['option'])
         event = SelectEvent(properties, player_id, active, option_id)
-        result, properties = game.event(state, event)
+        result, properties = game.on_event(state, event)
 
         if result:
             board.set_state(result)
@@ -106,7 +106,7 @@ def board_view(request, board_code):
 
     active = active and board.current(player)
     event = RenderEvent(properties, player_id, active)
-    display = game.render(state, event).scale(800, 800)
+    display = game.on_render(state, event).scale(800, 800)
 
     return render(request, 'games/board.html', {
         'display': display,

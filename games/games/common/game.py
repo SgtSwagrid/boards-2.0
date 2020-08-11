@@ -1,6 +1,6 @@
 from .state import *
 from .display import *
-from .event import *
+from .events import *
 from .backgrounds import *
 
 
@@ -19,74 +19,36 @@ class Game:
     SELECTED_COLOUR = '#6A89CC'
     MODIFIED_COLOUR = '#74B9FF'
 
-    def place_valid(self, state, piece):
-
-        return piece and self.SHAPE.in_bounds(piece.x, piece.y) and\
-            piece.owner_id == state.turn.current_id and\
-            not state.pieces[piece.x][piece.y] and\
-            piece.type.place_valid(state, piece)
-
-    def place_piece(self, state, piece):
-        return piece.type.place_piece(state, piece)
-
-    def move_valid(self, state, piece, x_to, y_to):
-
-        return piece and self.SHAPE.in_bounds(piece.x, piece.y) and \
-            self.SHAPE.in_bounds(x_to, y_to) and \
-            piece.owner_id == state.turn.current_id and\
-            (x_to != piece.x or y_to != piece.y) and\
-            not state.friendly(x_to, y_to) and\
-            piece.type.move_valid(state, piece, x_to, y_to)
-
-    def move_piece(self, state, piece, x_to, y_to):
-        return piece.type.move_piece(state, piece, x_to, y_to)
-
-    def remove_valid(self, state, piece):
-        return piece and self.SHAPE.in_bounds(piece.x, piece.y) and\
-            piece.type.remove_valid(state, piece)
-
-    def remove_piece(self, state, piece):
-        return piece.type.remove_piece(state, piece)
-
-    def moveable(self, state, piece):
-        return piece and piece.owner_id == state.turn.current_id and\
-               piece.type.moveable(state, piece)
-
-    def selector(self, state):
-        return None
-
-    def option(self, state, selector, option):
-        return state
-
-    def setup(self, num_players):
+    def on_setup(self, num_players):
 
         def piece_at(piece, x, y):
             return piece.at(x, y) if piece else None
 
-        pieces = [[piece_at(self.piece(num_players, x, y), x, y)
+        pieces = [[piece_at(self.initial_piece(num_players, x, y), x, y)
             for y in range(0, self.SHAPE.height)]
             for x in range(0, self.SHAPE.width)]
 
         return State(game=self, num_players=num_players, pieces=pieces)
 
-    def piece(self, num_players, x, y):
+    def initial_piece(self, num_players, x, y):
         return None
 
-    def event(self, state, event):
+    def on_event(self, state, event):
 
         for handler in self.HANDLERS:
-            if isinstance(event, handler.event):
+            if isinstance(event, handler.EVENT):
 
                 consumed, result, properties = handler.apply(state, event)
                 if consumed:
-                    return result, properties
+                    if result: return self.on_action(result), properties
+                    else: return None, properties
 
         return None, DisplayProperties()
 
-    def action(self, state, action):
+    def on_action(self, state):
         return state.end_turn()
 
-    def render(self, state, event):
+    def on_render(self, state, event):
 
         display = Display([self.row(state, event, y)
             for y in range(0, self.SHAPE.height)], self.SHAPE.hexagonal)
@@ -139,6 +101,9 @@ class Game:
 
         return textures
 
+    def board_enabled(self, state):
+        return all(h.board_enabled(state) for h in self.HANDLERS)
+
 
 class PieceType:
 
@@ -155,22 +120,20 @@ class PieceType:
         return self.COLOURS[piece.owner_id]
 
     def place_valid(self, state, piece):
-        return False
+        return piece.owner_id == state.turn.current_id and\
+            not state.pieces[piece.x][piece.y]
 
     def place_piece(self, state, piece):
         return state.place_piece(piece)
 
     def move_valid(self, state, piece, x_to, y_to):
-        return False
+        return True
 
     def move_piece(self, state, piece, x_to, y_to):
         return state.move_piece(piece, x_to, y_to)
 
     def remove_valid(self, state, piece):
-        return False
+        return True
 
     def remove_piece(self, state, piece):
         return state.remove_piece(piece)
-
-    def moveable(self, state, piece):
-        return True
