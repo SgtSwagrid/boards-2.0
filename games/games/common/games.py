@@ -7,6 +7,8 @@ from games.games.amazons import Amazons
 from games.games.dotsandboxes import DotsAndBoxes
 from games.games.chomp import Chomp
 from games.games.clobber import Clobber
+from games.games.quixo import Quixo
+from games.games.shogi import Shogi
 
 games = {
     TicTacToe().ID: TicTacToe(),
@@ -17,5 +19,7 @@ games = {
     Amazons().ID: Amazons(),
     DotsAndBoxes().ID: DotsAndBoxes(),
     Chomp().ID: Chomp(),
-    Clobber().ID: Clobber()
+    Clobber().ID: Clobber(),
+    Quixo().ID: Quixo(),
+    Shogi().ID: Shogi()
 }
