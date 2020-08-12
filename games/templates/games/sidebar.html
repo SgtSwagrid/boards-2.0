@@ -139,8 +139,6 @@
                 </h6>
             {% endif %}
             <br><br>
-        {% else %}
-            <h6 class="medium-text white-text">Waiting...</h6>
         {% endif %}
 
     {% elif board.status == 1 %}
@@ -158,13 +156,6 @@
             {% endif %}
         <br><br>
         {% endif %}
-        <h6 class="medium-text white-text">
-            {% if turn.order != this_player.order %}
-                {{ turn.user }}'s Turn
-            {% else %}
-                Your Turn
-            {% endif %}
-        </h6>
 
     {% elif board.status == 2 %}
         {% if this_player %}
@@ -181,16 +172,7 @@
             </a>
             <br><br>
         {% endif %}
-        <h6 class="medium-text white-text">
-            {% if winner %}
-                {% if winner.order != this_player.order %}
-                    {{ winner.user }} Won
-                {% else %}
-                    You Won
-                {% endif %}
-            {% else %}
-                Draw
-            {% endif %}
-        </h6>
     {% endif %}
+
+    <h6 class="medium-text white-text">{{ status }}</h6>
 </div>

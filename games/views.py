@@ -19,7 +19,10 @@ def browse_view(request):
     pages = math.ceil(len(boards) / boards_per_page)
 
     return render(request, 'games/browse.html', {
-        'boards': boards[start:end],
+        'boards': [{
+            'board': board,
+            'status': status(board, request.user)
+         } for board in boards[start:end]],
         'page': page,
         'pages': range(1, pages + 1)
     })
@@ -78,7 +81,7 @@ def board_view(request, board_code):
     if 'sx' in request.POST:
         sx, sy = int(request.POST['sx']), int(request.POST['sy'])
 
-    active = board.status == 1 and board.current(player)\
+    active = board.status == 1 and board.is_current(player)\
         and state_model == board.state
     player_id = player.order if player else -1
 
@@ -104,7 +107,7 @@ def board_view(request, board_code):
             notify_board(board)
             state = result
 
-    active = active and board.current(player)
+    active = active and board.is_current(player)
     event = RenderEvent(properties, player_id, active)
     display = game.on_render(state, event).scale(800, 800)
 
@@ -162,7 +165,8 @@ def sidebar_view(request, board_code):
         'this_player': board.player(request.user),
         'previous': state_model.previous,
         'next': StateModel.states.filter(previous=state_model).first(),
-        'current': board.state
+        'current': board.state,
+        'status': status(board, request.user)
     })
 
 def rematch_view(request, board_code):
@@ -211,3 +215,46 @@ def setup(request, board):
         if 'transfer' in request.POST and other_player and leader:
             other_player.transfer()
             notify_board(board)
+
+def status(board, user):
+
+    game = board.game()
+    player = board.player(user)
+    num_players = len(board.players())
+    current = board.current()
+    winner = board.winner()
+
+    if board.status == 0:
+
+        if num_players < game.MIN_PLAYERS:
+            return 'Awaiting Players'
+
+        elif player and player.leader:
+            return ''
+
+        elif player:
+            return 'Ready'
+
+        elif num_players >= game.MAX_PLAYERS:
+            return 'Game Full'
+
+        else: return 'Pending'
+
+    elif board.status == 1:
+
+        if player == current:
+            return 'Your Turn'
+
+        else: return current.user.username + '\'s Turn'
+
+    elif board.status == 2:
+
+        if player == winner:
+            return 'You Won'
+
+        elif winner:
+            return winner.user.username + ' Won'
+
+        else: return 'Draw'
+
+    else: return 'Invalid'

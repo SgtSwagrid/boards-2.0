@@ -44,7 +44,7 @@ class BoardModel(models.Model):
         if self.state.outcome != -2: self.status = 2
         self.save()
 
-    def current(self, player):
+    def is_current(self, player):
         return player is not None and player.order == self.state.current
 
     def players(self):
@@ -56,6 +56,10 @@ class BoardModel(models.Model):
 
     def game(self):
         return games[self.game_id]
+
+    def current(self):
+        return self.players()[self.state.current]\
+            if self.state.outcome == -2 else None
 
     def winner(self):
         return self.players()[self.state.outcome]\
