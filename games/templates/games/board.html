@@ -73,27 +73,27 @@
 
     {% endfor %}
 
-    {% if display.selector %}
+    {% for selector in display.selectors %}
         <div style="
                 position: absolute;
-                width: {{ display.selector.width }}px;
-                height: {{ display.selector.height }}px;
-                left: {{ display.selector.x }}px;
-                top: {{ display.selector.y }}px;
-                background: {{ display.selector.colour }};
-                opacity: {{ display.selector.opacity }};
+                width: {{ selector.width }}px;
+                height: {{ selector.height }}px;
+                left: {{ selector.x }}px;
+                top: {{ selector.y }}px;
+                background: {{ selector.colour }};
+                opacity: {{ selector.opacity }};
                 z-index: 1000;
                 border-radius: 15px;">
 
-            {% for option in display.selector.options %}
+            {% for option in selector.options %}
                 <div onclick="clickSelector({{ option.id }},
-                            {{ display.selector.target_x }},
-                            {{ display.selector.target_y }})" style="
+                            {{ selector.target_x }},
+                            {{ selector.target_y }})" style="
                         position: absolute;
-                        width: {{ display.selector.height }}px;
-                        height: {{ display.selector.height }}px;
-                        left: {{ display.selector.height|mul:option.id }}px;
-                        background: {{ display.selector.colour }};
+                        width: {{selector.height }}px;
+                        height: {{ selector.height }}px;
+                        left: {{ selector.height|mul:option.id }}px;
+                        background: {{ selector.colour }};
                         border-radius: 15px;
                         padding: 0px;">
 
@@ -109,6 +109,6 @@
             {% endfor %}
 
         </div>
-    {% endif %}
+    {% endfor %}
 
 </div>

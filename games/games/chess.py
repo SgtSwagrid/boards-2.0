@@ -94,39 +94,31 @@ class ChessMoveHandler(MoveHandler):
     def move_valid(self, state, piece, x_to, y_to):
 
         return super().move_valid(state, piece, x_to, y_to) and\
-            not Chess().check(self.move_piece(state, piece, x_to, y_to))
+            not state.game.check(self.move_piece(state, piece, x_to, y_to)) and\
+            not PromotionHandler().promotion(state)
+
+    def move_piece(self, state, piece, x_to, y_to):
+
+        state = super().move_piece(state, piece, x_to, y_to)
+        return state.set_piece_mode(state.pieces[x_to][y_to], 1)
 
 
-class PromotionHandler(SelectHandler):
+class PromotionHandler(MultiPlaceHandler):
 
-    def show(self, state, event):
+    def enabled(self, state, x, y):
 
-        return self.promotion(state) is not None
+        return state.friendly(x, y) and\
+            isinstance(state.pieces[x][y].type, Pawn) and\
+            y == [7, 0][state.turn.current_id]
 
-    def selector(self, state, event):
-
-        promotion = self.promotion(state)
-
-        return PieceSelector([
-            Piece(Rook(), state.turn.current_id),
-            Piece(Knight(), state.turn.current_id),
-            Piece(Bishop(), state.turn.current_id),
-            Piece(Queen(), state.turn.current_id)
-        ], state, promotion.x, promotion.y, Chess().SHAPE)
-
-    def select(self, state, event, option):
-
-        promotion = self.promotion(state)
-        piece = Piece(Chess().PIECES[option.value],
-            state.turn.current_id, promotion.x, promotion.y)
-        return state.place_piece(piece)
+    def pieces(self, state, x, y):
+        return [Rook(), Knight(), Bishop(), Queen()]
 
     def promotion(self, state):
 
         player_id = state.turn.current_id
-        row = [7, 0][player_id]
-        pawns = state.find_pieces(player_id, Pawn(), y=row)
-        return pawns[0] if pawns else None
+        pieces = state.find_pieces(player_id, Pawn(), y=[7, 0][player_id])
+        return pieces[0] if any(pieces) else None
 
 
 class Chess(Game):
@@ -138,11 +130,15 @@ class Chess(Game):
     INFO = 'https://en.wikipedia.org/wiki/Chess'
 
     PIECES = [Pawn(), Rook(), Knight(), Bishop(), Queen(), King()]
-    HANDLERS = [ChessMoveHandler(PIECES), PromotionHandler()]
+
+    HANDLERS = [
+        ChessMoveHandler(PIECES),
+        PromotionHandler(click_to_show=False)
+    ]
 
     def on_action(self, state):
 
-        if PromotionHandler().show(state, None): return state
+        if PromotionHandler().promotion(state): return state
         else: return state.end_turn()
 
     def initial_piece(self, num_players, x, y):

@@ -367,7 +367,9 @@ class ActionManager(models.Manager):
 
         elif isinstance(action, SelectAction):
             action_model = super().create(type=3,
-                option=action.option_id)
+                option=action.option_id,
+                x_to=action.x_to,
+                y_to=action.y_to)
 
         return action_model
 
@@ -402,7 +404,7 @@ class ActionModel(models.Model):
             return RemoveAction(piece)
 
         elif self.type == 3:
-            return SelectAction(self.option)
+            return SelectAction(self.option, self.x_to, self.y_to)
 
 class ChangeManager(models.Manager):
 

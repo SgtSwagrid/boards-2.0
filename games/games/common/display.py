@@ -1,5 +1,4 @@
 import copy
-import math
 
 class Display:
 
@@ -8,7 +7,7 @@ class Display:
         self.width = max(r.width for r in rows)
         self.height = rows[0].offset + rows[0].height
         self.hexagonal = hexagonal
-        self.selector = None
+        self.selectors = []
 
     def scale(self, width, height):
 
@@ -27,11 +26,11 @@ class Display:
                 tile.width *= sf
                 tile.offset *= sf
 
-        if display.selector:
-            display.selector.x *= sf
-            display.selector.y *= sf
-            display.selector.width *= sf
-            display.selector.height *= sf
+        for selector in display.selectors:
+            selector.x *= sf
+            selector.y *= sf
+            selector.width *= sf
+            selector.height *= sf
 
         return display
 
@@ -39,9 +38,9 @@ class Display:
         return [(tile.x, tile.y) for row in self.rows
             for tile in row.tiles if tile.selected]
 
-    def show_selector(self, selector):
+    def add_selectors(self, selectors):
         display = copy.copy(self)
-        display.selector = selector
+        display.selectors = display.selectors + selectors
         return display
 
 class Row:
@@ -78,7 +77,7 @@ class Texture:
 
 class Selector:
 
-    def __init__(self, options, target_x, target_y, shape,
+    def __init__(self, options, target_x, target_y, state,
             size=0.5, offset=0.5, colour='#F5F6FA', opacity=0.9):
 
         self.options = options
@@ -89,6 +88,7 @@ class Selector:
         self.target_x = target_x
         self.target_y = target_y
 
+        shape = state.game.SHAPE
         target_y = shape.height - target_y - 1
 
         min_x = 0
@@ -109,23 +109,10 @@ class Selector:
         self.colour = colour
         self.opacity = opacity
 
-class PieceSelector(Selector):
-
-    def __init__(self, pieces, state, target_x, target_y, shape,
-            size=0.5, offset=0.5, colour='#F5F6FA', opacity=0.9):
-
-        options = [Option(i, piece.type.ID, type(piece.type).__name__,
-            piece.type.texture(piece, state))
-            for i, piece in enumerate(pieces)]
-
-        super().__init__(options, target_x, target_y, shape,
-            size, offset, colour, opacity)
-
 class Option:
 
-    def __init__(self, id, value, name, textures):
+    def __init__(self, id, value, textures):
         self.id = id
         self.value = value
-        self.name = name
         self.textures = [texture if isinstance(texture, Texture)
             else Texture(texture) for texture in textures]

@@ -36,9 +36,6 @@ class Game:
 
     def on_event(self, state, event):
 
-        if not self.board_enabled(state, event) and isinstance(event, BoardEvent):
-            return None, DisplayProperties()
-
         for handler in self.HANDLERS:
             if any(isinstance(event, e) for e in handler.EVENTS):
 
@@ -51,6 +48,13 @@ class Game:
 
     def on_action(self, state):
         return state.end_turn()
+
+    def get_actions(self, state):
+
+        actions = []
+        for handler in self.HANDLERS:
+            actions.extend(handler.actions(state))
+        return actions
 
     def on_render(self, state, event):
 
@@ -104,9 +108,6 @@ class Game:
                 textures.extend(handler.texture(state, event, x, y))
 
         return textures
-
-    def board_enabled(self, state, event):
-        return not any(h.disable_board(state, event) for h in self.HANDLERS)
 
 
 class PieceType:

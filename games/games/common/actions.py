@@ -26,5 +26,7 @@ class RemoveAction:
 
 class SelectAction:
 
-    def __init__(self, option_id):
+    def __init__(self, option_id, x_to, y_to):
         self.option_id = option_id
+        self.x_to = x_to
+        self.y_to = y_to

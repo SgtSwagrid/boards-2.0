@@ -81,6 +81,10 @@ def board_view(request, board_code):
     if 'sx' in request.POST:
         sx, sy = int(request.POST['sx']), int(request.POST['sy'])
 
+    tx, ty = -1, -1
+    if 'tx' in request.POST:
+        tx, ty = int(request.POST['tx']), int(request.POST['ty'])
+
     active = board.status == 1 and board.is_current(player)\
         and state_model == board.state
     player_id = player.order if player else -1
@@ -99,7 +103,7 @@ def board_view(request, board_code):
 
     if 'option' in request.POST and active:
         option_id = int(request.POST['option'])
-        event = SelectEvent(properties, player_id, active, option_id)
+        event = SelectEvent(properties, player_id, active, option_id, tx, ty)
         result, properties = game.on_event(state, event)
 
         if result:

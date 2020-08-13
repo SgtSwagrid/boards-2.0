@@ -26,9 +26,9 @@ function clickBoard(cx=-1, cy=-1, sx=-1, sy=-1) {
         {'cx': cx, 'cy': cy, 'sx': sx, 'sy': sy});
 }
 
-function clickSelector(optionId, sx=-1, sy=-1) {
+function clickSelector(optionId, tx=-1, ty=-1) {
     $('#board').load('board/',
-        {'option': optionId, 'sx': sx, 'sy': sy});
+        {'option': optionId, 'tx': tx, 'ty': ty});
 }
 
 function setState(state) {
