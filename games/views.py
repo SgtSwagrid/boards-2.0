@@ -167,6 +167,7 @@ def sidebar_view(request, board_code):
         'winner': board.players()[board.state.outcome]\
             if board.state.outcome > -1 else None,
         'this_player': board.player(request.user),
+        'first': board.first(),
         'previous': state_model.previous,
         'next': StateModel.states.filter(previous=state_model).first(),
         'current': board.state,

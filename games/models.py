@@ -86,6 +86,12 @@ class BoardModel(models.Model):
         self.rematch.join(user)
         return self.rematch
 
+    def first(self):
+        first = self.state
+        while first.previous:
+            first = first.previous
+        return first
+
 class PlayerModel(models.Model):
 
     user = models.ForeignKey(User,

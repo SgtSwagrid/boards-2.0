@@ -55,47 +55,50 @@
 
 {% if board.status >= 1 %}
     <br>
-    <div class="row">
-        <div class="col s4">
-            {% if previous %}
-                <a class="block btn-small waves-effect"
-                        onclick="setState({{ previous.id }})">
-                    <i class="material-icons">skip_previous</i>
-                </a>
-            {% else %}
-                <a class="block btn-small grey">
-                    <i class="material-icons">skip_previous</i>
-                </a>
-            {% endif %}
-        </div>
-        <div class="col s4">
-            {% if next %}
-                <a class="block btn-small waves-effect"
-                        onclick="setState({{ next.id }})">
-                    <i class="material-icons">skip_next</i>
-                </a>
-            {% else %}
-                <a class="block btn-small grey">
-                    <i class="material-icons">skip_next</i>
-                </a>
-            {% endif %}
-            </div>
-            <div class="col s4">
-            {% if next %}
-                <a class="block btn-small waves-effect"
-                        onclick="setState({{ current.id }})">
-                    <i class="material-icons">last_page</i>
-                </a>
-            {% else %}
-                <a class="block btn-small grey">
-                    <i class="material-icons">last_page</i>
-                </a>
-            {% endif %}
-        </div>
+    <div class="center">
+        {% if previous %}
+            <a class="btn-small waves-effect"
+                    onclick="setState({{ first.id }})">
+                <i class="material-icons">first_page</i>
+            </a>
+        {% else %}
+            <a class="btn-small grey">
+                <i class="material-icons">first_page</i>
+            </a>
+        {% endif %}
+        {% if previous %}
+            <a class="btn-small waves-effect"
+                    onclick="setState({{ previous.id }})">
+                <i class="material-icons">skip_previous</i>
+            </a>
+        {% else %}
+            <a class="btn-small grey">
+                <i class="material-icons">skip_previous</i>
+            </a>
+        {% endif %}
+        {% if next %}
+            <a class="btn-small waves-effect"
+                    onclick="setState({{ next.id }})">
+                <i class="material-icons">skip_next</i>
+            </a>
+        {% else %}
+            <a class="btn-small grey">
+                <i class="material-icons">skip_next</i>
+            </a>
+        {% endif %}
+        {% if next %}
+            <a class="btn-small waves-effect"
+                    onclick="setState({{ current.id }})">
+                <i class="material-icons">last_page</i>
+            </a>
+        {% else %}
+            <a class="btn-small grey">
+                <i class="material-icons">last_page</i>
+            </a>
+        {% endif %}
     </div>
 {% endif %}
-
-<br>
+<br><br>
 <div class="center-align">
     {% if board.status == 0 %}
         {% if this_player %}
@@ -170,9 +173,20 @@
                 Rematch
                 <i class="material-icons small white-text right">refresh</i>
             </a>
-            <br><br>
+            {% if board.rematch %}
+                <h6 class="small-text indigo-text text-darken-3">
+                    {{ board.rematch.players.0.user }}
+                    {% for player in board.rematch.players|slice:"1:" %}
+                        &#x2022 {{ player.user }}
+                    {% endfor %}
+                </h6>
+            {% else %}
+                <br>
+            {% endif %}
+            <br>
         {% endif %}
     {% endif %}
 
     <h6 class="medium-text white-text">{{ status }}</h6>
+    <br>
 </div>
