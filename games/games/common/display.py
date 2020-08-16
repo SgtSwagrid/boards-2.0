@@ -78,7 +78,7 @@ class Texture:
 class Selector:
 
     def __init__(self, options, target_x, target_y, state,
-            size=0.5, offset=0.5, colour='#F5F6FA', opacity=0.9):
+            size=0.5, offset=0.5, colour='#F5F6FA', opacity=0.85):
 
         self.options = options
 
@@ -93,17 +93,15 @@ class Selector:
 
         min_x = 0
         max_x = shape.display_width() - self.width
-        tile_width = shape.tile_width(target_x, target_y)
-        x = target_x - self.width / 2 + tile_width / 2
+        tile_x = shape.tile_centre(target_x, target_y)
+        x = tile_x - self.width / 2
         self.x = max(min_x, min(max_x, x))
 
         min_y = 0
         max_y = shape.display_height() - self.height
-        row_height = shape.row_height(target_y)
-        row_centre = shape.row_centre(target_y)
-        bottom = row_centre < shape.display_height() - row_centre
-        if bottom: offset *= -1
-        y = target_y - self.height / 2 + row_height / 2 + offset
+        row_y = shape.row_centre(target_y)
+        if 2 * row_y > shape.display_height(): offset *= -1
+        y = row_y - self.height / 2 + offset
         self.y = max(min_y, min(max_y, y))
 
         self.colour = colour

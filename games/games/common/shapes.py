@@ -54,6 +54,11 @@ class Shape:
         return sum(self.row_spacing(y) + self.row_height(y)
             for y in range(0, self.height))
 
+    def positions(self):
+        return ((x, y)
+            for y in range(0, self.height)
+            for x in range(0, self.row_size(y)))
+
 class Rectangle(Shape):
     pass
 
@@ -69,6 +74,30 @@ class Table(Rectangle):
 
     def tile_width(self, x, y):
         return 1 if x % 2 == 0 else self.cell_width
+
+class Sections(Rectangle):
+
+    def __init__(self, h_sections=[], v_sections=[], border=0.1):
+        super().__init__(sum(h_sections), sum(v_sections))
+        self.h_sections = h_sections
+        self.v_sections = v_sections
+        self.border = border
+
+    def row_spacing(self, y):
+
+        spaced = y < self.height - 1 and\
+            any(y + 1 == sum(self.v_sections[0:yy])
+            for yy in range(0, self.height))
+
+        return self.border if spaced else 0
+
+    def tile_spacing(self, x, y):
+
+        spaced = x > 0 and\
+            any(x == sum(self.h_sections[0:xx])
+            for xx in range(0, self.width))
+
+        return self.border if spaced else 0
 
 class Hexagonal(Shape):
 

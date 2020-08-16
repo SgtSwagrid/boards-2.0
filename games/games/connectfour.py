@@ -1,7 +1,15 @@
-from .common.game import *
-from .common.handlers import *
+from .tictactoe import TicTacToe, TicTacToePiece
+from .common.handlers import PlaceHandler
 from .common.shapes import Rectangle
-from .tictactoe import TicTacToe
+
+
+class ConnectFourPiece(TicTacToePiece):
+
+    ID = 0
+    TEXTURES = ['connectfour/yellow_dot.png', 'connectfour/red_dot.png']
+
+    def place_valid(self, state, piece):
+        return not state.open(piece.x, piece.y - 1)
 
 
 class ConnectFour(TicTacToe):
@@ -12,15 +20,7 @@ class ConnectFour(TicTacToe):
     PLAYER_NAMES = ['Yellow', 'Red']
     INFO = 'https://en.wikipedia.org/wiki/Connect_Four'
 
-    TARGET = 4
-
-    class ConnectFourPiece(PieceType):
-        ID = 0
-        TEXTURES = ['connectfour/yellow_dot.png', 'connectfour/red_dot.png']
-
     PIECES = [ConnectFourPiece()]
     HANDLERS = [PlaceHandler(ConnectFourPiece())]
 
-    def place_valid(self, state, piece):
-        return state.open(piece.x, piece.y) and\
-            not state.open(piece.x, piece.y - 1)
+    TARGET = 4

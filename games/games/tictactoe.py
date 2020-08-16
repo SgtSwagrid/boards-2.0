@@ -1,6 +1,16 @@
-from .common.game import *
-from .common.handlers import *
+from .common.game import Game, PieceType
+from .common.handlers import PlaceHandler
 from .common.shapes import Rectangle
+import itertools
+
+
+class TicTacToePiece(PieceType):
+
+    ID = 0
+    TEXTURES = ['misc/naught.png', 'misc/cross.png']
+
+    def colour(self, piece, state):
+        return [None, state.game.RUN_COLOUR][piece.mode]
 
 
 class TicTacToe(Game):
@@ -11,70 +21,45 @@ class TicTacToe(Game):
     PLAYER_NAMES = ['Naughts', 'Crosses']
     INFO = 'https://en.wikipedia.org/wiki/Tic-tac-toe'
 
-    TARGET = 3
-
-    class TicTacToePiece(PieceType):
-        ID = 0
-        TEXTURES = ['misc/naught.png', 'misc/cross.png']
-
     PIECES = [TicTacToePiece()]
     HANDLERS = [PlaceHandler(TicTacToePiece())]
 
+    TARGET = 3
     RUN_COLOUR = '#16A085'
 
-    def setup(self, num_players):
-        return super().setup(num_players)\
-            .set_score(0, 0)\
-            .set_score(1, 0)
+    def on_action(self, state):
 
-    def place_valid(self, state, piece):
-        return self.SHAPE.in_bounds(piece.x, piece.y) and \
-               not state.pieces[piece.x][piece.y]
+        if any(pieces := self.captures(state, state.action.piece)):
 
-    def place_piece(self, state, piece):
-        return state.place_piece(piece)
+            for piece in pieces:
+                state = state.set_piece_mode(piece, 1)
 
-    def action(self, state, action):
-        game_ended = self.has_run(state, state.action.piece)
-        game_draw = not game_ended and all([state.pieces[x][y]
-            for x in range(0, self.SHAPE.width)
-            for y in range(0, self.SHAPE.height)])
+            return state.end_game(state.turn.current_id)
 
-        return state.end_turn() if not (game_ended or game_draw)\
-            else state.end_game(winner_id=state.turn.current_id if not game_draw else -1)
+        elif state.turn.ply + 1 == self.SHAPE.width * self.SHAPE.height:
+            return state.end_game()
 
-    def colour(self, state, event, x, y):
-        col = super().colour(state, event, x, y)
+        else: return state.end_turn()
 
-        if state.action:
-            last_piece = state.action.piece
-            runs = self.runs(state, last_piece)
+    def captures(self, state, piece):
 
-            if state.outcome.finished and not state.outcome.draw:
-                for sub_run in runs:
-                    if [x, y] in sub_run:
-                        col = self.RUN_COLOUR
-
-        return col
-
-    def has_run(self, state, piece):
-        return len(self.runs(state, piece)) > 0
-
-    def runs(self, state, piece):
         directions = [[1, 0], [0, 1], [1, 1], [1, -1]]
-        runs = []
+        captures = set()
 
         for dir in directions:
-            sub_runs = []
+            run = {piece}
 
-            for mult in [-1, 1]:
-                for i in range(1, max(self.SHAPE.width, self.SHAPE.height)):
-                    x_next = piece.x + mult * i * dir[0]
-                    y_next = piece.y + mult * i * dir[1]
-                    if state.friendly(x_next, y_next):
-                        sub_runs.append([x_next, y_next])
-                    else:
-                        break
+            for sign in [-1, 1]:
+                for i in itertools.count(1):
 
-            if len(sub_runs) >= self.TARGET - 1: runs.append(sub_runs)
-        return runs
+                    x = piece.x + dir[0] * sign * i
+                    y = piece.y + dir[1] * sign * i
+
+                    if state.friendly(x, y, piece.owner_id):
+                        run.add(state.pieces[x][y])
+                    else: break
+
+            if len(run) >= self.TARGET:
+                captures.update(run)
+
+        return captures

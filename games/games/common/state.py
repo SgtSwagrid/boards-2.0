@@ -149,7 +149,7 @@ class State:
         return self.set_score(player_id, total)
 
     def highest_scorer(self):
-        players = self.player_states.sorted(key=lambda p: p.score)
+        players = sorted(self.player_states, key=lambda p: p.score)
         return players[-1].order if players[-1].score > players[-2].score else -1
 
     def set_player_mode(self, player_id, mode):
@@ -163,13 +163,15 @@ class State:
     def open(self, x, y):
         return self.game.SHAPE.in_bounds(x, y) and not self.pieces[x][y]
 
-    def friendly(self, x, y):
+    def friendly(self, x, y, player_id=-1):
+        if player_id == -1: player_id = self.turn.current_id
         return self.exists(x, y) and\
-            self.pieces[x][y].owner_id == self.turn.current_id
+            self.pieces[x][y].owner_id == player_id
 
-    def enemy(self, x, y):
+    def enemy(self, x, y, player_id=-1):
+        if player_id == -1: player_id = self.turn.current_id
         return self.exists(x, y) and\
-            self.pieces[x][y].owner_id != self.turn.current_id
+            self.pieces[x][y].owner_id != player_id
 
     def push_action(self, action):
         state = copy.deepcopy(self)

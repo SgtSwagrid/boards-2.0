@@ -41,7 +41,7 @@ class PlaceHandler(Handler):
         piece = Piece(self.type, state.turn.current_id, event.x, event.y)
 
         if piece.type.ID == self.type.ID and\
-                any(piece.type.ID == t.ID for t in self.types):
+                self.place_valid(state, piece):
 
             state = self.place_piece(state, piece)
             return True, state, DisplayProperties()
@@ -220,8 +220,9 @@ class SelectHandler(Handler):
 
     EVENTS = [SelectEvent, BoardEvent]
 
-    def __init__(self, click_to_show=False, icon=PLACE_ICON):
+    def __init__(self, click_to_show=False, hints=False, icon=PLACE_ICON):
         self.click_to_show = click_to_show
+        self.hints = hints
         self.icon = icon
 
     def apply(self, state, event):
@@ -241,8 +242,11 @@ class SelectHandler(Handler):
         elif isinstance(event, SelectEvent) and enabled and\
                 0 <= event.option_id < len(options):
 
-            state = self.select(state, options[event.option_id],
-                event.x, event.y)
+            state = state.push_action(SelectAction(
+                event.option_id, event.x, event.y))
+
+            state = self.select(state,
+                options[event.option_id], event.x, event.y)
 
             return True, state, DisplayProperties()
 
