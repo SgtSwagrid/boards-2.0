@@ -78,7 +78,7 @@ class Texture:
 class Selector:
 
     def __init__(self, options, target_x, target_y, state,
-            size=0.5, offset=0.5, colour='#F5F6FA', opacity=0.85):
+            size=0.5, offset=0.5, colour='#F5F6FA', opacity=0.8):
 
         self.options = options
 
@@ -89,7 +89,6 @@ class Selector:
         self.target_y = target_y
 
         shape = state.game.SHAPE
-        target_y = shape.height - target_y - 1
 
         min_x = 0
         max_x = shape.display_width() - self.width
