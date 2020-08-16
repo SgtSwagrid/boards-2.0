@@ -2,10 +2,13 @@ import copy
 
 class Display:
 
-    def __init__(self, rows, hexagonal=False):
+    def __init__(self, rows, panel_colour='#FFFFFF', hexagonal=False):
+
         self.rows = rows
         self.width = max(r.width for r in rows)
         self.height = rows[0].offset + rows[0].height
+        if hexagonal: self.height += rows[0].height / 2
+        self.panel_colour = panel_colour
         self.hexagonal = hexagonal
         self.selectors = []
 
@@ -25,6 +28,11 @@ class Display:
             for tile in row.tiles:
                 tile.width *= sf
                 tile.offset *= sf
+
+        if display.hexagonal:
+            display.height -= len(display.rows) - 1
+            for y, row in enumerate(display.rows):
+                row.offset -= len(display.rows) - 1 - y
 
         for selector in display.selectors:
             selector.x *= sf
@@ -55,6 +63,7 @@ class Tile:
 
     def __init__(self, x, y, colour='#FFFFFF', textures=[],
             width=1, offset=0, selected=False):
+
         self.x = x
         self.y = y
         self.colour = colour

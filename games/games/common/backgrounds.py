@@ -1,7 +1,8 @@
 class Background:
 
-    def __init__(self, colours):
+    def __init__(self, colours, panel_colour='#3F51B5'):
         self.colours = colours
+        self.panel_colour = panel_colour
 
     def colour(self, x, y):
         return '#FFFFFF'

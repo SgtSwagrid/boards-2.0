@@ -1,9 +1,10 @@
 {% load static %}
 {% load mathfilters %}
 
-<div class="board indigo {% if not display.hexagonal %} z-depth-3 {% endif %}" style="
+<div class="board z-depth-3" style="
         width: {{ display.width }}px;
-        height: {{ display.height }}px;">
+        height: {{ display.height }}px;
+        background: {{ display.panel_colour }};">
 
     {% for row in display.rows %}
 

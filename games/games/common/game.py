@@ -59,7 +59,8 @@ class Game:
     def on_render(self, state, event):
 
         display = Display([self.row(state, event, y)
-            for y in range(0, self.SHAPE.height)], self.SHAPE.hexagonal)
+            for y in range(0, self.SHAPE.height)],
+            self.BACKGROUND.panel_colour, self.SHAPE.hexagonal)
 
         for handler in self.HANDLERS:
             display = handler.render(state, event, display)
