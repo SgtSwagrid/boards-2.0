@@ -1,4 +1,6 @@
+from .util import *
 import copy
+
 
 class PlayerState:
 
@@ -6,6 +8,7 @@ class PlayerState:
         self.order = order
         self.score = score
         self.mode = mode
+
 
 class Piece:
 
@@ -22,6 +25,7 @@ class Piece:
         piece.y = y
         return piece
 
+
 class Turn:
 
     def __init__(self, current_id=0, next_id=1,
@@ -32,6 +36,7 @@ class Turn:
         self.ply = ply
         self.epoch = epoch
         self.new = new
+
 
 class Outcome:
 
@@ -47,6 +52,7 @@ class Outcome:
         if finished != -1: self.finished = finished
         else: self.finished = self.winner != -1 or self.draw
 
+
 class Change:
 
     def __init__(self, x, y, old, new):
@@ -54,6 +60,7 @@ class Change:
         self.y = y
         self.old = old
         self.new = new
+
 
 class State:
 
@@ -77,18 +84,22 @@ class State:
         self.outcome = outcome
         self.previous = previous
 
-    def find_pieces(self, player_id=-1, type=-1, x=-1, y=-1):
+    def find_pieces(self, player_id=-1, type=-1, mode=-1, x=-1, y=-1):
+
         return [piece for col in self.pieces for piece in col if piece and\
             (type == -1 or piece.type.ID == type.ID) and\
             (player_id == -1 or piece.owner_id == player_id) and\
-            (x == -1 or piece.x == x) and (y == -1 or piece.y == y)]
+            (x == -1 or piece.x == x) and (y == -1 or piece.y == y) and\
+            (mode == -1 or piece.mode == mode)]
 
     def end_stage(self, skip=1):
+
         state = copy.deepcopy(self)
         state.turn.stage += skip
         return state
 
     def end_turn(self, skip=1):
+
         state = copy.deepcopy(self)
         state.turn.current_id = (state.turn.current_id + skip)\
             % len(state.player_states)
@@ -100,11 +111,13 @@ class State:
         return state
 
     def end_epoch(self, skip=1):
+
         state = copy.deepcopy(self)
         state.turn.epoch += skip
         return state
 
     def end_game(self, winner_id=-2):
+
         state = copy.deepcopy(self)
         if winner_id == -2: winner_id = self.highest_scorer()
         state.outcome.finished = True
@@ -113,72 +126,117 @@ class State:
         return state
 
     def set_outcome(self, outcome):
+
         state = copy.deepcopy(self)
         state.outcome = outcome
         return state
 
     def set_piece(self, piece, x, y):
+
         state = copy.deepcopy(self)
         state.pieces[x][y] = piece
         return state.set_changed(Change(x, y, self.pieces[x][y], piece))
 
     def set_piece_mode(self, piece, mode):
+
         state = copy.deepcopy(self)
         state.pieces[piece.x][piece.y] = copy.deepcopy(piece)
         state.pieces[piece.x][piece.y].mode = mode
         return state
 
     def place_piece(self, piece):
+
         return self.set_piece(piece, piece.x, piece.y)\
             if piece else self
 
     def move_piece(self, piece, x_to, y_to):
+
         return self.remove_piece(piece)\
             .place_piece(piece.at(x_to, y_to))
 
     def remove_piece(self, piece):
+
         return self.set_piece(None, piece.x, piece.y)
 
     def set_score(self, player_id, score):
+
         state = copy.deepcopy(self)
         state.player_states[player_id].score = score
         return state
 
     def add_score(self, player_id, score):
+
         total = self.player_states[player_id].score + score
         return self.set_score(player_id, total)
 
     def highest_scorer(self):
+
         players = sorted(self.player_states, key=lambda p: p.score)
         return players[-1].order if players[-1].score > players[-2].score else -1
 
     def set_player_mode(self, player_id, mode):
+
         state = copy.deepcopy(self)
         state.player_states[player_id].mode = mode
         return state
 
     def exists(self, x, y):
+
         return self.game.SHAPE.in_bounds(x, y) and self.pieces[x][y]
 
     def open(self, x, y):
+
         return self.game.SHAPE.in_bounds(x, y) and not self.pieces[x][y]
 
     def friendly(self, x, y, player_id=-1):
+
         if player_id == -1: player_id = self.turn.current_id
         return self.exists(x, y) and\
             self.pieces[x][y].owner_id == player_id
 
     def enemy(self, x, y, player_id=-1):
+
         if player_id == -1: player_id = self.turn.current_id
         return self.exists(x, y) and\
             self.pieces[x][y].owner_id != player_id
 
+    def path_from(self, x_from, y_from, x_step, y_step, dist):
+
+        return all(self.open(x_from + i * x_step, y_from + i * y_step)
+            for i in range(1, dist))
+
+    def path_to(self, x_from, y_from, x_to, y_to):
+
+        x_step, y_step = direction(x_from, y_from, x_to, y_to)
+        dist = steps(x_from, y_from, x_to, y_to)
+        return self.path_from(x_from, y_from, x_step, y_step, dist)
+
+    def raycast(self, x_from, y_from, x_step, y_step):
+
+        while self.open(x_from + x_step, y_from + y_step):
+            x_from += x_step
+            y_from += y_step
+
+        return x_from, y_from
+
+    def surrounded(self, piece):
+
+        kernel = self.game.SHAPE.box_kernel(piece.x, piece.y, 3, 3)
+        return not any(self.open(x, y) for x, y in kernel)
+
+    def all_surrounded(self, player_id):
+
+        pieces = self.find_pieces(player_id)
+        return all(self.surrounded(piece) for piece in pieces)
+
     def push_action(self, action):
+
         state = copy.deepcopy(self)
         state.action = action
         return state
 
     def set_changed(self, change):
+
         state = copy.deepcopy(self)
         if state.turn.new: state.changes = []
         state.changes.append(change)
@@ -186,4 +244,5 @@ class State:
         return state
 
     def changed(self, x, y):
+
         return any((c.x, c.y) == (x, y) for c in self.changes)

@@ -142,7 +142,7 @@ class MoveHandler(Handler):
     def move_valid(self, state, piece, x_to, y_to):
 
         return state.game.SHAPE.in_bounds(x_to, y_to) and\
-            piece.owner_id == state.turn.current_id and\
+            piece.owner_id in [state.turn.current_id, -1] and\
             (x_to != piece.x or y_to != piece.y) and\
             (self.capture_self or not state.friendly(x_to, y_to)) and\
             (self.capture_enemy or not state.enemy(x_to, y_to)) and\

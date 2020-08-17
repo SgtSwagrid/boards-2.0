@@ -1,4 +1,4 @@
-from .common.game import Game, PieceType
+from .common.game import *
 from .common.state import Piece
 from .common.handlers import MoveHandler
 from .common.shapes import Rectangle
@@ -40,4 +40,3 @@ class Breakthrough(Game):
 
         if y <= 1: return Piece(BreakthroughPiece(), 0)
         elif y >= self.HEIGHT - 2: return Piece(BreakthroughPiece(), 1)
-        else: return None

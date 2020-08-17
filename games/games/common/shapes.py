@@ -59,6 +59,14 @@ class Shape:
             for y in range(0, self.height)
             for x in range(0, self.row_size(y)))
 
+    def box_kernel(self, x, y, width, height):
+
+        tiles = [(x - width // 2 + xx, y - height // 2 + yy)
+            for xx in range(0, width)
+            for yy in range(0, height)]
+
+        return [tile for tile in tiles if self.in_bounds(*tile)]
+
 class Rectangle(Shape):
     pass
 

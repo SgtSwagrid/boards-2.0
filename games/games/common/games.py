@@ -11,6 +11,7 @@ from games.games.quixo import Quixo
 from games.games.shogi import Shogi
 from games.games.pentago import Pentago
 from games.games.breakthrough import Breakthrough
+from games.games.neutron import Neutron
 
 games = {
     TicTacToe().ID: TicTacToe(),
@@ -25,5 +26,6 @@ games = {
     Quixo().ID: Quixo(),
     Shogi().ID: Shogi(),
     Pentago().ID: Pentago(),
-    Breakthrough().ID: Breakthrough()
+    Breakthrough().ID: Breakthrough(),
+    Neutron().ID: Neutron()
 }
