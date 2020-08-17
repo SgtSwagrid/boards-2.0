@@ -10,6 +10,7 @@ from games.games.clobber import Clobber
 from games.games.quixo import Quixo
 from games.games.shogi import Shogi
 from games.games.pentago import Pentago
+from games.games.breakthrough import Breakthrough
 
 games = {
     TicTacToe().ID: TicTacToe(),
@@ -23,5 +24,6 @@ games = {
     Clobber().ID: Clobber(),
     Quixo().ID: Quixo(),
     Shogi().ID: Shogi(),
-    Pentago().ID: Pentago()
+    Pentago().ID: Pentago(),
+    Breakthrough().ID: Breakthrough()
 }
