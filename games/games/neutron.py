@@ -13,7 +13,7 @@ class SoldierPiece(PieceType):
     def move_valid(self, state, piece, x_to, y_to):
 
         if not state.turn.stage == self.STAGE or\
-            not is_line(piece.x, piece.y, x_to, y_to): return False
+            not is_straight(piece.x, piece.y, x_to, y_to): return False
 
         dx, dy = direction(piece.x, piece.y, x_to, y_to)
         return (x_to, y_to) == state.raycast(piece.x, piece.y, dx, dy)
@@ -31,7 +31,7 @@ class Neutron(Game):
     ID = 14
     NAME = 'Neutron'
     SHAPE = Rectangle(WIDTH := 5, HEIGHT := 5)
-    PLAYER_NAMES = ['Yellow', 'Red']
+    PLAYER_NAMES = ['White', 'Black']
     INFO = 'https://en.m.wikipedia.org/wiki/Neutron_(game)'
 
     PIECES = [SoldierPiece(), NeutronPiece()]

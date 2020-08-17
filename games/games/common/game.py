@@ -78,10 +78,12 @@ class Game:
 
     def tile(self, state, event, x, y):
 
-        colour = self.colour(state, event, x, y)
-        texture = self.texture(state, event, x, y)
         width = self.SHAPE.tile_width(x, y)
         offset = self.SHAPE.tile_offset(x, y)
+
+        x += self.SHAPE.coordinate_offset(y)
+        colour = self.colour(state, event, x, y)
+        texture = self.texture(state, event, x, y)
 
         return Tile(x, y, colour, texture, width, offset)
 
@@ -94,13 +96,11 @@ class Game:
         if piece_colour: return piece_colour
         elif event.properties.selected(x, y): return self.SELECTED_COLOUR
         elif state.changed(x, y): return self.MODIFIED_COLOUR
-        else: return self.BACKGROUND.colour(
-            x + self.SHAPE.pattern_offset(x, y), y)
+        else: return self.BACKGROUND.colour(x, y)
 
     def texture(self, state, event, x, y):
 
-        textures = self.BACKGROUND.texture(
-            x + self.SHAPE.pattern_offset(x, y), y)
+        textures = self.BACKGROUND.texture(x, y)
         piece = state.pieces[x][y]
         if piece: textures.extend(piece.type.texture(piece, state))
 

@@ -12,6 +12,7 @@ from games.games.shogi import Shogi
 from games.games.pentago import Pentago
 from games.games.breakthrough import Breakthrough
 from games.games.neutron import Neutron
+from games.games.camelot import Camelot
 
 games = {
     TicTacToe().ID: TicTacToe(),
@@ -27,5 +28,6 @@ games = {
     Shogi().ID: Shogi(),
     Pentago().ID: Pentago(),
     Breakthrough().ID: Breakthrough(),
-    Neutron().ID: Neutron()
+    Neutron().ID: Neutron(),
+    Camelot().ID: Camelot()
 }
