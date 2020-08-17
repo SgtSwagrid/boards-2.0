@@ -98,6 +98,12 @@ class State:
         state.turn.stage += skip
         return state
 
+    def set_stage(self, stage):
+
+        state = copy.deepcopy(self)
+        state.turn.stage = stage
+        return state
+
     def end_turn(self, skip=1):
 
         state = copy.deepcopy(self)

@@ -23,6 +23,9 @@ class Shape:
     def row_indent(self, y):
         return 0
 
+    def coordinate_offset(self, y):
+        return self.row_indent(y)
+
     def tile_spacing(self, x, y):
         return 0
 
@@ -39,11 +42,9 @@ class Shape:
     def row_size(self, y):
         return self.width
 
-    def pattern_offset(self, x, y):
-        return 0
-
     def in_bounds(self, x, y):
-        return 0 <= y < self.height and 0 <= x < self.row_size(y)
+        return 0 <= y < self.height and\
+            0 <= (x - self.coordinate_offset(y)) < self.row_size(y)
 
     def display_width(self):
         return max(sum(self.tile_spacing(x, y) + self.tile_width(x, y)
@@ -55,7 +56,7 @@ class Shape:
             for y in range(0, self.height))
 
     def positions(self):
-        return ((x, y)
+        return ((x + self.coordinate_offset(y), y)
             for y in range(0, self.height)
             for x in range(0, self.row_size(y)))
 
@@ -123,5 +124,5 @@ class Hexagonal(Shape):
         if not self.slanted: return math.sqrt(3) / 2 if y % 2 == 0 else 0
         else: return (self.height - y - 1) * math.sqrt(3) / 2
 
-    def pattern_offset(self, x, y):
+    def coordinate_offset(self, x, y):
         return -(y // 2) if self.slanted else 0
