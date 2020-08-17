@@ -31,5 +31,5 @@ games = {
     Breakthrough().ID: Breakthrough(),
     Neutron().ID: Neutron(),
     Camelot().ID: Camelot(),
-    ChineseCheckers().ID: ChineseCheckers
+    ChineseCheckers().ID: ChineseCheckers()
 }

@@ -1,5 +1,7 @@
+import math
+
 from games.games.common.game import PieceType, Game
-from games.games.common.shapes import Hexagonal
+from games.games.common.shapes import Hexagonal, Rectangle
 
 
 class Star(Hexagonal):
@@ -12,19 +14,17 @@ class Star(Hexagonal):
         super().__init__(self.total_cols, self.total_rows)
 
     def row_size(self, y):
-        if 0 <= y < self.star_size:
-            return y+1;
-        elif self.total_rows > y >= (self.total_rows - self.star_size):
-            return self.total_rows - y
-        elif self.star_size <= y <= self.total_rows // 2:
-            return self.total_cols + self.star_size - y
-        elif self.total_rows // 2 < y <= self.total_rows - self.star_size:
-            return self.total_cols + self.star_size - y
-        else:
-            return self.total_cols
 
-class CheckersPiece(PieceType):
-    pass
+        tri_size = self.total_cols
+        upper = self.total_rows - y - 1
+
+        tr1 = y+1 if y < tri_size else 1
+        tr2 = upper+1 if upper < tri_size else 1
+
+        return max(tr1, tr2)
+
+    def row_indent(self, y):
+        return (self.total_cols / 2 - self.row_size(y) / 2) * math.sqrt(3)
 
 
 class ChineseCheckers(Game):
@@ -33,6 +33,6 @@ class ChineseCheckers(Game):
     # BACKGROUND = ChompBoard(['#5D4037', '#8D6E63'])
     SHAPE = Star(4)
     PLAYER_NAMES = ['Purple', 'Yellow']
-    INFO = 'https://en.wikipedia.org/wiki/Chinese_Chequers'
+    INFO = 'https://en.wikipedia.org/wiki/Chinese_checkers'
 
 

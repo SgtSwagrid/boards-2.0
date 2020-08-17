@@ -124,5 +124,5 @@ class Hexagonal(Shape):
         if not self.slanted: return math.sqrt(3) / 2 if y % 2 == 0 else 0
         else: return (self.height - y - 1) * math.sqrt(3) / 2
 
-    def coordinate_offset(self, x, y):
+    def coordinate_offset(self, y):
         return -(y // 2) if self.slanted else 0
