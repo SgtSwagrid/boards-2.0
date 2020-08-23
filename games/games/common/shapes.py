@@ -102,7 +102,7 @@ class Shape:
 
         max_width = max(self.visual_row_width(y)
             for y in range(0, self.height))
-        return (max_width - self.visual_row_width(row)) // 2
+        return (max_width - self.visual_row_width(row)) / 2
 
     def visual_row_end(self, row):
 
@@ -223,43 +223,55 @@ class Rows(Shape):
 
 class Hexagonal(Shape):
 
-    def __init__(self, width, height, slanted=False, flipped=False):
+    def __init__(self, width, height):
 
         super().__init__(width, height, hexagonal=True)
-        self.slanted = slanted
-        self.flipped = flipped
 
     def visual_board_height(self):
+
         return super().visual_board_height() + 0.5
 
     def visual_tile_width(self, row, tile):
+
         return math.sqrt(3)
 
     def visual_row_vspace(self, row):
+
         return 0.5
 
     def visual_tile_hspace(self, row, tile):
 
         return self.logical_tile_hspace(row, tile) * math.sqrt(3)
 
+    def logical_row_start(self, row):
+
+        return super().logical_row_start(row)
+
+        #start = max(range(0, self.height),
+        #    key=lambda row: row + self.row_width(row))
+
+        #return self.logical_row_width(row) - self.logical_row_width(start) - (row - start)
+
+
+class SlantedHexagonal(Hexagonal):
+
     def visual_row_start(self, row):
 
-        offset = self.logical_row_start(row) * math.sqrt(3)
+        return (row / 2 + self.logical_row_start(row)) * math.sqrt(3)
 
-        if not self.slanted:
-            if row % 2 == 0 ^ self.flipped: return offset
-            else: return offset + math.sqrt(3) / 2
 
-        elif self.slanted:
-            y = (self.height - 1 - row) if self.flipped else row
-            return offset + y * math.sqrt(3) / 2
+class StaggeredHexagonal(Hexagonal):
+
+    def visual_row_start(self, row):
+
+        return (row % 2 / 2 + self.logical_row_start(row)) * math.sqrt(3)
 
 
 class Hexagon(Hexagonal):
 
     def __init__(self, size):
 
-        super().__init__(2 * size - 1, 2 * size - 1, slanted=True)
+        super().__init__(2 * size - 1, 2 * size - 1)
         self.size = size
 
     def row_width(self, row):
@@ -267,10 +279,16 @@ class Hexagon(Hexagonal):
         y = (row if row < self.size else self.height - 1 - row)
         return self.size + y
 
-    def logical_row_start(self, row):
-
-        return self.size - 1 - row if row < self.size - 1 else 0
-
 
 class Star(Hexagonal):
-    pass
+
+    def __init__(self, size):
+
+        super().__init__(3 * size + 1, 4 * size + 1)
+        self.size = size
+
+    def row_width(self, row):
+
+        lower = row + 1 if row < self.width else 0
+        upper = self.height - row if self.height - row - 1 < self.width else 0
+        return max(lower, upper)

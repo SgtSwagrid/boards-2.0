@@ -13,7 +13,7 @@
     left: 0;
     right: 0;
     top: 0;
-    height: 125px;
+    height: 150px;
     padding: 10px 10px 10px 25px;
 }
 
@@ -21,7 +21,7 @@
     position: absolute;
     left: 15px;
     right: 15px;
-    top: 125px;
+    top: 150px;
     padding-top: 15px;
     z-index: -900;
 }
@@ -36,7 +36,7 @@
 }
 
 .message-history {
-    height: 150px;
+    height: 100px;
     overflow-y: scroll;
     padding: 10px;
 }

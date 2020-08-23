@@ -1,3 +1,4 @@
+from games.games.chinesecheckers import ChineseCheckers
 from games.games.tictactoe import TicTacToe
 from games.games.chess import Chess
 from games.games.reversi import Reversi
@@ -31,5 +32,6 @@ games = {
     Breakthrough().ID: Breakthrough(),
     Neutron().ID: Neutron(),
     Camelot().ID: Camelot(),
-    Hex().ID: Hex()
+    Hex().ID: Hex(),
+    ChineseCheckers().ID: ChineseCheckers()
 }
