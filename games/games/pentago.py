@@ -27,13 +27,13 @@ class RotationHandler(SelectHandler):
 
     def options(self, state, x, y):
         return [
-            Option(0, 0, ['misc/rotate_clockwise.png']),
-            Option(1, 1, ['misc/rotate_anticlockwise.png'])
+            Option(0, 0, ['misc/rotate_anticlockwise.png']),
+            Option(1, 1, ['misc/rotate_clockwise.png'])
         ]
 
     def select(self, state, option, x, y):
         qx, qy = self.QUADRANTS[(x, y)]
-        return self.rotate(state, qx, qy, option.value == 0)
+        return self.rotate(state, qx, qy, option.value == 1)
 
     def rotate(self, state, qx, qy, clockwise):
 

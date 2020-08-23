@@ -26,8 +26,8 @@ class Game:
             return piece.at(x, y) if piece else None
 
         pieces = [[at(self.initial_piece(num_players, x, y), x, y)
-            for y in range(0, self.SHAPE.height)]
-            for x in range(0, self.SHAPE.width)]
+            for y in range(0, self.SHAPE.logical_board_height())]
+            for x in range(0, self.SHAPE.logical_board_end() + 1)]
 
         return State(game=self, num_players=num_players, pieces=pieces)
 
@@ -47,6 +47,7 @@ class Game:
         return None, DisplayProperties()
 
     def on_action(self, state):
+
         return state.end_turn()
 
     def get_actions(self, state):
@@ -58,34 +59,25 @@ class Game:
 
     def on_render(self, state, event):
 
-        display = Display([self.row(state, event, y)
-            for y in range(0, self.SHAPE.height)],
-            self.BACKGROUND.panel_colour, self.SHAPE.hexagonal)
+        display = Display(self.SHAPE)
+
+        positions = [[(self.SHAPE.logical_tile_hoffset(row, tile),
+            self.SHAPE.logical_row_voffset(row))
+            for tile in range(0, self.SHAPE.row_width(row))]
+            for row in range(0, self.SHAPE.height)]
+
+        display = display.set_colours([[self.colour(state, event, x, y)
+            for (x, y) in row] for row in positions])
+
+        display = display.set_textures([[self.texture(state, event, x, y)
+            for (x, y) in row] for row in positions])
+
+        display = display.set_background(self.BACKGROUND.background)
 
         for handler in self.HANDLERS:
             display = handler.render(state, event, display)
 
         return display
-
-    def row(self, state, event, y):
-
-        tiles = [self.tile(state, event, x, y)
-            for x in range(0, self.SHAPE.row_size(y))]
-        height = self.SHAPE.row_height(y)
-        offset = self.SHAPE.row_offset(y)
-
-        return Row(tiles, height, offset)
-
-    def tile(self, state, event, x, y):
-
-        width = self.SHAPE.tile_width(x, y)
-        offset = self.SHAPE.tile_offset(x, y)
-
-        x += self.SHAPE.coordinate_offset(y)
-        colour = self.colour(state, event, x, y)
-        texture = self.texture(state, event, x, y)
-
-        return Tile(x, y, colour, texture, width, offset)
 
     def colour(self, state, event, x, y):
 

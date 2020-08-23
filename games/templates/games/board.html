@@ -4,29 +4,29 @@
 <div class="board z-depth-3" style="
         width: {{ display.width }}px;
         height: {{ display.height }}px;
-        background: {{ display.panel_colour }};">
+        background: {{ display.background }};">
 
     {% for row in display.rows %}
 
         <div style="
                 position: absolute;
-                width: {{ row.width }}px;
+                width: {{ display.width }}px;
                 height: {{ row.height }}px;
-                top: {{ row.offset }}px;">
+                bottom: {{ row.voffset }}px;">
 
             {% for tile in row.tiles %}
 
                 <div {% if event.active %}
-                        onclick="clickBoard({{ tile.x }}, {{ tile.y }},
+                        onclick="clickBoard({{ tile.x }}, {{ row.y }},
                             {{ event.properties.first_selection.0 }},
                             {{ event.properties.first_selection.1 }})"
                         {% endif %}>
 
-                    {% if display.hexagonal %}
+                    {% if display.shape.hexagonal %}
                         <div style="
                                 position: absolute;
                                 width: 0;
-                                left: {{ tile.offset }}px;
+                                left: {{ tile.hoffset }}px;
                                 top: -{{ row.height|div:2 }}px;
                                 border-bottom: {{ row.height|div:2 }}px solid {{ tile.colour }};
                                 border-left: {{ tile.width|div:2 }}px solid transparent;
@@ -38,10 +38,10 @@
                             position: absolute;
                             width: {{ tile.width }}px;
                             height: {{ row.height }}px;
-                            left: {{ tile.offset }}px;
+                            left: {{ tile.hoffset }}px;
                             background: {{ tile.colour }};">
 
-                        {% for texture in tile.textures %}
+                        {% for texture in tile.texture %}
                             <img src="{% static 'games/img/' %}{{ texture.image }}"} style="
                                 position: absolute;
                                 opacity: {{ texture.opacity }};
@@ -54,11 +54,11 @@
 
                     </div>
 
-                    {% if display.hexagonal %}
+                    {% if display.shape.hexagonal %}
                         <div style="
                                 position: absolute;
                                 width: 0;
-                                left: {{ tile.offset }}px;
+                                left: {{ tile.hoffset }}px;
                                 top: {{ row.height }}px;
                                 border-top: {{ row.height|div:2 }}px solid {{ tile.colour }};
                                 border-left: {{ tile.width|div:2 }}px solid transparent;
@@ -80,7 +80,7 @@
                 width: {{ selector.width }}px;
                 height: {{ selector.height }}px;
                 left: {{ selector.x }}px;
-                top: {{ selector.y }}px;
+                bottom: {{ selector.y }}px;
                 background: {{ selector.colour }};
                 opacity: {{ selector.opacity }};
                 z-index: 1000;

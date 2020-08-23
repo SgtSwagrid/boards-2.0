@@ -156,8 +156,7 @@ class MoveHandler(Handler):
     def moveable(self, state, piece):
 
         return any(self.move_valid(state, piece, x, y)
-            for y in range(0, state.game.SHAPE.height)
-            for x in range(0, state.game.SHAPE.row_size(y)))
+            for x, y in state.game.SHAPE.positions())
 
 
 class RemoveHandler(Handler):
@@ -255,8 +254,7 @@ class SelectHandler(Handler):
     def actions(self, state):
 
         return [SelectAction(option.id, x, y)
-            for y in range(0, state.game.SHAPE.height)
-            for x in range(0, state.game.SHAPE.row_size(y))
+            for x, y in state.game.SHAPE.positions()
             if self.enabled(state, x, y)
             for option in self.options(state, x, y)]
 
@@ -265,8 +263,7 @@ class SelectHandler(Handler):
         if not event.active: return display
 
         selectors = [self.selector(state, self.options(state, x, y), x, y)
-            for y in range(0, state.game.SHAPE.height)
-            for x in range(0, state.game.SHAPE.row_size(y))
+            for x, y in state.game.SHAPE.positions()
             if self.visible(state, event, x, y)]
 
         return display.add_selectors(selectors)
@@ -313,8 +310,7 @@ class MultiPlaceHandler(SelectHandler, PlaceHandler):
     def actions(self, state):
 
         pieces = [Piece(type, state.turn.current_id, x, y)
-            for y in range(0, state.game.SHAPE.height)
-            for x in range(0, state.game.SHAPE.row_size(y))
+            for x, y in state.game.SHAPE.positions()
             if self.enabled(state, x, y)
             for type in self.pieces(state, x, y)]
 

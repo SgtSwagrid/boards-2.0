@@ -1,7 +1,7 @@
 from .common.game import Game, PieceType
 from .common.state import Piece
 from .common.handlers import MoveHandler
-from .common.shapes import Shape
+from .common.shapes import Rows
 from .common.util import *
 
 
@@ -59,29 +59,11 @@ class Knight(Man):
         pass
 
 
-
-class CamelotBoard(Shape):
-
-    def row_size(self, y):
-
-        if y in [0, 15]: return 2
-        elif y in [1, 14]: return 8
-        elif y in [2, 13]: return 10
-        else: return 12
-
-    def row_indent(self, y):
-
-        if y in [0, 15]: return 5
-        elif y in [1, 14]: return 2
-        elif y in [2, 13]: return 1
-        else: return 0
-
-
 class Camelot(Game):
 
     ID = 15
     NAME = 'Camelot'
-    SHAPE = CamelotBoard(12, 16)
+    SHAPE = Rows([2, 8, 10] + ([12] * 10) + [10, 8, 2])
     PLAYER_NAMES = ['White', 'Black']
     INFO = 'https://en.m.wikipedia.org/wiki/Camelot_(board_game)'
 

@@ -187,7 +187,9 @@ class StateManager(models.Manager):
 
         for col in state.pieces:
             for piece in col:
-                if piece: PieceModel.pieces.create(piece, state_model)
+                if piece:
+                    print(piece.x, piece.y, piece)
+                    PieceModel.pieces.create(piece, state_model)
 
         for change in state.changes:
             ChangeModel.changes.create(change, state_model)
@@ -231,11 +233,11 @@ class StateModel(models.Model):
         piece_set = PieceModel.pieces.filter(state=self)
         pieces = []
 
-        for x in range(0, game.SHAPE.width):
+        for x in range(0, game.SHAPE.logical_board_end()):
             col_set = piece_set.filter(x=x)
             col = []
 
-            for y in range(0, game.SHAPE.height):
+            for y in range(0, game.SHAPE.logical_board_height()):
                 piece = col_set.filter(y=y)
                 col.append(piece.get().get_piece() if piece.exists() else None)
 

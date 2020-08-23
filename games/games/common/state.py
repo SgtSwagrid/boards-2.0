@@ -76,7 +76,8 @@ class State:
             [PlayerState(i) for i in range(0, num_players)]
 
         self.pieces = pieces if pieces else\
-            [[None] * game.height] * game.width
+            [[None] * game.SHAPE.logical_board_height()] *\
+            (game.SHAPE.logical_board_end() + 1)
 
         self.action = action
         self.changes = changes

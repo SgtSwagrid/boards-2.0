@@ -13,6 +13,7 @@ from games.games.pentago import Pentago
 from games.games.breakthrough import Breakthrough
 from games.games.neutron import Neutron
 from games.games.camelot import Camelot
+from games.games.hex import Hex
 
 games = {
     TicTacToe().ID: TicTacToe(),
@@ -29,5 +30,6 @@ games = {
     Pentago().ID: Pentago(),
     Breakthrough().ID: Breakthrough(),
     Neutron().ID: Neutron(),
-    Camelot().ID: Camelot()
+    Camelot().ID: Camelot(),
+    Hex().ID: Hex()
 }
