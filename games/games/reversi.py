@@ -8,9 +8,7 @@ class ReversiPiece(PieceType):
 
     def place_valid(self, state, piece):
 
-        return state.game.SHAPE.in_bounds(piece.x, piece.y) and\
-            not state.pieces[piece.x][piece.y] and\
-            len(state.game.flips(state, piece)) > 0
+        return len(state.game.flips(state, piece)) > 0
 
     def place_piece(self, state, piece):
 
@@ -19,10 +17,10 @@ class ReversiPiece(PieceType):
 
         for pos in flips:
             state = state\
-                .add_score(state.pieces[pos[0]][pos[1]].owner_id, -1)\
+                .add_score(state.piece_at(pos).owner_id, -1)\
                 .add_score(state.turn.current_id, 1)\
                 .place_piece(Piece(ReversiPiece(),
-                    state.turn.current_id, pos[0], pos[1]))
+                    state.turn.current_id, pos))
 
         return state
 
@@ -41,17 +39,15 @@ class Reversi(Game):
 
     MODIFIED_COLOUR = '#16a085'
 
-    def initial_piece(self, num_players, x, y):
+    def initial_piece(self, num_players, pos):
 
-        x_mid = self.WIDTH // 2 - 1
-        y_mid = self.HEIGHT // 2 - 1
+        mid = Vec(self.WIDTH // 2 - 1, self.HEIGHT // 2 - 1)
 
         # Centre arrangement 2x2
-        if (x == x_mid and y == y_mid) or (x == x_mid + 1 and y == y_mid + 1):
-            return Piece(ReversiPiece(), 0, x, y)  # White
-        if (x == x_mid and y == y_mid + 1) or (x == x_mid + 1 and y == y_mid):
-            return Piece(ReversiPiece(), 1, x, y)  # Black
-        return None
+        if pos == mid or pos == mid + (1, 1):
+            return Piece(ReversiPiece(), 0)  # White
+        if pos == mid + (0, 1) or pos == mid + (1, 0):
+            return Piece(ReversiPiece(), 1)  # Black
 
     def initial_score(self, num_players, player_id):
         return 2
@@ -85,24 +81,25 @@ class Reversi(Game):
             sub_flips = []
 
             for i in range(1, max(self.WIDTH, self.HEIGHT)):
-                x_next = piece.x + i * dir.x
-                y_next = piece.y + i * dir.y
-                if state.enemy(x_next, y_next):
-                    sub_flips.append([x_next, y_next])
-                elif state.friendly(x_next, y_next):
+
+                next = Vec(piece.pos.x + i * dir.x, piece.pos.y + i * dir.y)
+
+                if state.enemy(next):
+                    sub_flips.append(next)
+
+                elif state.friendly(next):
                     flips.extend(sub_flips)
                     break
-                else:
-                    break
+
+                else: break
         return flips
 
     def has_moves(self, state):
 
         '''Returns true if the current state's player has a turn they can play'''
-        for x in range(self.SHAPE.width):
-            for y in range(self.SHAPE.height):
-                if not state.pieces[x][y]:
-                    if ReversiPiece().place_valid(state,
-                            Piece(ReversiPiece(), state.turn.current_id, x, y)):
-                        return True
+        for pos in self.SHAPE.positions():
+            if not state.piece_at(pos):
+                if ReversiPiece().place_valid(state,
+                        Piece(ReversiPiece(), state.turn.current_id, pos)):
+                    return True
         return False

@@ -62,6 +62,9 @@ class Vec:
         if isinstance(v, Vec): return Vec(self.x - v.x, self.y - v.y)
         else: return Vec(self.x - v[0], self.y - v[1])
 
+    def __neg__(self):
+        return Vec(-self.x, -self.y)
+
     def __mul__(self, s):
         return Vec(self.x * s, self.y * s)
 

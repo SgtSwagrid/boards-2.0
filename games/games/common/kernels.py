@@ -65,6 +65,7 @@ class DiamondKernel(Kernel):
             for x in range(-r, r + 1)
             for y in [r - abs(x), abs(x) - r]]
 
+
 class RayKernel(Kernel):
 
     def __init__(self, shape, dir, r0=1, r1=-1):
