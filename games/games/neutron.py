@@ -7,14 +7,14 @@ class SoldierPiece(PieceType):
     TEXTURES = ['misc/white_dot.png', 'misc/black_dot.png']
     STAGE = 1
 
-    def move_valid(self, state, piece, x_to, y_to):
+    def move_valid(self, state, piece, pos):
 
         if not state.turn.stage == self.STAGE or\
-            not piece.pos.straight(Vec(x_to, y_to)): return False
+            not piece.pos.straight(pos): return False
 
-        direction = piece.pos.direction(Vec(x_to, y_to))
+        direction = piece.pos.direction(pos)
         kernel = RayKernel(state.game.SHAPE, direction)
-        return Vec(x_to, y_to) == kernel.extent(state, piece.pos)
+        return pos == kernel.extent(state, piece.pos)
 
 
 class NeutronPiece(SoldierPiece):
@@ -42,8 +42,8 @@ class Neutron(Game):
 
         if state.turn.stage == 0:
 
-            if neuron.y in [0, self.HEIGHT - 1]:
-                return state.end_game(0 if neuron.y == 0 else 1)
+            if neuron.pos.y in [0, self.HEIGHT - 1]:
+                return state.end_game(0 if neuron.pos.y == 0 else 1)
 
             elif all(BoxKernel(self.SHAPE).filled(state, piece.pos)
                     for piece in state.find_pieces(state.turn.next_id)):
@@ -62,9 +62,9 @@ class Neutron(Game):
 
         return super().on_setup(num_players).end_stage()
 
-    def initial_piece(self, num_players, x, y):
+    def initial_piece(self, num_players, pos):
 
-        if y == 0: return Piece(SoldierPiece(), 0)
-        elif y == self.HEIGHT - 1: return Piece(SoldierPiece(), 1)
-        elif x == self.WIDTH // 2 and y == self.HEIGHT // 2:
+        if pos.y == 0: return Piece(SoldierPiece(), 0)
+        elif pos.y == self.HEIGHT - 1: return Piece(SoldierPiece(), 1)
+        elif pos.x == self.WIDTH // 2 and pos.y == self.HEIGHT // 2:
             return Piece(NeutronPiece(), -1)

@@ -125,7 +125,7 @@ class Texture:
 class Selector:
 
     def __init__(self, options, target, state,
-            size=0.5, offset=0.5, colour='#F5F6FA', opacity=0.9):
+            size=0.5, offset=0.5, colour='#F5F6FA', opacity=0.8):
 
         self.options = options
 

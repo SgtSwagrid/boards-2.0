@@ -88,8 +88,8 @@
 
             {% for option in selector.options %}
                 <div onclick="clickSelector({{ option.id }},
-                            {{ selector.target_x }},
-                            {{ selector.target_y }})" style="
+                            {{ selector.target.x }},
+                            {{ selector.target.y }})" style="
                         position: absolute;
                         width: {{selector.height }}px;
                         height: {{ selector.height }}px;

@@ -3,7 +3,7 @@ class PlaceAction:
     def __init__(self, piece):
 
         self.piece = piece
-        self.new_pos = piece.new_pos
+        self.new_pos = piece.pos
 
 
 class MoveAction:

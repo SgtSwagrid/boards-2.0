@@ -83,7 +83,7 @@ def board_view(request, board_code):
 
     target = None
     if 'tx' in request.POST:
-        target = int(request.POST['tx']), int(request.POST['ty'])
+        target = Vec(int(request.POST['tx']), int(request.POST['ty']))
 
     active = board.status == 1 and board.is_current(player)\
         and state_model == board.state

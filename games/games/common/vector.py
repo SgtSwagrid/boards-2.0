@@ -72,6 +72,9 @@ class Vec:
     def __str__(self):
         return f'({self.x}, {self.y})'
 
+    def __hash__(self):
+        return hash((self.x, self.y))
+
 
 def directions():
 

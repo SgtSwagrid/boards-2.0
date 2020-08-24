@@ -8,13 +8,13 @@ class Kernel:
     def positions(self, centre):
 
         return [v for v in self.apply(centre)
-            if self.shape.in_bounds(v.x, v.y)]
+            if self.shape.in_bounds(v)]
 
     def pieces(self, state, centre):
 
-        return [state.pieces[v.x][v.y]
+        return [state.piece_at(v)
             for v in self.positions(centre)
-            if state.pieces[v.x][v.y]]
+            if state.piece_at(v)]
 
     def find_pieces(self, state, centre,
             player_id=-1, type=-1, mode=-1, x=-1, y=-1):
@@ -27,7 +27,7 @@ class Kernel:
 
     def filled(self, state, centre):
 
-        return all(state.pieces[v.x][v.y] for v in self.positions(centre))
+        return all(state.piece_at(v) for v in self.positions(centre))
 
     def open(self, state, centre):
 
@@ -44,7 +44,7 @@ class BoxKernel(Kernel):
 
     def apply(self, centre):
 
-        return [Vec(centre.x + x, centre.y + y)
+        return [centre + Vec(x, y)
             for r in range(self.r0, self.r1 + 1)
             for x in range(-r, r + 1)
             for y in range(-r, r + 1)]
@@ -60,7 +60,7 @@ class DiamondKernel(Kernel):
 
     def apply(self, centre):
 
-        return [Vec(centre.x + x, centre.y + y)
+        return [centre + Vec(x, y)
             for r in range(self.r0, self.r1 + 1)
             for x in range(-r, r + 1)
             for y in [r - abs(x), abs(x) - r]]
@@ -76,7 +76,7 @@ class RayKernel(Kernel):
 
     def apply(self, centre):
 
-        return [Vec(centre.x + r * self.dir.x, centre.y + r * self.dir.y)
+        return [centre + Vec(r * self.dir.x, r * self.dir.y)
             for r in range(self.r0, self.r1 + 1)]
 
     def first(self, state, centre):
@@ -86,10 +86,7 @@ class RayKernel(Kernel):
 
     def extent(self, state, centre):
 
-        x, y = centre.x, centre.y
+        while state.open(centre):
+            centre = centre + self.dir
 
-        while state.open(x + self.dir.x, y + self.dir.y):
-            x += self.dir.x
-            y += self.dir.y
-
-        return Vec(x, y)
+        return centre

@@ -169,7 +169,6 @@ class Shape:
             for row in range(0, self.height)
             for tile in range(0, self.row_width(row))]
 
-    @lru_cache
     def row(self, y):
 
         row = [row for row in range(0, self.height)
