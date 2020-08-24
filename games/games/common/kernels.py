@@ -86,7 +86,7 @@ class RayKernel(Kernel):
 
     def extent(self, state, centre):
 
-        while state.open(centre):
+        while state.open(centre + self.dir):
             centre = centre + self.dir
 
         return centre
