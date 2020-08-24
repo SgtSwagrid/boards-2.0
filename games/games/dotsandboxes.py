@@ -42,7 +42,7 @@ class DotsAndBoxes(Game):
 
     def on_action(self, state):
 
-        game_finished = all([state.pieces_at(pos)
+        game_finished = all([state.piece_at(pos)
             for pos in self.SHAPE.positions()
             if (pos.x % 2 == 1 and pos.y % 2 == 1)])
 

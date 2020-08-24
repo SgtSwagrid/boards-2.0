@@ -18,8 +18,8 @@ class ChompPiece(PieceType):
 
         fill_piece = Piece(ChompPiece(), owner_id=piece.owner_id, pos=piece.pos)
 
-        for x in range(piece.x, state.game.SHAPE.width):
-            for y in range(piece.y, state.game.SHAPE.height):
+        for x in range(piece.pos.x, state.game.SHAPE.width):
+            for y in range(piece.pos.y, state.game.SHAPE.height):
                 if not state.piece_at(Vec(x, y)):
                     state = state.place_piece(fill_piece.at(Vec(x, y)))
 

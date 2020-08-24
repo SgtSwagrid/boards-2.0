@@ -101,7 +101,7 @@ class MillBackground(Background):
                 textures.append('mill/half_line_right.png')
             if pos - (1, 0) in self.connections:
                 textures.append('mill/half_line_left.png')
-            if pos + (1, 0) in self.connections:
+            if pos + (0, 1) in self.connections:
                 textures.append('mill/half_line_up.png')
             if pos - (0, 1) in self.connections:
                 textures.append('mill/half_line_down.png')

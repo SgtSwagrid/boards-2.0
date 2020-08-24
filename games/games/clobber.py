@@ -26,7 +26,7 @@ class Clobber(Game):
 
     def initial_piece(self, num_players, pos):
 
-        return Piece(ClobberPiece(), (pos.y + pos.y) % 2)
+        return Piece(ClobberPiece(), (pos.x + pos.y) % 2)
 
     def on_action(self, state):
 
