@@ -1,7 +1,4 @@
 from .common.game import *
-from .common.handlers import *
-from .common.backgrounds import Gingham
-from .common.shapes import Table
 
 
 class DotsAndBoxes(Game):

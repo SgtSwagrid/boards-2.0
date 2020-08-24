@@ -2,6 +2,8 @@ from .state import *
 from .display import *
 from .events import *
 from .backgrounds import *
+from .shapes import *
+from .handlers import *
 
 
 class Game:

@@ -1,6 +1,4 @@
-from .tictactoe import TicTacToe, TicTacToePiece
-from .common.handlers import PlaceHandler
-from .common.shapes import Rectangle
+from .tictactoe import *
 
 
 class ConnectFourPiece(TicTacToePiece):

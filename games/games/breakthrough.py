@@ -1,7 +1,4 @@
 from .common.game import *
-from .common.state import Piece
-from .common.handlers import MoveHandler
-from .common.shapes import Rectangle
 
 
 class BreakthroughPiece(PieceType):

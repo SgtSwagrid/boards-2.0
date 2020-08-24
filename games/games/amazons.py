@@ -1,12 +1,11 @@
 from .common.game import *
-from .common.handlers import *
-from .common.shapes import Rectangle
 
 
 class Amazons(Game):
 
     ID = 6
     NAME = 'Amazons'
+    BACKGROUND = Checkerboard(['#FDCB6E', '#FFEAA7'])
     SHAPE = Rectangle(10, 10)
     PLAYER_NAMES = ['White', 'Black']
     INFO = 'https://en.wikipedia.org/wiki/Game_of_the_Amazons'

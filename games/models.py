@@ -188,7 +188,6 @@ class StateManager(models.Manager):
         for col in state.pieces:
             for piece in col:
                 if piece:
-                    print(piece.x, piece.y, piece)
                     PieceModel.pieces.create(piece, state_model)
 
         for change in state.changes:

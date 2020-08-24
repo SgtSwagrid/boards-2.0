@@ -1,7 +1,4 @@
-from .common.game import *
-from .common.handlers import *
-from .common.shapes import Rectangle
-from .tictactoe import TicTacToe
+from .tictactoe import *
 
 
 class Quixo(TicTacToe):

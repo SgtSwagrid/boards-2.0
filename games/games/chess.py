@@ -1,6 +1,4 @@
 from .common.game import *
-from .common.handlers import *
-from .common.shapes import *
 
 
 class Pawn(PieceType):

@@ -243,31 +243,41 @@ class Hexagonal(Shape):
 
         return self.logical_tile_hspace(row, tile) * math.sqrt(3)
 
+
+class CentredHex(Hexagonal):
+
     def logical_row_start(self, row):
 
-        return super().logical_row_start(row)
+        start = max(range(0, self.height),
+            key=lambda r: self.row_width(r) - r)
 
-        #start = max(range(0, self.height),
-        #    key=lambda row: row + self.row_width(row))
-
-        #return self.logical_row_width(row) - self.logical_row_width(start) - (row - start)
-
-
-class SlantedHexagonal(Hexagonal):
-
-    def visual_row_start(self, row):
-
-        return (row / 2 + self.logical_row_start(row)) * math.sqrt(3)
+        dw = self.logical_row_width(row) - self.logical_row_width(start)
+        return ((start - row) - dw) // 2
 
 
-class StaggeredHexagonal(Hexagonal):
+class SlantedHex(Hexagonal):
 
     def visual_row_start(self, row):
 
-        return (row % 2 / 2 + self.logical_row_start(row)) * math.sqrt(3)
+        return (self.logical_row_start(row) + row / 2) * math.sqrt(3)
+
+    def logical_row_start(self, row):
+
+        return 0
 
 
-class Hexagon(Hexagonal):
+class StaggeredHex(Hexagonal):
+
+    def visual_row_start(self, row):
+
+        return row % 2 / 2 * math.sqrt(3)
+
+    def logical_row_start(self, row):
+
+        return (self.height - 1 - row) // 2
+
+
+class Hexagon(CentredHex):
 
     def __init__(self, size):
 
@@ -280,7 +290,7 @@ class Hexagon(Hexagonal):
         return self.size + y
 
 
-class Star(Hexagonal):
+class Star(CentredHex):
 
     def __init__(self, size):
 

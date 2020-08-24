@@ -1,7 +1,4 @@
 from .common.game import *
-from .common.handlers import MoveHandler
-from .common.shapes import Rectangle
-from .common.util import *
 
 
 class SoldierPiece(PieceType):

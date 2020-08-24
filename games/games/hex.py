@@ -1,7 +1,4 @@
-from .common.game import Game, PieceType
-from .common.handlers import PlaceHandler
-from .common.backgrounds import HexCheckerboard
-from .common.shapes import Hexagon
+from .common.game import *
 
 
 class HexPiece(PieceType):

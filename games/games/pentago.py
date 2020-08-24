@@ -1,7 +1,4 @@
-from .tictactoe import TicTacToe, TicTacToePiece
-from .common.handlers import PlaceHandler, SelectHandler
-from .common.shapes import Sections
-from .common.display import Option
+from .tictactoe import *
 
 
 class PentagoPiece(TicTacToePiece):

@@ -1,8 +1,4 @@
-from .common.game import Game, PieceType
-from .common.state import Piece
-from .common.handlers import MoveHandler
-from .common.shapes import Rows
-from .common.util import *
+from .common.game import *
 
 
 class Man(PieceType):

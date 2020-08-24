@@ -1,7 +1,4 @@
 from .common.game import *
-from .common.handlers import *
-from .common.shapes import Rectangle
-from .common.backgrounds import Background
 
 
 class MillBoardBackground(Background):

@@ -1,6 +1,4 @@
-from .common.game import Game, PieceType
-from .common.handlers import PlaceHandler
-from .common.shapes import Rectangle
+from .common.game import *
 import itertools
 
 

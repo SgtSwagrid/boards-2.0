@@ -50,6 +50,8 @@ class Display:
         display = copy.copy(self)
         display.width *= sf
         display.height *= sf
+        if self.shape.hexagonal:
+            display.height -= 2 * (self.shape.height - 1)
         display.rows = [row.scale(sf) for row in display.rows]
         display.selectors = [selector.scale(sf)
             for selector in display.selectors]
@@ -76,6 +78,8 @@ class Row:
         row = copy.copy(self)
         row.height *= sf
         row.voffset *= sf
+        if self.shape.hexagonal:
+            row.voffset -= 2 * self.row_id
         row.tiles = [tile.scale(sf) for tile in row.tiles]
         return row
 

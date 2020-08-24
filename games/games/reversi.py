@@ -1,7 +1,4 @@
 from .common.game import *
-from .common.handlers import *
-from .common.backgrounds import Checkerboard
-from .common.shapes import Rectangle
 
 
 class Reversi(Game):

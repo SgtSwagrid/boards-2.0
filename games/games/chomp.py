@@ -1,22 +1,18 @@
 from .common.game import *
-from .common.handlers import *
-from .common.shapes import Rectangle
 
 
-class ChompBoard(Checkerboard):
+class ChompBackground(Checkerboard):
 
     def texture(self, x, y):
-        if x == 0 and y == 0:
-            return ['misc/poison.png']
-        else:
-            return super().texture(x, y)
+        if x == 0 and y == 0: return ['misc/poison.png']
+        else: return super().texture(x, y)
 
 
 class Chomp(Game):
 
     ID = 8
     NAME = 'Chomp'
-    BACKGROUND = ChompBoard(['#5D4037', '#8D6E63'])
+    BACKGROUND = ChompBackground(['#5D4037', '#8D6E63'])
     SHAPE = Rectangle(6, 5)
     PLAYER_NAMES = ['Purple', 'Yellow']
     INFO = 'https://en.wikipedia.org/wiki/Chomp'

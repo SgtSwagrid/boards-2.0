@@ -20,7 +20,7 @@ class Checkerboard(Background):
     def colour(self, x, y):
         return self.colours[0] if (x + y) % 2 == 0 else self.colours[1]
 
-class Table(Background):
+class TableOutline(Background):
 
     def colour(self, x, y):
         return self.colours[0] if x % 2 == 1 and y % 2 == 1 else self.colours[1]
@@ -35,6 +35,6 @@ class Gingham(Background):
 class HexCheckerboard(Background):
 
     def colour(self, x, y):
-        if (x + (y % 2)) % 3 == 0: return self.colours[0]
-        elif (x + (y % 2)) % 3 == 1: return self.colours[1]
+        if (2 * x + y) % 3 == 0: return self.colours[0]
+        elif (2 * x + y) % 3 == 1: return self.colours[1]
         else: return self.colours[2]
