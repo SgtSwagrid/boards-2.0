@@ -6,11 +6,11 @@ class Amazon(PieceType):
     ID = 0
     TEXTURES = ['chess/white_queen.png', 'chess/black_queen.png']
 
-    def move_valid(self, state, piece, x_to, y_to):
+    def move_valid(self, state, piece, pos):
 
         return state.turn.stage == 0 and\
-            not state.pieces[x_to][y_to] and\
-            is_queen_move(state, piece.x, piece.y, x_to, y_to)
+            not state.piece_at(pos) and\
+            is_queen_move(state, piece.pos, pos)
 
 
 class Arrow(PieceType):
@@ -22,12 +22,9 @@ class Arrow(PieceType):
 
         if state.turn.stage == 0: return False
 
-        x_from = state.action.x_to
-        y_from = state.action.y_to
-
         return state.turn.stage == 1 and\
             not state.pieces[piece.x][piece.y] and\
-            is_queen_move(state, x_from, y_from, piece.x, piece.y)
+            is_queen_move(state, piece.pos, piece.x, piece.y)
 
 
 class Amazons(Game):
@@ -53,7 +50,7 @@ class Amazons(Game):
 
         else: return state.end_game(state.turn.current_id)
 
-    def initial_piece(self, num_players, x, y):
+    def initial_piece(self, num_players, pos):
 
         # Top and bottom arrangement
         tw = self.SHAPE.width // 3
@@ -63,44 +60,44 @@ class Amazons(Game):
         op_th = self.SHAPE.height - 1 - th
 
         white_queens = [
-            [tw, 0],
-            [op_tw, 0],
-            [0, th],
-            [self.SHAPE.width-1, th]
+            Vec(tw, 0),
+            Vec(op_tw, 0),
+            Vec(0, th),
+            Vec(self.SHAPE.width-1, th)
         ]
 
         black_queens = [
-            [tw, self.SHAPE.height-1],
-            [op_tw, self.SHAPE.height-1],
-            [0, op_th],
-            [self.SHAPE.width-1, op_th]
+            Vec(tw, self.SHAPE.height-1),
+            Vec(op_tw, self.SHAPE.height-1),
+            Vec(0, op_th),
+            Vec(self.SHAPE.width-1, op_th)
         ]
 
-        if [x, y] in white_queens:
-            return Piece(Amazon(), 0, x, y)  # White
+        if pos in white_queens:
+            return Piece(Amazon(), 0, pos)  # White
 
-        if [x, y] in black_queens:
-            return Piece(Amazon(), 1, x, y)  # Black
+        if pos in black_queens:
+            return Piece(Amazon(), 1, pos)  # Black
 
 
-def is_queen_move(state, x_from, y_from, x_to, y_to):
+def is_queen_move(state, pos_from, pos_to):
 
-    dx, dy = delta(x_from, y_from, x_to, y_to)
-    sx, sy = direction(x_from, y_from, x_to, y_to)
-    d = distance(x_from, y_from, x_to, y_to)
-    return (((sx == 0) ^ (sy == 0)) or (abs(dx) == abs(dy))) and\
-        path(x_from, y_from, sx, sy, d, state.pieces)
+    dpos = delta(pos_from, pos_to)
+    spos = direction(pos_from, pos_to)
+    d = distance(pos_from, pos_to)
+    return (((spos.x == 0) ^ (spos.y == 0)) or (abs(dpos.x) == abs(dpos.y))) and\
+        path(pos_from, spos, d, state.pieces)
 
-def distance(x_from, y_from, x_to, y_to):
-    return max(abs(x_to - x_from), abs(y_to - y_from))
+def distance(pos_from, pos_to):
+    return Vec(max(abs(pos_to.x - pos_from.x), abs(pos_to.y - pos_from.y)))
 
-def delta(x_from, y_from, x_to, y_to):
-    return abs(x_to - x_from), abs(y_to - y_from)
+def delta(pos_from, pos_to):
+    return Vec(abs(pos_to.x - pos_from.x), abs(pos_to.y - pos_from.y))
 
-def direction(x_from, y_from, x_to, y_to):
-    return (-1 if x_to < x_from else 0 if x_to == x_from else 1),\
-            (-1 if y_to < y_from else 0 if y_to == y_from else 1)
+def direction(pos_from, pos_to):
+    return (-1 if pos_to.x < pos_from.x else 0 if pos_to.x == pos_from.x else 1),\
+            (-1 if pos_to.y < pos_from.y else 0 if pos_to.y == pos_from.y else 1)
 
-def path(x, y, sx, sy, d, pieces):
+def path(pos, spos, d, pieces):
     return all(map(lambda r: not pieces
-    [x + sx * r][y + sy * r], range(1, d)))
+    [pos.x + spos.x * r][pos.y + spos.y * r], range(1, d)))

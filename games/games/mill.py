@@ -10,7 +10,7 @@ class MillPiece(PieceType):
     def place_valid(self, state, piece):
         # if epoch is placing epoch and the selected tile is valid and there is no other piece already
         if state.turn.epoch == 0 and state.turn.stage == 0:
-            return state.game.graph.is_node(piece.x, piece.y) and not state.pieces[piece.x][piece.y]
+            return state.game.graph.is_node(piece.pos) and not state.piece_at(piece.pos)
         else:
             return False
 
@@ -21,7 +21,7 @@ class MillPiece(PieceType):
         if state.turn.ply / 2 > 8:
             state = state.end_epoch()
         #print(state.turn.ply / 2)
-        piece = state.pieces[piece.x][piece.y]
+        piece = state.piece_at(piece.pos)
         if state.game.graph.is_mill(state, piece):
             #print('end stage')
             return state.end_stage()
@@ -30,19 +30,19 @@ class MillPiece(PieceType):
             return state.end_turn()
 
     # a piece owned by the active player can be moved iff all pieces have already been placed = after turn 17
-    def move_valid(self, state, piece, x_to, y_to):
+    def move_valid(self, state, piece, pos):
         if state.turn.epoch == 1 and state.turn.stage == 0:
             # if in the graph from the starting node the target node is reachable and there is no other piece yet
-            if state.game.graph.fetch_node(piece.x, piece.y).is_neighbour(state.game.graph.fetch_node(x_to, y_to)) and not \
-                    state.pieces[x_to][y_to]:
+            if state.game.graph.fetch_node(piece.x, piece.y).is_neighbour(state.game.graph.fetch_node(pos)) and not \
+                    state.piece_at(pos):
                 return True
         else:
             return False
 
     # after moving a piece a NEW mill might have been formed iff that is the case remove one opponents piece
-    def move_piece(self, state, piece, x_to, y_to):
-        state = state.move_piece(piece, x_to, y_to)
-        piece = state.pieces[x_to][y_to]
+    def move_piece(self, state, piece, pos):
+        state = state.move_piece(piece, pos)
+        piece = state.piece_at(pos)
         # print([x_to, y_to])
         # print([piece.x, piece.y])
         if not state.game.graph.is_mill(state, piece):
@@ -53,7 +53,7 @@ class MillPiece(PieceType):
     #  a piece may only removed IFF a mill has been formed before(state.stage == 1) and it's an opponent's
     def remove_valid(self, state, piece):
         try:
-            return state.turn.stage == 1 and state.enemy(piece.x, piece.y)
+            return state.turn.stage == 1 and state.enemy(piece.pos)
         except AttributeError:
             return False
 
@@ -72,37 +72,38 @@ class MillBackground(Background):
         self.connections = []
         for x in range(0, width):
             for y in range(0, height):
-                if x == 0 or x == (width - 1) or y == 0 or y == (height - 1):
-                    self.connections.append((x, y))
-                elif (y == 2 or y == (height - 3)) and 1 < x < (width - 2):
-                    self.connections.append((x, y))
-                elif (x == 2 or x == (width - 3)) and 1 < y < (height - 2):
-                    self.connections.append((x, y))
-                elif (y == 4 or y == (height - 5)) and 3 < x < (width - 4):
-                    self.connections.append((x, y))
-                elif y == 5 and x != 5:
-                    self.connections.append((x, y))
-                elif y != 5 and x == 5:
-                    self.connections.append((x, y))
+                pos = Vec(x, y)
+                if pos.x == 0 or pos.x == (width - 1) or pos.y == 0 or pos.y == (height - 1):
+                    self.connections.append(pos)
+                elif (pos.y == 2 or pos.y == (height - 3)) and 1 < pos.x < (width - 2):
+                    self.connections.append(pos)
+                elif (pos.x == 2 or pos.x == (width - 3)) and 1 < pos.y < (height - 2):
+                    self.connections.append(pos)
+                elif (pos.y == 4 or pos.y == (height - 5)) and 3 < pos.x < (width - 4):
+                    self.connections.append(pos)
+                elif pos.y == 5 and pos.x != 5:
+                    self.connections.append(pos)
+                elif pos.y != 5 and pos.x == 5:
+                    self.connections.append(pos)
 
-    def colour(self, x, y):
+    def colour(self, pos):
         return '#FFEAA7'
 
-    def texture(self, x, y):
+    def texture(self, pos):
         textures = []
         # tests that only connection tiles get to be shown as connections
-        if (x, y) in self.connections:
+        if pos in self.connections:
             # tests whether a tile needs to be marked as a valid point to be moved one
-            if self.GRAPH.is_node(x, y):
+            if self.GRAPH.is_node(pos):
                 textures.append('mill/dot.png')
             # tests whether a tile has neighbours it needs to be connected to
-            if (x + 1, y) in self.connections:
+            if pos + (1, 0) in self.connections:
                 textures.append('mill/half_line_right.png')
-            if (x - 1, y) in self.connections:
+            if pos - (1, 0) in self.connections:
                 textures.append('mill/half_line_left.png')
-            if (x, y + 1) in self.connections:
+            if pos + (1, 0) in self.connections:
                 textures.append('mill/half_line_up.png')
-            if (x, y - 1) in self.connections:
+            if pos - (0, 1) in self.connections:
                 textures.append('mill/half_line_down.png')
         return textures
 
@@ -119,9 +120,8 @@ class Mill(Game):
 
         class Node:
 
-            def __init__(self, x, y):
-                self.x = x
-                self.y = y
+            def __init__(self, pos):
+                self.pos = pos
                 self.neighbours = []
 
             def add_neighbour(self, other):
@@ -134,59 +134,61 @@ class Mill(Game):
         def __init__(self):
             self.nodes = []
 
-        def add_node(self, x, y):
-            self.nodes.append(self.Node(x, y))
+        def add_node(self, pos):
+            self.nodes.append(self.Node(pos))
 
-        def add_edge(self, node, node_list):
-            for point in node_list:
+        def add_edge(self, pos, pos_list):
+            node = self.fetch_node(pos)
+            for point_pos in pos_list:
+                point = self.fetch_node(point_pos)
                 node.add_neighbour(point)
                 point.add_neighbour(node)
 
-        def fetch_node(self, x=None, y=None, piece=None):
+        def fetch_node(self, pos=None, piece=None):
             if piece is None:
                 for point in self.nodes:
-                    if x == point.x and y == point.y:
+                    if pos == point.pos:
                         return point
             else:
                 for point in self.nodes:
-                    if piece.x == point.x and piece.y == point.y:
+                    if piece.pos == point.pos:
                         return point
 
-        def is_node(self, x, y):
-            return self.fetch_node(x, y) in self.nodes
+        def is_node(self, pos):
+            return self.fetch_node(pos) in self.nodes
 
         def is_mill(self, state, piece):
             mill_x_friend = None
             mill_y_friend = None
             for neighbour in self.fetch_node(piece=piece).neighbours:
                 # print(str(neighbour.x) + ' | ' + str(neighbour.y))
-                if state.pieces[neighbour.x][neighbour.y]:
-                    neighbour_piece = state.pieces[neighbour.x][neighbour.y]
+                if state.piece_at(neighbour.pos):
+                    neighbour_piece = state.piece_at(neighbour.pos)
                     if neighbour_piece.owner_id == state.turn.current_id:
                         # print('True')
                         # these so called duplicates are actually not duplicates at all ...
                         if not mill_x_friend:
-                            if neighbour_piece.x == piece.x:
+                            if neighbour_piece.pos.x == piece.pos.x:
                                 # print('Make a friend in x')
                                 mill_x_friend = neighbour_piece
-                        elif neighbour_piece is not piece and mill_x_friend.x == neighbour_piece.x:
+                        elif neighbour_piece is not piece and mill_x_friend.pos.x == neighbour_piece.pos.x:
                             #print([[mill_x_friend.x, mill_x_friend.y], [neighbour_piece.x, neighbour_piece.y]])
                             return True
 
                         if not mill_y_friend:
-                            if neighbour_piece.y == piece.y:
+                            if neighbour_piece.pos.y == piece.pos.y:
                                 # print('Make a friend in y')
                                 mill_y_friend = neighbour_piece
-                        elif neighbour_piece is not piece and mill_y_friend.y == neighbour_piece.y:
+                        elif neighbour_piece is not piece and mill_y_friend.pos.y == neighbour_piece.pos.y:
                             #print([[mill_y_friend.x, mill_y_friend.y], [neighbour_piece.x, neighbour_piece.y]])
                             return True
 
                         for more_neighbour in self.fetch_node(piece=neighbour_piece).neighbours:
                             # print(str(more_neighbour.x) + ' | ' + str(more_neighbour.y))
-                            if state.pieces[more_neighbour.x][more_neighbour.y]:
-                                neighbour_piece = state.pieces[more_neighbour.x][more_neighbour.y]
+                            if state.piece_at(more_neighbour.pos):
+                                neighbour_piece = state.piece_at(more_neighbour.pos)
                                 if neighbour_piece.owner_id == state.turn.current_id and \
-                                        (piece.x == neighbour_piece.x or piece.y == neighbour_piece.y) and \
+                                        (piece.pos == more_neighbour.pos) and \
                                         (neighbour_piece is not piece):
                                     #print([[piece.x, piece.y], [neighbour_piece.x, neighbour_piece.y]])
                                     # print('True')
@@ -204,40 +206,41 @@ class Mill(Game):
     graph = Graph()
 
     validPoint = [
-        (0, 10), (0, 5), (0, 0), (2, 8), (2, 5), (2, 2), (4, 6), (4, 5), (4, 4), (5, 10), (5, 8), (5, 6), (5, 4),
-        (5, 2), (5, 0), (6, 6), (6, 5), (6, 4), (8, 8), (8, 5), (8, 2), (10, 10), (10, 5), (10, 0)
+        Vec(0, 10), Vec(0, 5), Vec(0, 0), Vec(2, 8), Vec(2, 5), Vec(2, 2), Vec(4, 6), Vec(4, 5), Vec(4, 4),
+        Vec(5, 10), Vec(5, 8), Vec(5, 6), Vec(5, 4), Vec(5, 2), Vec(5, 0), Vec(6, 6), Vec(6, 5), Vec(6, 4),
+        Vec(8, 8), Vec(8, 5), Vec(8, 2), Vec(10, 10), Vec(10, 5), Vec(10, 0)
     ]
 
     for point in validPoint:
-        graph.add_node(point[0], point[1])
+        graph.add_node(point)
 
-    graph.add_edge(graph.fetch_node(0, 10), [graph.fetch_node(5, 10), graph.fetch_node(0, 5)])
-    graph.add_edge(graph.fetch_node(5, 10), [graph.fetch_node(5, 8), graph.fetch_node(10, 10)])
-    graph.add_edge(graph.fetch_node(10, 10), [graph.fetch_node(10, 5)])
+    graph.add_edge(Vec(0, 10), [Vec(5, 10), Vec(0, 5)])
+    graph.add_edge(Vec(5, 10), [Vec(5, 8), Vec(10, 10)])
+    graph.add_edge(Vec(10, 10), [Vec(10, 5)])
 
-    graph.add_edge(graph.fetch_node(2, 8), [graph.fetch_node(5, 8), graph.fetch_node(2, 5)])
-    graph.add_edge(graph.fetch_node(5, 8), [graph.fetch_node(5, 6), graph.fetch_node(8, 8)])
-    graph.add_edge(graph.fetch_node(8, 8), [graph.fetch_node(8, 5)])
+    graph.add_edge(Vec(2, 8), [Vec(5, 8), Vec(2, 5)])
+    graph.add_edge(Vec(5, 8), [Vec(5, 6), Vec(8, 8)])
+    graph.add_edge(Vec(8, 8), [Vec(8, 5)])
 
-    graph.add_edge(graph.fetch_node(4, 6), [graph.fetch_node(4, 5), graph.fetch_node(5, 6)])
-    graph.add_edge(graph.fetch_node(5, 6), [graph.fetch_node(6, 6)])
-    graph.add_edge(graph.fetch_node(6, 6), [graph.fetch_node(6, 5)])
+    graph.add_edge(Vec(4, 6), [Vec(4, 5), Vec(5, 6)])
+    graph.add_edge(Vec(5, 6), [Vec(6, 6)])
+    graph.add_edge(Vec(6, 6), [Vec(6, 5)])
 
-    graph.add_edge(graph.fetch_node(0, 5), [graph.fetch_node(0, 0), graph.fetch_node(2, 5)])
-    graph.add_edge(graph.fetch_node(2, 5), [graph.fetch_node(2, 2), graph.fetch_node(4, 5)])
-    graph.add_edge(graph.fetch_node(4, 5), [graph.fetch_node(4, 4)])
+    graph.add_edge(Vec(0, 5), [Vec(0, 0), Vec(2, 5)])
+    graph.add_edge(Vec(2, 5), [Vec(2, 2), Vec(4, 5)])
+    graph.add_edge(Vec(4, 5), [Vec(4, 4)])
 
-    graph.add_edge(graph.fetch_node(0, 0), [graph.fetch_node(5, 0)])
-    graph.add_edge(graph.fetch_node(2, 2), [graph.fetch_node(5, 2)])
-    graph.add_edge(graph.fetch_node(4, 4), [graph.fetch_node(5, 4)])
+    graph.add_edge(Vec(0, 0), [Vec(5, 0)])
+    graph.add_edge(Vec(2, 2), [Vec(5, 2)])
+    graph.add_edge(Vec(4, 4), [Vec(5, 4)])
 
-    graph.add_edge(graph.fetch_node(5, 4), [graph.fetch_node(5, 2), graph.fetch_node(6, 4)])
-    graph.add_edge(graph.fetch_node(5, 2), [graph.fetch_node(5, 0), graph.fetch_node(8, 2)])
-    graph.add_edge(graph.fetch_node(5, 0), [graph.fetch_node(10, 0)])
+    graph.add_edge(Vec(5, 4), [Vec(5, 2), Vec(6, 4)])
+    graph.add_edge(Vec(5, 2), [Vec(5, 0), Vec(8, 2)])
+    graph.add_edge(Vec(5, 0), [Vec(10, 0)])
 
-    graph.add_edge(graph.fetch_node(6, 5), [graph.fetch_node(6, 4), graph.fetch_node(8, 5)])
-    graph.add_edge(graph.fetch_node(8, 5), [graph.fetch_node(8, 2), graph.fetch_node(10, 5)])
-    graph.add_edge(graph.fetch_node(10, 5), [graph.fetch_node(10, 0)])
+    graph.add_edge(Vec(6, 5), [Vec(6, 4), Vec(8, 5)])
+    graph.add_edge(Vec(8, 5), [Vec(8, 2), Vec(10, 5)])
+    graph.add_edge(Vec(10, 5), [Vec(10, 0)])
 
     PIECES = [MillPiece()]
     HANDLERS = [PlaceHandler(MillPiece()), MoveHandler(PIECES), RemoveHandler(PIECES)]

@@ -9,29 +9,28 @@ class ChompPiece(PieceType):
     def colour(self, piece, state):
 
         return self.COLOURS[2 * piece.owner_id]\
-            if (piece.x + piece.y) % 2 == 0 else\
+            if (piece.pos.x + piece.pos.y) % 2 == 0 else\
             self.COLOURS[piece.owner_id * 2 + 1]
 
     def place_piece(self, state, piece):
 
         state = state.place_piece(piece)
 
-        fill_piece = Piece(ChompPiece(),
-            owner_id=piece.owner_id, x=piece.x, y=piece.y)
+        fill_piece = Piece(ChompPiece(), owner_id=piece.owner_id, pos=piece.pos)
 
         for x in range(piece.x, state.game.SHAPE.width):
             for y in range(piece.y, state.game.SHAPE.height):
-                if not state.pieces[x][y]:
-                    state = state.place_piece(fill_piece.at(x, y))
+                if not state.piece_at(Vec(x, y)):
+                    state = state.place_piece(fill_piece.at(Vec(x, y)))
 
         return state
 
 
 class ChompBackground(Checkerboard):
 
-    def texture(self, x, y):
-        if x == 0 and y == 0: return ['misc/poison.png']
-        else: return super().texture(x, y)
+    def texture(self, pos):
+        if pos.x == 0 and pos.y == 0: return ['misc/poison.png']
+        else: return super().texture(pos)
 
 
 class Chomp(Game):
@@ -50,7 +49,7 @@ class Chomp(Game):
 
         l_piece = state.action.piece
         # Eaten the poison
-        game_finished = (l_piece.x == 0 and l_piece.y == 0)
+        game_finished = (l_piece.pos.x == 0 and l_piece.pos.y == 0)
 
         return state.end_turn() if not game_finished\
             else state.end_game(winner_id=state.turn.next_id)

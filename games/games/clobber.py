@@ -6,10 +6,10 @@ class ClobberPiece(PieceType):
     ID = 0
     TEXTURES = ['misc/white_dot.png', 'misc/black_dot.png']
 
-    def move_valid(self, state, piece, x_to, y_to):
+    def move_valid(self, state, piece, pos):
 
-        return piece.pos.orth_adjacent(Vec(x_to, y_to)) and\
-            state.enemy(x_to, y_to)
+        return piece.pos.orth_adjacent(pos) and\
+            state.enemy(pos)
 
 
 class Clobber(Game):
@@ -24,14 +24,14 @@ class Clobber(Game):
     PIECES = [ClobberPiece()]
     HANDLERS = [MoveHandler(PIECES)]
 
-    def initial_piece(self, num_players, x, y):
+    def initial_piece(self, num_players, pos):
 
-        return Piece(ClobberPiece(), (x + y) % 2)
+        return Piece(ClobberPiece(), (pos.y + pos.y) % 2)
 
     def on_action(self, state):
 
         won = not any(DiamondKernel(self.SHAPE).find_pieces(
-            state, piece.x, piece.y, state.turn.current_id)
+            state, piece.pos.x, piece.pos.y, state.turn.current_id)
             for piece in state.find_pieces(state.turn.next_id))
 
         if not won: return state.end_turn()
