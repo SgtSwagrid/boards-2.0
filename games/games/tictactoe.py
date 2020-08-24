@@ -50,11 +50,11 @@ class TicTacToe(Game):
             for sign in [-1, 1]:
                 for i in itertools.count(1):
 
-                    x = piece.x + dir.x * sign * i
-                    y = piece.y + dir.y * sign * i
+                    pos = Vec(piece.pos.x + dir.x * sign * i,
+                        piece.pos.y + dir.y * sign * i)
 
-                    if state.friendly(x, y, piece.owner_id):
-                        run.add(state.pieces[x][y])
+                    if state.friendly(pos, piece.owner_id):
+                        run.add(state.piece_at(pos))
                     else: break
 
             if len(run) >= self.TARGET:

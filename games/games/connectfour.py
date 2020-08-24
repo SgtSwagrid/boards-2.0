@@ -7,7 +7,7 @@ class ConnectFourPiece(TicTacToePiece):
     TEXTURES = ['connectfour/yellow_dot.png', 'connectfour/red_dot.png']
 
     def place_valid(self, state, piece):
-        return not state.open(piece.x, piece.y - 1)
+        return not state.open(piece.pos - (0, 1))
 
 
 class ConnectFour(TicTacToe):

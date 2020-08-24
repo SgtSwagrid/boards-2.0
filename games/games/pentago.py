@@ -13,26 +13,28 @@ class PentagoPiece(TicTacToePiece):
 class RotationHandler(SelectHandler):
 
     QUADRANTS = {
-        (1, 1): (0, 0),
-        (4, 1): (1, 0),
-        (4, 4): (1, 1),
-        (1, 4): (0, 1)
+        Vec(1, 1): Vec(0, 0),
+        Vec(4, 1): Vec(1, 0),
+        Vec(4, 4): Vec(1, 1),
+        Vec(1, 4): Vec(0, 1)
     }
 
-    def enabled(self, state, x, y):
-        return state.turn.stage == 1 and (x, y) in self.QUADRANTS.keys()
+    def enabled(self, state, pos):
 
-    def options(self, state, x, y):
+        return state.turn.stage == 1 and pos in self.QUADRANTS.keys()
+
+    def options(self, state, pos):
+
         return [
             Option(0, 0, ['misc/rotate_anticlockwise.png']),
             Option(1, 1, ['misc/rotate_clockwise.png'])
         ]
 
-    def select(self, state, option, x, y):
-        qx, qy = self.QUADRANTS[(x, y)]
-        return self.rotate(state, qx, qy, option.value == 1)
+    def select(self, state, option, pos):
 
-    def rotate(self, state, qx, qy, clockwise):
+        return self.rotate(state, self.QUADRANTS[pos], option.value == 1)
+
+    def rotate(self, state, quad, clockwise):
 
         pieces = state.pieces
         size = state.game.SHAPE.width // 2
@@ -40,19 +42,19 @@ class RotationHandler(SelectHandler):
         for x in range(0, size):
             for y in range(0, size):
 
-                x_to = size * qx + x
-                y_to = size * qy + y
+                x_to = size * quad.x + x
+                y_to = size * quad.y + y
 
                 if clockwise:
-                    x_from = size * qx + size - 1 - y
-                    y_from = size * qy + x
+                    x_from = size * quad.x + size - 1 - y
+                    y_from = size * quad.y + x
 
                 else:
-                    x_from = size * qx + y
-                    y_from = size * qy + size - 1 - x
+                    x_from = size * quad.x + y
+                    y_from = size * quad.y + size - 1 - x
 
                 if pieces[x_from][y_from]:
-                    piece = pieces[x_from][y_from].at(x_to, y_to)
+                    piece = pieces[x_from][y_from].at(Vec(x_to, y_to))
                     state = state.place_piece(piece)
 
                 elif pieces[x_to][y_to]:
@@ -99,8 +101,8 @@ class Pentago(TicTacToe):
 
     def all_captures(self, state, player_id):
 
-        captures = (self.captures(state, state.pieces[x][y])
-            for x, y in self.SHAPE.positions()
-            if state.friendly(x, y, player_id))
+        captures = (self.captures(state, state.piece_at(pos))
+            for pos in self.SHAPE.positions()
+            if state.friendly(pos, player_id))
 
         return {capture for c in captures for capture in c}
