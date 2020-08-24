@@ -18,5 +18,3 @@ class Hex(Game):
 
     PIECES = [HexPiece()]
     HANDLERS = [PlaceHandler(HexPiece(), hints=False)]
-
-    #def adjacencies(self, state, x, y):
