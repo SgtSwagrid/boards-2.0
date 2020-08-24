@@ -89,7 +89,7 @@ def is_queen_move(state, pos_from, pos_to):
         path(pos_from, spos, d, state.pieces)
 
 def distance(pos_from, pos_to):
-    return Vec(max(abs(pos_to.x - pos_from.x), abs(pos_to.y - pos_from.y)))
+    return max(abs(pos_to.x - pos_from.x), abs(pos_to.y - pos_from.y))
 
 def delta(pos_from, pos_to):
     return Vec(abs(pos_to.x - pos_from.x), abs(pos_to.y - pos_from.y))
