@@ -65,17 +65,17 @@ class DotsAndBoxes(Game):
 
     def adjacent_tiles(self, state, piece):
 
-        return [(piece.x+dx, piece.y+dy)
+        return [Vec(piece.pos.x+dx, piece.pos.y+dy)
                 for dx in [-1, 0, 1]
                 for dy in [-1, 0, 1]
                 if ((piece.pos.x+dx) % 2 == 1 and ((piece.pos.y+dy) % 2 == 1))
                 and not (dx == 0 and dy == 0)
-                and state.open(piece.x+dx, piece.y+dy)]
+                and state.open(Vec(piece.pos.x+dx, piece.pos.y+dy))]
 
     def adjacent_edges(self, state, pos):
 
         return [state.piece_at(pos)
                 for dx in [-1, 0, 1]
                 for dy in [-1, 0, 1]
-                if (((x+dx) % 2 == 0) ^ ((y+dy) % 2 == 0))
+                if (((pos.x+dx) % 2 == 0) ^ ((pos.y+dy) % 2 == 0))
                 and not (dx == 0 and dy == 0)]
