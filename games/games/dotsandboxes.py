@@ -8,9 +8,9 @@ class EdgePiece(PieceType):
 
     def place_valid(self, state, piece):
 
-        return ((piece.x % 2 == 0) ^ (piece.y % 2 == 0)) and\
-            state.game.SHAPE.in_bounds(piece.x, piece.y) and\
-            not state.pieces[piece.x][piece.y]
+        return ((piece.pos.x % 2 == 0) ^ (piece.pos.y % 2 == 0)) and\
+            state.game.SHAPE.in_bounds(piece.pos) and\
+            not state.piece_at(piece.pos)
 
     def place_piece(self, state, piece):
 
@@ -42,10 +42,9 @@ class DotsAndBoxes(Game):
 
     def on_action(self, state):
 
-        game_finished = all([state.pieces[x][y]
-            for x in range(self.SHAPE.width)
-            for y in range(self.SHAPE.height)
-            if (x % 2 == 1 and y % 2 == 1)])
+        game_finished = all([state.pieces_at(pos)
+            for pos in self.SHAPE.positions()
+            if (pos.x % 2 == 1 and pos.y % 2 == 1)])
 
         return state if not game_finished else state.end_game()
 
@@ -54,10 +53,10 @@ class DotsAndBoxes(Game):
         adj = self.adjacent_tiles(state, piece)
 
         for tile in adj:
-            if not state.pieces[tile[0]][tile[1]] and\
-                    all(self.adjacent_edges(state, tile[0], tile[1])):
+            if not state.piece_at(tile) and\
+                    all(self.adjacent_edges(state, tile)):
                 cap_piece = Piece(CapturePiece(),
-                    state.turn.current_id, tile[0], tile[1])
+                    state.turn.current_id, tile)
                 state = state\
                     .place_piece(cap_piece)\
                     .add_score(state.turn.current_id, 1)
@@ -69,13 +68,13 @@ class DotsAndBoxes(Game):
         return [(piece.x+dx, piece.y+dy)
                 for dx in [-1, 0, 1]
                 for dy in [-1, 0, 1]
-                if ((piece.x+dx) % 2 == 1 and ((piece.y+dy) % 2 == 1))
+                if ((piece.pos.x+dx) % 2 == 1 and ((piece.pos.y+dy) % 2 == 1))
                 and not (dx == 0 and dy == 0)
                 and state.open(piece.x+dx, piece.y+dy)]
 
-    def adjacent_edges(self, state, x, y):
+    def adjacent_edges(self, state, pos):
 
-        return [state.pieces[x+dx][y+dy]
+        return [state.piece_at(pos)
                 for dx in [-1, 0, 1]
                 for dy in [-1, 0, 1]
                 if (((x+dx) % 2 == 0) ^ ((y+dy) % 2 == 0))
