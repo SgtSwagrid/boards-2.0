@@ -12,14 +12,14 @@
                 position: absolute;
                 width: {{ display.width }}px;
                 height: {{ row.height }}px;
-                bottom: {{ row.voffset }}px;">
+                bottom: {{ row.voffset|add:1 }}px;">
 
             {% for tile in row.tiles %}
 
                 <div {% if event.active %}
                         onclick="clickBoard({{ tile.x }}, {{ row.y }},
-                            {{ event.properties.first_selection.0 }},
-                            {{ event.properties.first_selection.1 }})"
+                            {{ event.properties.selection.x }},
+                            {{ event.properties.selection.y }})"
                         {% endif %}>
 
                     {% if display.shape.hexagonal %}
@@ -27,8 +27,8 @@
                                 position: absolute;
                                 width: 0;
                                 left: {{ tile.hoffset }}px;
-                                top: -{{ row.height|div:2 }}px;
-                                border-bottom: {{ row.height|div:2 }}px solid {{ tile.colour }};
+                                top: -{{ row.height|div:2|add:1 }}px;
+                                border-bottom: {{ row.height|div:2|add:1 }}px solid {{ tile.colour }};
                                 border-left: {{ tile.width|div:2 }}px solid transparent;
                                 border-right: {{ tile.width|div:2 }}px solid transparent;">
                         </div>
@@ -37,7 +37,7 @@
                     <div style="
                             position: absolute;
                             width: {{ tile.width }}px;
-                            height: {{ row.height }}px;
+                            height: {{ row.height|add:2 }}px;
                             left: {{ tile.hoffset }}px;
                             background: {{ tile.colour }};">
 
@@ -47,7 +47,7 @@
                                 opacity: {{ texture.opacity }};
                                 width: 100%;
                                 z-index: 900;
-                                {% if display.hexagonal %}
+                                {% if display.shape.hexagonal %}
                                     top: -{{ row.height|div:2 }}px;
                                 {% endif %}">
                         {% endfor %}
@@ -59,8 +59,8 @@
                                 position: absolute;
                                 width: 0;
                                 left: {{ tile.hoffset }}px;
-                                top: {{ row.height }}px;
-                                border-top: {{ row.height|div:2 }}px solid {{ tile.colour }};
+                                top: {{ row.height|add:2 }}px;
+                                border-top: {{ row.height|div:2|add:1 }}px solid {{ tile.colour }};
                                 border-left: {{ tile.width|div:2 }}px solid transparent;
                                 border-right: {{ tile.width|div:2 }}px solid transparent;">
                         </div>

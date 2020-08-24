@@ -12,18 +12,15 @@ class PlayerState:
 
 class Piece:
 
-    def __init__(self, type, owner_id, x=-1, y=-1, mode=0):
+    def __init__(self, type, owner_id, pos=None, mode=0):
         self.type = type
         self.owner_id = owner_id
-        self.x = x
-        self.y = y
-        self.pos = Vec(x, y)
+        self.pos = pos
         self.mode = mode
 
-    def at(self, x, y):
+    def at(self, pos):
         piece = copy.deepcopy(self)
-        piece.x = x
-        piece.y = y
+        piece.pos = pos
         return piece
 
 
@@ -56,9 +53,8 @@ class Outcome:
 
 class Change:
 
-    def __init__(self, x, y, old, new):
-        self.x = x
-        self.y = y
+    def __init__(self, pos, old, new):
+        self.pos = pos
         self.old = old
         self.new = new
 
@@ -85,6 +81,10 @@ class State:
         self.turn = turn
         self.outcome = outcome
         self.previous = previous
+
+    def piece_at(self, pos):
+
+        return self.pieces[pos.x][pos.y]
 
     def piece_list(self):
 
@@ -143,32 +143,33 @@ class State:
         state.outcome = outcome
         return state
 
-    def set_piece(self, piece, x, y):
+    def set_piece(self, piece, pos):
 
         state = copy.deepcopy(self)
-        state.pieces[x][y] = piece
-        return state.set_changed(Change(x, y, self.pieces[x][y], piece))
+        state.pieces[pos.x][pos.y] = piece
+        change = Change(pos, self.piece_at(pos), piece)
+        return state.set_changed(change)
 
     def set_piece_mode(self, piece, mode):
 
         state = copy.deepcopy(self)
-        state.pieces[piece.x][piece.y] = copy.deepcopy(piece)
-        state.pieces[piece.x][piece.y].mode = mode
+        state.pieces[piece.pos.x][piece.pos.y] = copy.deepcopy(piece)
+        state.pieces[piece.pos.x][piece.pos.y].mode = mode
         return state
 
     def place_piece(self, piece):
 
-        return self.set_piece(piece, piece.x, piece.y)\
+        return self.set_piece(piece, piece.pos)\
             if piece else self
 
-    def move_piece(self, piece, x_to, y_to):
+    def move_piece(self, piece, pos):
 
         return self.remove_piece(piece)\
-            .place_piece(piece.at(x_to, y_to))
+            .place_piece(piece.at(pos))
 
     def remove_piece(self, piece):
 
-        return self.set_piece(None, piece.x, piece.y)
+        return self.set_piece(None, piece.pos)
 
     def set_score(self, player_id, score):
 
@@ -192,25 +193,25 @@ class State:
         state.player_states[player_id].mode = mode
         return state
 
-    def exists(self, x, y):
+    def exists(self, pos):
 
-        return self.game.SHAPE.in_bounds(x, y) and self.pieces[x][y]
+        return self.game.SHAPE.in_bounds(pos) and self.piece_at(pos)
 
-    def open(self, x, y):
+    def open(self, pos):
 
-        return self.game.SHAPE.in_bounds(x, y) and not self.pieces[x][y]
+        return self.game.SHAPE.in_bounds(pos) and not self.piece_at(pos)
 
-    def friendly(self, x, y, player_id=-1):
-
-        if player_id == -1: player_id = self.turn.current_id
-        return self.exists(x, y) and\
-            self.pieces[x][y].owner_id == player_id
-
-    def enemy(self, x, y, player_id=-1):
+    def friendly(self, pos, player_id=-1):
 
         if player_id == -1: player_id = self.turn.current_id
-        return self.exists(x, y) and\
-            self.pieces[x][y].owner_id != player_id
+        return self.exists(pos) and\
+            self.piece_at(pos).owner_id == player_id
+
+    def enemy(self, pos, player_id=-1):
+
+        if player_id == -1: player_id = self.turn.current_id
+        return self.exists(pos) and\
+            self.piece_at(pos).owner_id != player_id
 
     def push_action(self, action):
 
@@ -226,6 +227,6 @@ class State:
         state.turn.new = False
         return state
 
-    def changed(self, x, y):
+    def changed(self, pos):
 
-        return any((c.x, c.y) == (x, y) for c in self.changes)
+        return any(c.pos == pos for c in self.changes)

@@ -73,27 +73,26 @@ def board_view(request, board_code):
     game = board.game()
     player = board.player(request.user)
 
-    cx, cy = -1, -1
+    clicked = None
     if 'cx' in request.POST:
-        cx, cy = int(request.POST['cx']), int(request.POST['cy'])
+        clicked = Vec(int(request.POST['cx']), int(request.POST['cy']))
 
-    sx, sy = -1, -1
+    selected = None
     if 'sx' in request.POST:
-        sx, sy = int(request.POST['sx']), int(request.POST['sy'])
+        selected = Vec(int(request.POST['sx']), int(request.POST['sy']))
 
-    tx, ty = -1, -1
+    target = None
     if 'tx' in request.POST:
-        tx, ty = int(request.POST['tx']), int(request.POST['ty'])
+        target = int(request.POST['tx']), int(request.POST['ty'])
 
     active = board.status == 1 and board.is_current(player)\
         and state_model == board.state
     player_id = player.order if player else -1
 
-    selections = [(sx, sy)] if sx != -1 else []
-    properties = DisplayProperties(selections)
+    properties = DisplayProperties([selected] if selected else [])
 
-    if cx != -1 and active:
-        event = BoardEvent(properties, player_id, active, cx, cy)
+    if clicked and active:
+        event = BoardEvent(properties, player_id, active, clicked)
         result, properties = game.on_event(state, event)
 
         if result:
@@ -103,7 +102,7 @@ def board_view(request, board_code):
 
     if 'option' in request.POST and active:
         option_id = int(request.POST['option'])
-        event = SelectEvent(properties, player_id, active, option_id, tx, ty)
+        event = SelectEvent(properties, player_id, active, option_id, target)
         result, properties = game.on_event(state, event)
 
         if result:

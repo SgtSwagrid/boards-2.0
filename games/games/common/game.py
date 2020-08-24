@@ -26,10 +26,10 @@ class Game:
 
     def on_setup(self, num_players):
 
-        def at(piece, x, y):
-            return piece.at(x, y) if piece else None
+        def at(piece, pos):
+            return piece.at(pos) if piece else None
 
-        pieces = [[at(self.initial_piece(num_players, x, y), x, y)
+        pieces = [[at(self.initial_piece(num_players, Vec(x, y)), Vec(x, y))
             for y in range(0, self.SHAPE.logical_board_height())]
             for x in range(0, self.SHAPE.logical_board_end() + 1)]
 
@@ -41,7 +41,7 @@ class Game:
 
         return state
 
-    def initial_piece(self, num_players, x, y):
+    def initial_piece(self, num_players, pos):
         return None
 
     def initial_score(self, num_players, player_id):
@@ -74,16 +74,16 @@ class Game:
 
         display = Display(self.SHAPE)
 
-        positions = [[(self.SHAPE.logical_tile_hoffset(row, tile),
+        positions = [[Vec(self.SHAPE.logical_tile_hoffset(row, tile),
             self.SHAPE.logical_row_voffset(row))
             for tile in range(0, self.SHAPE.row_width(row))]
             for row in range(0, self.SHAPE.height)]
 
-        display = display.set_colours([[self.colour(state, event, x, y)
-            for (x, y) in row] for row in positions])
+        display = display.set_colours([[self.colour(state, event, pos)
+            for pos in row] for row in positions])
 
-        display = display.set_textures([[self.texture(state, event, x, y)
-            for (x, y) in row] for row in positions])
+        display = display.set_textures([[self.texture(state, event, pos)
+            for pos in row] for row in positions])
 
         display = display.set_background(self.BACKGROUND.background)
 
@@ -92,26 +92,27 @@ class Game:
 
         return display
 
-    def colour(self, state, event, x, y):
+    def colour(self, state, event, pos):
 
-        piece_colour = state.pieces[x][y].type.colour(
-            state.pieces[x][y], state)\
-            if state.pieces[x][y] else None
+        piece_colour = state.pieces[pos.x][pos.y].type.colour(
+            state.pieces[pos.x][pos.y], state)\
+            if state.pieces[pos.x][pos.y] else None
 
         if piece_colour: return piece_colour
-        elif event.properties.selected(x, y): return self.SELECTED_COLOUR
-        elif state.changed(x, y): return self.MODIFIED_COLOUR
-        else: return self.BACKGROUND.colour(x, y)
+        elif event.properties.is_selected(pos):
+            return self.SELECTED_COLOUR
+        elif state.changed(pos): return self.MODIFIED_COLOUR
+        else: return self.BACKGROUND.colour(pos)
 
-    def texture(self, state, event, x, y):
+    def texture(self, state, event, pos):
 
-        textures = self.BACKGROUND.texture(x, y)
-        piece = state.pieces[x][y]
+        textures = self.BACKGROUND.texture(pos)
+        piece = state.pieces[pos.x][pos.y]
         if piece: textures = textures + piece.type.texture(piece, state)
 
         if event.active:
             for handler in self.HANDLERS:
-                textures.extend(handler.texture(state, event, x, y))
+                textures.extend(handler.texture(state, event, pos))
 
         return textures
 
@@ -136,11 +137,11 @@ class PieceType:
     def place_piece(self, state, piece):
         return state.place_piece(piece)
 
-    def move_valid(self, state, piece, x_to, y_to):
+    def move_valid(self, state, piece, pos):
         return True
 
-    def move_piece(self, state, piece, x_to, y_to):
-        return state.move_piece(piece, x_to, y_to)
+    def move_piece(self, state, piece, pos):
+        return state.move_piece(piece, pos)
 
     def remove_valid(self, state, piece):
         return True

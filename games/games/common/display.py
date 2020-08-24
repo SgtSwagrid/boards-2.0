@@ -1,5 +1,6 @@
 import copy
 
+
 class Display:
 
     def __init__(self, shape):
@@ -51,8 +52,6 @@ class Display:
         display = copy.copy(self)
         display.width *= sf
         display.height *= sf
-        if self.shape.hexagonal:
-            display.height -= 2 * (self.shape.height - 1)
         display.rows = [row.scale(sf) for row in display.rows]
         display.selectors = [selector.scale(sf)
             for selector in display.selectors]
@@ -79,8 +78,6 @@ class Row:
         row = copy.copy(self)
         row.height *= sf
         row.voffset *= sf
-        if self.shape.hexagonal:
-            row.voffset -= 2 * self.row_id
         row.tiles = [tile.scale(sf) for tile in row.tiles]
         return row
 
@@ -127,7 +124,7 @@ class Texture:
 
 class Selector:
 
-    def __init__(self, options, target_x, target_y, state,
+    def __init__(self, options, target, state,
             size=0.5, offset=0.5, colour='#F5F6FA', opacity=0.9):
 
         self.options = options
@@ -135,13 +132,11 @@ class Selector:
         self.width = len(self.options) * size
         self.height = size
 
-        self.target_x = target_x
-        self.target_y = target_y
-
+        self.target = target
         shape = state.game.SHAPE
 
-        row = shape.row(target_y)
-        tile = shape.tile(target_x, target_y)
+        row = shape.row(target.y)
+        tile = shape.tile(target)
 
         min_x = 0
         max_x = shape.visual_board_width() - self.width

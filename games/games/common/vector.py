@@ -55,10 +55,12 @@ class Vec:
             (v.y - self.y == -1 and v.x in [self.x, self.x + 1])
 
     def __add__(self, v):
-        return Vec(self.x + v.x, self.y + v.y)
+        if isinstance(v, Vec): return Vec(self.x + v.x, self.y + v.y)
+        else: return Vec(self.x + v[0], self.y + v[1])
 
     def __sub__(self, v):
-        return Vec(self.x - v.x, self.y - v.y)
+        if isinstance(v, Vec): return Vec(self.x - v.x, self.y - v.y)
+        else: return Vec(self.x - v[0], self.y - v[1])
 
     def __mul__(self, s):
         return Vec(self.x * s, self.y * s)

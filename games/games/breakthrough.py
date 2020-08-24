@@ -6,11 +6,11 @@ class BreakthroughPiece(PieceType):
     ID = 0
     TEXTURES = ['chess/white_pawn.png', 'chess/black_pawn.png']
 
-    def move_valid(self, state, piece, x_to, y_to):
+    def move_valid(self, state, piece, pos):
 
-        return y_to - piece.y == [1, -1][piece.owner_id] and\
-            ((state.enemy(x_to, y_to) and (x_to - piece.x) in [-1, 1]) or
-            (state.open(x_to, y_to) and (x_to - piece.x) in [-1, 0, 1]))
+        return pos.y - piece.pos.y == [1, -1][piece.owner_id] and\
+            ((state.enemy(pos) and (pos.x - piece.pos.x) in [-1, 1]) or
+            (state.open(pos) and (pos.x - piece.pos.x) in [-1, 0, 1]))
 
 
 class Breakthrough(Game):
@@ -27,14 +27,15 @@ class Breakthrough(Game):
 
     def on_action(self, state):
 
-        if state.action.y_to == [self.HEIGHT - 1, 0][state.turn.current_id] or\
+        home = [self.HEIGHT - 1, 0][state.turn.current_id]
+        if state.action.new_pos.y == home or\
                 not any(state.find_pieces(state.turn.next_id)):
 
             return state.end_game(state.turn.current_id)
 
         else: return state.end_turn()
 
-    def initial_piece(self, num_players, x, y):
+    def initial_piece(self, num_players, pos):
 
-        if y <= 1: return Piece(BreakthroughPiece(), 0)
-        elif y >= self.HEIGHT - 2: return Piece(BreakthroughPiece(), 1)
+        if pos.y <= 1: return Piece(BreakthroughPiece(), 0)
+        elif pos.y >= self.HEIGHT - 2: return Piece(BreakthroughPiece(), 1)

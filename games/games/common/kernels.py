@@ -29,6 +29,10 @@ class Kernel:
 
         return all(state.pieces[v.x][v.y] for v in self.positions(centre))
 
+    def open(self, state, centre):
+
+        return len(self.pieces(state, centre)) == 0
+
 
 class BoxKernel(Kernel):
 

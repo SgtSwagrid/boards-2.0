@@ -1,3 +1,4 @@
+from .vector import *
 import math
 from functools import lru_cache
 
@@ -163,7 +164,7 @@ class Shape:
     @lru_cache
     def positions(self):
 
-        return [(self.logical_tile_hoffset(row, tile),
+        return [Vec(self.logical_tile_hoffset(row, tile),
             self.logical_row_voffset(row))
             for row in range(0, self.height)
             for tile in range(0, self.row_width(row))]
@@ -175,19 +176,17 @@ class Shape:
             if self.logical_row_voffset(row) == y]
         return row[0] if len(row) > 0 else -1
 
-    @lru_cache
-    def tile(self, x, y):
+    def tile(self, pos):
 
-        row = self.row(y)
+        row = self.row(pos.y)
         if row == -1: return -1
         tile = [tile for tile in range(0, self.row_width(row))
-            if self.logical_tile_hoffset(row, tile) == x]
+            if self.logical_tile_hoffset(row, tile) == pos.x]
         return tile[0] if len(tile) > 0 else -1
 
-    @lru_cache
-    def in_bounds(self, x, y):
+    def in_bounds(self, pos):
 
-        return self.tile(x, y) != -1
+        return self.tile(pos) != -1
 
 
 class Rectangle(Shape):

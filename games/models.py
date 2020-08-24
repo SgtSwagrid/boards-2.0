@@ -222,8 +222,8 @@ class StateModel(models.Model):
         return [p.get_player() for p in
             PlayerStateModel.players.filter(state=self)]
 
-    def get_piece(self, x, y):
-        piece = PieceModel.pieces.filter(state=self, x=x, y=y)
+    def get_piece(self, pos):
+        piece = PieceModel.pieces.filter(state=self, x=pos.x, y=pos.y)
         return piece.get().get_piece() if piece.exists() else None
 
     def get_pieces(self):
@@ -320,8 +320,8 @@ class PieceManager(models.Manager):
             state=state,
             type=piece.type.ID,
             owner=piece.owner_id,
-            x=piece.x,
-            y=piece.y,
+            x=piece.pos.x,
+            y=piece.pos.y,
             mode=piece.mode)
 
 class PieceModel(models.Model):
@@ -347,8 +347,7 @@ class PieceModel(models.Model):
         return Piece(
             type=games[self.state.game_id].PIECES[self.type],
             owner_id=self.owner,
-            x=self.x,
-            y=self.y,
+            pos=Vec(self.x, self.y),
             mode=self.mode)
 
 class ActionManager(models.Manager):
@@ -357,26 +356,26 @@ class ActionManager(models.Manager):
 
         if isinstance(action, PlaceAction):
             action_model = super().create(type=0,
-                x_to=action.piece.x,
-                y_to=action.piece.y)
+                x_to=action.new_pos.x,
+                y_to=action.new_pos.y)
 
         elif isinstance(action, MoveAction):
             action_model = super().create(type=1,
-                x_from=action.piece.x,
-                y_from=action.piece.y,
-                x_to=action.x_to,
-                y_to=action.y_to)
+                x_from=action.old_pos.x,
+                y_from=action.old_pos.y,
+                x_to=action.new_pos.x,
+                y_to=action.new_pos.y)
 
         elif isinstance(action, RemoveAction):
             action_model = super().create(type=2,
-                x_from=action.piece.x,
-                y_from=action.piece.y)
+                x_from=action.old_pos.x,
+                y_from=action.old_pos.y)
 
         elif isinstance(action, SelectAction):
             action_model = super().create(type=3,
                 option=action.option_id,
-                x_to=action.x_to,
-                y_to=action.y_to)
+                x_to=action.target.x,
+                y_to=action.target.y)
 
         return action_model
 
@@ -399,24 +398,24 @@ class ActionModel(models.Model):
     def get_action(self, state):
 
         if self.type == 0:
-            piece = state.get_piece(self.x_to, self.y_to)
+            piece = state.get_piece(Vec(self.x_to, self.y_to))
             return PlaceAction(piece)
 
         elif self.type == 1:
-            piece = state.previous.get_piece(self.x_from, self.y_from)
-            return MoveAction(piece, self.x_to, self.y_to)
+            piece = state.previous.get_piece(Vec(self.x_from, self.y_from))
+            return MoveAction(piece, Vec(self.x_to, self.y_to))
 
         elif self.type == 2:
-            piece = state.previous.get_piece(self.x_from, self.y_from)
+            piece = state.previous.get_piece(Vec(self.x_from, self.y_from))
             return RemoveAction(piece)
 
         elif self.type == 3:
-            return SelectAction(self.option, self.x_to, self.y_to)
+            return SelectAction(self.option, Vec(self.x_to, self.y_to))
 
 class ChangeManager(models.Manager):
 
     def create(self, change, state):
-        return super().create(state=state, x=change.x, y=change.y)
+        return super().create(state=state, x=change.pos.x, y=change.pos.y)
 
 class ChangeModel(models.Model):
 
@@ -430,7 +429,8 @@ class ChangeModel(models.Model):
 
     def get_change(self):
 
-        old_piece = self.state.previous.get_piece(self.x, self.y)
-        new_piece = self.state.get_piece(self.x, self.y)
+        pos = Vec(self.x, self.y)
+        old_piece = self.state.previous.get_piece(pos)
+        new_piece = self.state.get_piece(pos)
 
-        return Change(self.x, self.y, old_piece, new_piece)
+        return Change(pos, old_piece, new_piece)

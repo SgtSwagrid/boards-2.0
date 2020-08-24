@@ -1,32 +1,31 @@
 class PlaceAction:
 
     def __init__(self, piece):
+
         self.piece = piece
-        self.x_to = piece.x
-        self.y_to = piece.y
+        self.new_pos = piece.new_pos
 
 
 class MoveAction:
 
-    def __init__(self, piece, x_to, y_to):
+    def __init__(self, piece, new_pos):
+
         self.piece = piece
-        self.x_from = piece.x
-        self.y_from = piece.y
-        self.x_to = x_to
-        self.y_to = y_to
+        self.old_pos = piece.pos
+        self.new_pos = new_pos
 
 
 class RemoveAction:
 
     def __init__(self, piece):
+
         self.piece = piece
-        self.x_from = piece.x
-        self.y_from = piece.y
+        self.old_pos = piece.pos
 
 
 class SelectAction:
 
-    def __init__(self, option_id, x_to, y_to):
+    def __init__(self, option_id, target):
+
         self.option_id = option_id
-        self.x_to = x_to
-        self.y_to = y_to
+        self.target = target

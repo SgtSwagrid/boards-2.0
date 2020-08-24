@@ -1,3 +1,5 @@
+from .vector import *
+
 class Event:
 
     def __init__(self, properties, player_id, active):
@@ -5,40 +7,42 @@ class Event:
         self.player_id = player_id
         self.active = active
 
+
 class BoardEvent(Event):
 
-    def __init__(self, properties, player_id, active, x, y):
+    def __init__(self, properties, player_id, active, clicked):
         super().__init__(properties, player_id, active)
-        self.x = x
-        self.y = y
+        self.clicked = clicked
+
 
 class SelectEvent(Event):
 
-    def __init__(self, properties, player_id, active, option_id, x, y):
+    def __init__(self, properties, player_id, active, option_id, target):
         super().__init__(properties, player_id, active)
         self.option_id = option_id
-        self.x = x
-        self.y = y
+        self.target = target
+
 
 class RenderEvent(Event):
 
     def __init__(self, properties, player_id, active):
         super().__init__(properties, player_id, active)
 
+
 class DisplayProperties:
 
     def __init__(self, selections=[]):
-        self.selections = selections
+        self.selected = selections
 
-    def first_selection(self):
-        return self.selections[0] if len(self.selections) > 0 else (-1, -1)
+    def selection(self):
+        return self.selected[0] if len(self.selected) > 0 else Vec(-1, -1)
 
-    def selected(self, x, y):
-        return any((x, y) == s for s in self.selections)
+    def is_selected(self, pos):
+        return any(pos == s for s in self.selected)
 
-    def get_selection(self, state, id):
+    def get_piece(self, state, id):
 
-        if 0 <= id < len(self.selections):
-            pos = self.selections[id]
-            if state.game.SHAPE.in_bounds(pos[0], pos[1]):
-                return state.pieces[pos[0]][pos[1]]
+        if 0 <= id < len(self.selected):
+            pos = self.selected[id]
+            if state.game.SHAPE.in_bounds(pos):
+                return state.piece_at(pos)
