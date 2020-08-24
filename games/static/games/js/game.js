@@ -2,6 +2,12 @@ const loc = 'ws://' + window.location.host + window.location.pathname;
 
 const csrftoken = Cookies.get('csrftoken');
 
+const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+
+const hpadding = 315;
+const vpadding = 40;
+
 function csrfSafeMethod(method) {
     return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
 }

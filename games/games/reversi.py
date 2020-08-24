@@ -1,60 +1,63 @@
 from .common.game import *
 
 
+class ReversiPiece(PieceType):
+
+    ID = 0
+    TEXTURES = ['misc/white_dot.png', 'misc/black_dot.png']
+
+    def place_valid(self, state, piece):
+
+        return state.game.SHAPE.in_bounds(piece.x, piece.y) and\
+            not state.pieces[piece.x][piece.y] and\
+            len(state.game.flips(state, piece)) > 0
+
+    def place_piece(self, state, piece):
+
+        state = state.place_piece(piece).add_score(state.turn.current_id, 1)
+        flips = state.game.flips(state, piece)
+
+        for pos in flips:
+            state = state\
+                .add_score(state.pieces[pos[0]][pos[1]].owner_id, -1)\
+                .add_score(state.turn.current_id, 1)\
+                .place_piece(Piece(ReversiPiece(),
+                    state.turn.current_id, pos[0], pos[1]))
+
+        return state
+
+
 class Reversi(Game):
 
     ID = 3
     NAME = 'Reversi'
     BACKGROUND = Checkerboard(['#27AE60', '#2ECC71'])
-    SHAPE = Rectangle(8, 8)
+    SHAPE = Rectangle(WIDTH := 8, HEIGHT := 8)
     PLAYER_NAMES = ['White', 'Black']
     INFO = 'https://en.wikipedia.org/wiki/Reversi'
-
-    class ReversiPiece(PieceType):
-        ID = 0
-        TEXTURES = ['misc/white_dot.png', 'misc/black_dot.png']
 
     PIECES = [ReversiPiece()]
     HANDLERS = [PlaceHandler(ReversiPiece())]
 
     MODIFIED_COLOUR = '#16a085'
 
-    def setup(self, num_players):
-        return super().setup(num_players)\
-            .add_score(0, 2)\
-            .add_score(1, 2)
-
     def initial_piece(self, num_players, x, y):
-        x_mid = self.SHAPE.width // 2 - 1
-        y_mid = self.SHAPE.height // 2 - 1
+
+        x_mid = self.WIDTH // 2 - 1
+        y_mid = self.HEIGHT // 2 - 1
 
         # Centre arrangement 2x2
         if (x == x_mid and y == y_mid) or (x == x_mid + 1 and y == y_mid + 1):
-            return Piece(self.ReversiPiece(), 0, x, y)  # White
+            return Piece(ReversiPiece(), 0, x, y)  # White
         if (x == x_mid and y == y_mid + 1) or (x == x_mid + 1 and y == y_mid):
-            return Piece(self.ReversiPiece(), 1, x, y)  # Black
+            return Piece(ReversiPiece(), 1, x, y)  # Black
         return None
 
-    def place_valid(self, state, piece):
-        return self.SHAPE.in_bounds(piece.x, piece.y) and\
-                not state.pieces[piece.x][piece.y] and\
-                len(self.flips(state, piece)) > 0
+    def initial_score(self, num_players, player_id):
+        return 2
 
-    def place_piece(self, state, piece):
+    def on_action(self, state):
 
-        state = state.place_piece(piece).add_score(state.turn.current_id, 1)
-
-        flips = self.flips(state, piece)
-
-        for pos in flips:
-            state = state\
-                .add_score(state.pieces[pos[0]][pos[1]].owner_id, -1)\
-                .add_score(state.turn.current_id, 1)\
-                .place_piece(Piece(self.ReversiPiece(), state.turn.current_id, pos[0], pos[1]))
-
-        return state
-
-    def action(self, state, action):
         skipped_turns = 1
         game_ended = False
 
@@ -75,15 +78,15 @@ class Reversi(Game):
             else state.end_game()
 
     def flips(self, state, piece):
-        directions = [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, -1], [-1, 1]]
+
         flips = []
 
-        for dir in directions:
+        for dir in directions():
             sub_flips = []
 
-            for i in range(1, max(self.SHAPE.width, self.SHAPE.height)):
-                x_next = piece.x + i * dir[0]
-                y_next = piece.y + i * dir[1]
+            for i in range(1, max(self.WIDTH, self.HEIGHT)):
+                x_next = piece.x + i * dir.x
+                y_next = piece.y + i * dir.y
                 if state.enemy(x_next, y_next):
                     sub_flips.append([x_next, y_next])
                 elif state.friendly(x_next, y_next):
@@ -94,10 +97,12 @@ class Reversi(Game):
         return flips
 
     def has_moves(self, state):
+
         '''Returns true if the current state's player has a turn they can play'''
         for x in range(self.SHAPE.width):
             for y in range(self.SHAPE.height):
                 if not state.pieces[x][y]:
-                    if self.place_valid(state, Piece(self.ReversiPiece(), state.turn.current_id, x, y)):
+                    if ReversiPiece().place_valid(state,
+                            Piece(ReversiPiece(), state.turn.current_id, x, y)):
                         return True
         return False

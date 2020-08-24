@@ -5,6 +5,7 @@ class Quixo(TicTacToe):
 
     ID = 10
     NAME = 'Quixo'
+    BACKGROUND = Checkerboard(['#FDCB6E', '#FFEAA7'])
     SHAPE = Rectangle(5, 5)
     INFO = 'https://en.wikipedia.org/wiki/Tic-tac-toe_variants#Quixo'
 

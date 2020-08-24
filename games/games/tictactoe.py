@@ -15,6 +15,7 @@ class TicTacToe(Game):
 
     ID = 1
     NAME = 'Tic Tac Toe'
+    BACKGROUND = Checkerboard(['#FDCB6E', '#FFEAA7'])
     SHAPE = Rectangle(3, 3)
     PLAYER_NAMES = ['Naughts', 'Crosses']
     INFO = 'https://en.wikipedia.org/wiki/Tic-tac-toe'
@@ -41,17 +42,16 @@ class TicTacToe(Game):
 
     def captures(self, state, piece):
 
-        directions = [[1, 0], [0, 1], [1, 1], [1, -1]]
         captures = set()
 
-        for dir in directions:
+        for dir in directions()[:4]:
             run = {piece}
 
             for sign in [-1, 1]:
                 for i in itertools.count(1):
 
-                    x = piece.x + dir[0] * sign * i
-                    y = piece.y + dir[1] * sign * i
+                    x = piece.x + dir.x * sign * i
+                    y = piece.y + dir.y * sign * i
 
                     if state.friendly(x, y, piece.owner_id):
                         run.add(state.pieces[x][y])

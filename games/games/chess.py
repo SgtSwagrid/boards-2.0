@@ -123,6 +123,7 @@ class Chess(Game):
 
     ID = 2
     NAME = 'Chess'
+    BACKGROUND = Checkerboard(['#FDCB6E', '#FFEAA7'])
     SHAPE = Rectangle(8, 8)
     PLAYER_NAMES = ['White', 'Black']
     INFO = 'https://en.wikipedia.org/wiki/Chess'

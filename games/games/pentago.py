@@ -65,6 +65,7 @@ class Pentago(TicTacToe):
 
     ID = 12
     NAME = 'Pentago'
+    BACKGROUND = Checkerboard(['#FDCB6E', '#FFEAA7'])
     SHAPE = Sections([3, 3], [3, 3])
     PLAYER_NAMES = ['White', 'Black']
     INFO = 'https://en.wikipedia.org/wiki/Pentago'

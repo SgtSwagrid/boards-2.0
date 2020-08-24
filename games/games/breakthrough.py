@@ -17,6 +17,7 @@ class Breakthrough(Game):
 
     ID = 13
     NAME = 'Breakthrough'
+    BACKGROUND = Checkerboard(['#FDCB6E', '#FFEAA7'])
     SHAPE = Rectangle(WIDTH := 8, HEIGHT := 8)
     PLAYER_NAMES = ['White', 'Black']
     INFO = 'https://en.m.wikipedia.org/wiki/Breakthrough_(board_game)'

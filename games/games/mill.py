@@ -1,7 +1,69 @@
 from .common.game import *
 
 
-class MillBoardBackground(Background):
+class MillPiece(PieceType):
+
+    ID = 0
+    TEXTURES = ['misc/white_dot.png', 'misc/black_dot.png']
+
+    # a piece of the active player can be placed iff not all pieces have been placed yet
+    def place_valid(self, state, piece):
+        # if epoch is placing epoch and the selected tile is valid and there is no other piece already
+        if state.turn.epoch == 0 and state.turn.stage == 0:
+            return state.game.graph.is_node(piece.x, piece.y) and not state.pieces[piece.x][piece.y]
+        else:
+            return False
+
+    # in case all pieces are placed, that means both players have a score of 9, the epoch advances and no more pieces
+    # shall be placed
+    def place_piece(self, state, piece):
+        state = state.place_piece(piece).add_score(state.turn.current_id, 1)
+        if state.turn.ply / 2 > 8:
+            state = state.end_epoch()
+        #print(state.turn.ply / 2)
+        piece = state.pieces[piece.x][piece.y]
+        if state.game.graph.is_mill(state, piece):
+            #print('end stage')
+            return state.end_stage()
+        else:
+            #print('end turn')
+            return state.end_turn()
+
+    # a piece owned by the active player can be moved iff all pieces have already been placed = after turn 17
+    def move_valid(self, state, piece, x_to, y_to):
+        if state.turn.epoch == 1 and state.turn.stage == 0:
+            # if in the graph from the starting node the target node is reachable and there is no other piece yet
+            if state.game.graph.fetch_node(piece.x, piece.y).is_neighbour(state.game.graph.fetch_node(x_to, y_to)) and not \
+                    state.pieces[x_to][y_to]:
+                return True
+        else:
+            return False
+
+    # after moving a piece a NEW mill might have been formed iff that is the case remove one opponents piece
+    def move_piece(self, state, piece, x_to, y_to):
+        state = state.move_piece(piece, x_to, y_to)
+        piece = state.pieces[x_to][y_to]
+        # print([x_to, y_to])
+        # print([piece.x, piece.y])
+        if not state.game.graph.is_mill(state, piece):
+            return state.end_turn()
+        else:
+            return state.end_stage()
+
+    #  a piece may only removed IFF a mill has been formed before(state.stage == 1) and it's an opponent's
+    def remove_valid(self, state, piece):
+        try:
+            return state.turn.stage == 1 and state.enemy(piece.x, piece.y)
+        except AttributeError:
+            return False
+
+    def remove_piece(self, state, piece):
+        state = state.remove_piece(piece)
+        state = state.add_score(state.turn.next_id, -1)
+        return state.end_turn()
+
+
+class MillBackground(Background):
 
     def __init__(self, colours, graph, width, height):
         super().__init__(colours)
@@ -46,6 +108,7 @@ class MillBoardBackground(Background):
 
 
 class Mill(Game):
+
     ID = 4
     NAME = 'Mill'
     SHAPE = Rectangle(11, 11)
@@ -107,7 +170,7 @@ class Mill(Game):
                                 # print('Make a friend in x')
                                 mill_x_friend = neighbour_piece
                         elif neighbour_piece is not piece and mill_x_friend.x == neighbour_piece.x:
-                            print([[mill_x_friend.x, mill_x_friend.y], [neighbour_piece.x, neighbour_piece.y]])
+                            #print([[mill_x_friend.x, mill_x_friend.y], [neighbour_piece.x, neighbour_piece.y]])
                             return True
 
                         if not mill_y_friend:
@@ -115,7 +178,7 @@ class Mill(Game):
                                 # print('Make a friend in y')
                                 mill_y_friend = neighbour_piece
                         elif neighbour_piece is not piece and mill_y_friend.y == neighbour_piece.y:
-                            print([[mill_y_friend.x, mill_y_friend.y], [neighbour_piece.x, neighbour_piece.y]])
+                            #print([[mill_y_friend.x, mill_y_friend.y], [neighbour_piece.x, neighbour_piece.y]])
                             return True
 
                         for more_neighbour in self.fetch_node(piece=neighbour_piece).neighbours:
@@ -125,7 +188,7 @@ class Mill(Game):
                                 if neighbour_piece.owner_id == state.turn.current_id and \
                                         (piece.x == neighbour_piece.x or piece.y == neighbour_piece.y) and \
                                         (neighbour_piece is not piece):
-                                    print([[piece.x, piece.y], [neighbour_piece.x, neighbour_piece.y]])
+                                    #print([[piece.x, piece.y], [neighbour_piece.x, neighbour_piece.y]])
                                     # print('True')
                                     return True
                 #                 else:
@@ -176,75 +239,16 @@ class Mill(Game):
     graph.add_edge(graph.fetch_node(8, 5), [graph.fetch_node(8, 2), graph.fetch_node(10, 5)])
     graph.add_edge(graph.fetch_node(10, 5), [graph.fetch_node(10, 0)])
 
-    class MillPiece(PieceType):
-        ID = 0
-        TEXTURES = ['misc/white_dot.png', 'misc/black_dot.png']
-
     PIECES = [MillPiece()]
-    HANDLERS = [PlaceHandler(MillPiece()), MoveHandler(), RemoveHandler()]
+    HANDLERS = [PlaceHandler(MillPiece()), MoveHandler(PIECES), RemoveHandler(PIECES)]
     # needs to be here so it can take "graph" as an argument
-    BACKGROUND = MillBoardBackground(['#FFEAA7'], graph, 11, 11)
+    BACKGROUND = MillBackground(['#FFEAA7'], graph, 11, 11)
 
-    # a piece of the active player can be placed iff not all pieces have been placed yet
-    def place_valid(self, state, piece):
-        # if epoch is placing epoch and the selected tile is valid and there is no other piece already
-        if state.turn.epoch == 0 and state.turn.stage == 0:
-            return self.graph.is_node(piece.x, piece.y) and not state.pieces[piece.x][piece.y]
-        else:
-            return False
+    def on_action(self, state):
 
-    # in case all pieces are placed, that means both players have a score of 9, the epoch advances and no more pieces
-    # shall be placed
-    def place_piece(self, state, piece):
-        state = state.place_piece(piece).add_score(state.turn.current_id, 1)
-        if state.turn.ply / 2 > 8:
-            state = state.end_epoch()
-        print(state.turn.ply / 2)
-        piece = state.pieces[piece.x][piece.y]
-        if self.graph.is_mill(state, piece):
-            print('end stage')
-            return state.end_stage()
-        else:
-            print('end turn')
-            return state.end_turn()
-
-    # a piece owned by the active player can be moved iff all pieces have already been placed = after turn 17
-    def move_valid(self, state, piece, x_to, y_to):
-        if state.turn.epoch == 1 and state.turn.stage == 0:
-            # if in the graph from the starting node the target node is reachable and there is no other piece yet
-            if self.graph.fetch_node(piece.x, piece.y).is_neighbour(self.graph.fetch_node(x_to, y_to)) and not \
-                    state.pieces[x_to][y_to]:
-                return True
-        else:
-            return False
-
-    # after moving a piece a NEW mill might have been formed iff that is the case remove one opponents piece
-    def move_piece(self, state, piece, x_to, y_to):
-        state = state.move_piece(piece, x_to, y_to)
-        piece = state.pieces[x_to][y_to]
-        # print([x_to, y_to])
-        # print([piece.x, piece.y])
-        if not self.graph.is_mill(state, piece):
-            return state.end_turn()
-        else:
-            return state.end_stage()
-
-    #  a piece may only removed IFF a mill has been formed before(state.stage == 1) and it's an opponent's
-    def remove_valid(self, state, piece):
-        try:
-            return state.turn.stage == 1 and state.enemy(piece.x, piece.y)
-        except AttributeError:
-            return False
-
-    def remove_piece(self, state, piece):
-        state = state.remove_piece(piece)
-        state = state.add_score(state.turn.next_id, -1)
-        return state.end_turn()
-
-    def action(self, state, action):
-        print([state.turn.next_id, state.player_states[state.turn.next_id].score],
-              [state.turn.current_id, state.player_states[state.turn.current_id].score],
-              state.turn.epoch)
+        #print([state.turn.next_id, state.player_states[state.turn.next_id].score],
+        #      [state.turn.current_id, state.player_states[state.turn.current_id].score],
+        #      state.turn.epoch)
         if state.player_states[state.turn.current_id].score < 3 and state.turn.epoch > 0:
             state = state.end_game(state.turn.next_id)
 

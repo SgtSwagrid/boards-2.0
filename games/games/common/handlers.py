@@ -104,8 +104,7 @@ class MoveHandler(Handler):
         if selected == clicked:
             return False, None, None
 
-        elif selected and any(selected.type.ID == t.ID for t in self.types) and\
-                self.move_valid(state, selected, event.x, event.y):
+        elif selected and self.move_valid(state, selected, event.x, event.y):
 
             state = state.push_action(MoveAction(selected, event.x, event.y))
             state = self.move_piece(state, selected, event.x, event.y)
@@ -142,6 +141,7 @@ class MoveHandler(Handler):
     def move_valid(self, state, piece, x_to, y_to):
 
         return state.game.SHAPE.in_bounds(x_to, y_to) and\
+            any(piece.type.ID == t.ID for t in self.types) and\
             piece.owner_id in [state.turn.current_id, -1] and\
             (x_to != piece.x or y_to != piece.y) and\
             (self.capture_self or not state.friendly(x_to, y_to)) and\
@@ -176,8 +176,7 @@ class RemoveHandler(Handler):
 
         piece = state.pieces[event.x][event.y]
 
-        if piece and any(piece.type.ID == t.ID for t in self.types) and\
-                self.remove_valid(state, piece):
+        if piece and self.remove_valid(state, piece):
 
             state = state.push_action(RemoveAction(piece))
             state = self.remove_piece(state, piece)
@@ -198,14 +197,15 @@ class RemoveHandler(Handler):
 
             piece = state.pieces[x][y]
 
-            if piece and self.remove_valid(piece):
+            if piece and self.remove_valid(state, piece):
                 return self.icon
 
         return []
 
     def remove_valid(self, state, piece):
 
-        return (self.capture_self or piece.ownerId != state.turn.current) and\
+        return any(piece.type.ID == t.ID for t in self.types) and\
+            (self.capture_self or piece.ownerId != state.turn.current) and\
             (self.capture_enemy or piece.ownerId == state.turn.current) and\
             piece.type.remove_valid(state, piece)
 

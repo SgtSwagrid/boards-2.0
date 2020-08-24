@@ -14,6 +14,7 @@ class ConnectFour(TicTacToe):
 
     ID = 5
     NAME = 'Connect Four'
+    BACKGROUND = Checkerboard(['#FDCB6E', '#FFEAA7'])
     SHAPE = Rectangle(7, 6)
     PLAYER_NAMES = ['Yellow', 'Red']
     INFO = 'https://en.wikipedia.org/wiki/Connect_Four'

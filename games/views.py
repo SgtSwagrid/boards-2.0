@@ -76,7 +76,6 @@ def board_view(request, board_code):
     cx, cy = -1, -1
     if 'cx' in request.POST:
         cx, cy = int(request.POST['cx']), int(request.POST['cy'])
-        print(cx, cy)
 
     sx, sy = -1, -1
     if 'sx' in request.POST:

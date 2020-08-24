@@ -1,4 +1,4 @@
-from .util import *
+from .vector import *
 import copy
 
 
@@ -17,6 +17,7 @@ class Piece:
         self.owner_id = owner_id
         self.x = x
         self.y = y
+        self.pos = Vec(x, y)
         self.mode = mode
 
     def at(self, x, y):
@@ -85,12 +86,16 @@ class State:
         self.outcome = outcome
         self.previous = previous
 
+    def piece_list(self):
+
+        return [piece for col in self.pieces for piece in col if piece]
+
     def find_pieces(self, player_id=-1, type=-1, mode=-1, x=-1, y=-1):
 
-        return [piece for col in self.pieces for piece in col if piece and\
-            (type == -1 or piece.type.ID == type.ID) and\
-            (player_id == -1 or piece.owner_id == player_id) and\
-            (x == -1 or piece.x == x) and (y == -1 or piece.y == y) and\
+        return [piece for piece in self.piece_list()
+            if (type == -1 or piece.type.ID == type.ID) and
+            (player_id == -1 or piece.owner_id == player_id) and
+            (x == -1 or piece.x == x) and (y == -1 or piece.y == y) and
             (mode == -1 or piece.mode == mode)]
 
     def end_stage(self, skip=1):
@@ -206,35 +211,6 @@ class State:
         if player_id == -1: player_id = self.turn.current_id
         return self.exists(x, y) and\
             self.pieces[x][y].owner_id != player_id
-
-    def path_from(self, x_from, y_from, x_step, y_step, dist):
-
-        return all(self.open(x_from + i * x_step, y_from + i * y_step)
-            for i in range(1, dist))
-
-    def path_to(self, x_from, y_from, x_to, y_to):
-
-        x_step, y_step = direction(x_from, y_from, x_to, y_to)
-        dist = steps(x_from, y_from, x_to, y_to)
-        return self.path_from(x_from, y_from, x_step, y_step, dist)
-
-    def raycast(self, x_from, y_from, x_step, y_step):
-
-        while self.open(x_from + x_step, y_from + y_step):
-            x_from += x_step
-            y_from += y_step
-
-        return x_from, y_from
-
-    def surrounded(self, piece):
-
-        kernel = self.game.SHAPE.box_kernel(piece.x, piece.y, 3, 3)
-        return not any(self.open(x, y) for x, y in kernel)
-
-    def all_surrounded(self, player_id):
-
-        pieces = self.find_pieces(player_id)
-        return all(self.surrounded(piece) for piece in pieces)
 
     def push_action(self, action):
 

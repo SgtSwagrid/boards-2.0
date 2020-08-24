@@ -10,10 +10,11 @@ class SoldierPiece(PieceType):
     def move_valid(self, state, piece, x_to, y_to):
 
         if not state.turn.stage == self.STAGE or\
-            not is_straight(piece.x, piece.y, x_to, y_to): return False
+            not piece.pos.straight(Vec(x_to, y_to)): return False
 
-        dx, dy = direction(piece.x, piece.y, x_to, y_to)
-        return (x_to, y_to) == state.raycast(piece.x, piece.y, dx, dy)
+        direction = piece.pos.direction(Vec(x_to, y_to))
+        kernel = RayKernel(state.game.SHAPE, direction)
+        return Vec(x_to, y_to) == kernel.extent(state, piece.pos)
 
 
 class NeutronPiece(SoldierPiece):
@@ -27,6 +28,7 @@ class Neutron(Game):
 
     ID = 14
     NAME = 'Neutron'
+    BACKGROUND = Checkerboard(['#FDCB6E', '#FFEAA7'])
     SHAPE = Rectangle(WIDTH := 5, HEIGHT := 5)
     PLAYER_NAMES = ['White', 'Black']
     INFO = 'https://en.m.wikipedia.org/wiki/Neutron_(game)'
@@ -43,14 +45,15 @@ class Neutron(Game):
             if neuron.y in [0, self.HEIGHT - 1]:
                 return state.end_game(0 if neuron.y == 0 else 1)
 
-            elif state.all_surrounded(state.turn.current_id):
+            elif all(BoxKernel(self.SHAPE).filled(state, piece.pos)
+                    for piece in state.find_pieces(state.turn.next_id)):
                 return state.end_game(state.turn.next_id)
 
             else: return state.end_stage()
 
         elif state.turn.stage == 1:
 
-            if state.surrounded(neuron):
+            if BoxKernel(self.SHAPE).filled(state, neuron.pos):
                 return state.end_game(state.turn.current_id)
 
             else: return state.end_turn()

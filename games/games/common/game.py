@@ -4,6 +4,8 @@ from .events import *
 from .backgrounds import *
 from .shapes import *
 from .handlers import *
+from .kernels import *
+from .vector import *
 
 
 class Game:
@@ -31,10 +33,19 @@ class Game:
             for y in range(0, self.SHAPE.logical_board_height())]
             for x in range(0, self.SHAPE.logical_board_end() + 1)]
 
-        return State(game=self, num_players=num_players, pieces=pieces)
+        state = State(game=self, num_players=num_players, pieces=pieces)
+
+        for player_id in range(0, num_players):
+            score = self.initial_score(num_players, player_id)
+            state = state.add_score(player_id, score)
+
+        return state
 
     def initial_piece(self, num_players, x, y):
         return None
+
+    def initial_score(self, num_players, player_id):
+        return 0
 
     def on_event(self, state, event):
 
@@ -96,7 +107,7 @@ class Game:
 
         textures = self.BACKGROUND.texture(x, y)
         piece = state.pieces[x][y]
-        if piece: textures.extend(piece.type.texture(piece, state))
+        if piece: textures = textures + piece.type.texture(piece, state)
 
         if event.active:
             for handler in self.HANDLERS:

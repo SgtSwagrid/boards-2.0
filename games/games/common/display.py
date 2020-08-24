@@ -29,7 +29,8 @@ class Display:
         display = copy.deepcopy(self)
         for row, row_textures in zip(display.rows, textures):
             for tile, texture in zip(row.tiles, row_textures):
-                tile.texture = texture
+                tile.texture = [t if isinstance(t, Texture)
+                    else Texture(t) for t in texture]
         return display
 
     def set_background(self, colour):
@@ -127,7 +128,7 @@ class Texture:
 class Selector:
 
     def __init__(self, options, target_x, target_y, state,
-            size=0.5, offset=0.5, colour='#F5F6FA', opacity=0.6):
+            size=0.5, offset=0.5, colour='#F5F6FA', opacity=0.9):
 
         self.options = options
 

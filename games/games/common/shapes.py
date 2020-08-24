@@ -1,4 +1,5 @@
 import math
+from functools import lru_cache
 
 
 class Shape:
@@ -9,129 +10,157 @@ class Shape:
         self.height = height
         self.hexagonal = hexagonal
 
+    @lru_cache
     def row_width(self, row):
         return self.width
 
+    @lru_cache
     def logical_board_start(self):
 
         return min(self.logical_row_start(row)
             for row in range(0, self.height))
 
+    @lru_cache
     def logical_board_end(self):
 
         return max(self.logical_row_end(row)
             for row in range(0, self.height))
 
+    @lru_cache
     def logical_board_width(self):
 
         return self.logical_board_start() - self.logical_board_end() + 1
 
+    @lru_cache
     def logical_board_height(self):
 
         return sum(self.logical_row_vspace(y) + 1
             for y in range(0, self.height))
 
+    @lru_cache
     def logical_row_vspace(self, row):
         return 0
 
+    @lru_cache
     def logical_row_voffset(self, row):
 
         return sum(self.logical_row_vspace(y)
             for y in range(0, row + 1)) + row
 
+    @lru_cache
     def logical_row_start(self, row):
 
         max_width = max(self.logical_row_width(y)
             for y in range(0, self.height))
         return (max_width - self.logical_row_width(row)) // 2
 
+    @lru_cache
     def logical_row_end(self, row):
 
         return self.logical_row_start(row) + self.logical_row_width(row)
 
+    @lru_cache
     def logical_row_width(self, row):
 
         return sum(self.logical_tile_hspace(row, x) + 1
             for x in range(0, self.row_width(row)))
 
+    @lru_cache
     def logical_tile_hspace(self, row, tile):
         return 0
 
+    @lru_cache
     def logical_tile_hoffset(self, row, tile):
 
         return sum(self.logical_tile_hspace(row, x)
             for x in range(0, tile + 1)) + tile +\
             self.logical_row_start(row)
 
+    @lru_cache
     def visual_board_start(self):
 
         return min(self.visual_row_start(row)
             for row in range(0, self.height))
 
+    @lru_cache
     def visual_board_end(self):
 
         return max(self.visual_row_end(row)
             for row in range(0, self.height))
 
+    @lru_cache
     def visual_board_width(self):
 
         return self.visual_board_end() - self.visual_board_start()
 
+    @lru_cache
     def visual_board_height(self):
 
         return sum(self.visual_row_vspace(y) + self.visual_row_height(y)
             for y in range(0, self.height))
 
+    @lru_cache
     def visual_row_height(self, row):
         return 1
 
+    @lru_cache
     def visual_row_vspace(self, row):
 
         return self.logical_row_vspace(row)
 
+    @lru_cache
     def visual_row_voffset(self, row):
 
         return sum(self.visual_row_vspace(y) + self.visual_row_height(y)
             for y in range(0, row)) + self.visual_row_vspace(row)
 
+    @lru_cache
     def visual_row_vcentre(self, row):
 
         return self.visual_row_voffset(row) + self.visual_row_height(row) / 2
 
+    @lru_cache
     def visual_row_start(self, row):
 
         max_width = max(self.visual_row_width(y)
             for y in range(0, self.height))
         return (max_width - self.visual_row_width(row)) / 2
 
+    @lru_cache
     def visual_row_end(self, row):
 
         return self.visual_row_start(row) + self.visual_row_width(row)
 
+    @lru_cache
     def visual_row_width(self, row):
 
         return sum(self.visual_tile_hspace(row, x) +
             self.visual_tile_width(row, x)
             for x in range(0, self.row_width(row)))
 
+    @lru_cache
     def visual_tile_width(self, row, tile):
         return 1
 
+    @lru_cache
     def visual_tile_hspace(self, row, tile):
 
         return self.logical_tile_hspace(row, tile)
 
+    @lru_cache
     def visual_tile_hoffset(self, row, tile):
 
         return sum(self.visual_tile_hspace(row, x) + self.visual_tile_width(row, x)
             for x in range(0, tile)) + self.visual_tile_hspace(row, tile) +\
             self.visual_row_start(row)
 
+    @lru_cache
     def visual_tile_hcentre(self, row, tile):
 
         return self.visual_tile_hoffset(row, tile) +\
             self.visual_tile_width(row, tile) / 2
 
+    @lru_cache
     def positions(self):
 
         return [(self.logical_tile_hoffset(row, tile),
@@ -139,12 +168,14 @@ class Shape:
             for row in range(0, self.height)
             for tile in range(0, self.row_width(row))]
 
+    @lru_cache
     def row(self, y):
 
         row = [row for row in range(0, self.height)
             if self.logical_row_voffset(row) == y]
         return row[0] if len(row) > 0 else -1
 
+    @lru_cache
     def tile(self, x, y):
 
         row = self.row(y)
@@ -153,17 +184,10 @@ class Shape:
             if self.logical_tile_hoffset(row, tile) == x]
         return tile[0] if len(tile) > 0 else -1
 
+    @lru_cache
     def in_bounds(self, x, y):
 
         return self.tile(x, y) != -1
-
-    def box_kernel(self, x, y, width, height):
-
-        tiles = [(x - width // 2 + xx, y - height // 2 + yy)
-            for xx in range(0, width)
-            for yy in range(0, height)]
-
-        return [tile for tile in tiles if self.in_bounds(*tile)]
 
 
 class Rectangle(Shape):

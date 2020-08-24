@@ -59,6 +59,7 @@ class Camelot(Game):
 
     ID = 15
     NAME = 'Camelot'
+    BACKGROUND = Checkerboard(['#FDCB6E', '#FFEAA7'])
     SHAPE = Rows([2, 8, 10] + ([12] * 10) + [10, 8, 2])
     PLAYER_NAMES = ['White', 'Black']
     INFO = 'https://en.m.wikipedia.org/wiki/Camelot_(board_game)'

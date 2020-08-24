@@ -1,6 +1,33 @@
 from .common.game import *
 
 
+class EdgePiece(PieceType):
+
+    ID = 0
+    COLOURS = ['#E74C3C', '#3498DB']
+
+    def place_valid(self, state, piece):
+
+        return ((piece.x % 2 == 0) ^ (piece.y % 2 == 0)) and\
+            state.game.SHAPE.in_bounds(piece.x, piece.y) and\
+            not state.pieces[piece.x][piece.y]
+
+    def place_piece(self, state, piece):
+
+        player_score = state.player_states[state.turn.current_id].score
+        state = state.place_piece(piece)
+        state = state.game.capture(state, piece)
+        player_score_after = state.player_states[state.turn.current_id].score
+
+        return state.end_turn() if player_score == player_score_after else state
+
+
+class CapturePiece(PieceType):
+
+    ID = 1
+    COLOURS = ['#FAB1A0', '#74B9FF']
+
+
 class DotsAndBoxes(Game):
 
     ID = 7
@@ -10,31 +37,11 @@ class DotsAndBoxes(Game):
     PLAYER_NAMES = ['Red', 'Blue']
     INFO = 'https://en.wikipedia.org/wiki/Dots_and_Boxes'
 
-    class EdgePiece(PieceType):
-        ID = 0
-        COLOURS = ['#E74C3C', '#3498DB']
-
-    class CapturePiece(PieceType):
-        ID = 1
-        COLOURS = ['#FAB1A0', '#74B9FF']
-
     PIECES = [EdgePiece(), CapturePiece()]
     HANDLERS = [PlaceHandler(EdgePiece(), hints=False)]
 
-    def place_valid(self, state, piece):
-        return ((piece.x % 2 == 0) ^ (piece.y % 2 == 0)) and\
-               state.game.SHAPE.in_bounds(piece.x, piece.y) and\
-                not state.pieces[piece.x][piece.y]
+    def on_action(self, state):
 
-    def place_piece(self, state, piece):
-        player_score = state.player_states[state.turn.current_id].score
-        state = state.place_piece(piece)
-        state = self.capture(state, piece)
-        player_score_after = state.player_states[state.turn.current_id].score
-
-        return state.end_turn() if player_score == player_score_after else state
-
-    def action(self, state, action):
         game_finished = all([state.pieces[x][y]
             for x in range(self.SHAPE.width)
             for y in range(self.SHAPE.height)
@@ -43,12 +50,14 @@ class DotsAndBoxes(Game):
         return state if not game_finished else state.end_game()
 
     def capture(self, state, piece):
+
         adj = self.adjacent_tiles(state, piece)
 
         for tile in adj:
             if not state.pieces[tile[0]][tile[1]] and\
                     all(self.adjacent_edges(state, tile[0], tile[1])):
-                cap_piece = Piece(self.CapturePiece(), state.turn.current_id, tile[0], tile[1])
+                cap_piece = Piece(CapturePiece(),
+                    state.turn.current_id, tile[0], tile[1])
                 state = state\
                     .place_piece(cap_piece)\
                     .add_score(state.turn.current_id, 1)
@@ -56,6 +65,7 @@ class DotsAndBoxes(Game):
         return state
 
     def adjacent_tiles(self, state, piece):
+
         return [(piece.x+dx, piece.y+dy)
                 for dx in [-1, 0, 1]
                 for dy in [-1, 0, 1]
@@ -64,6 +74,7 @@ class DotsAndBoxes(Game):
                 and state.open(piece.x+dx, piece.y+dy)]
 
     def adjacent_edges(self, state, x, y):
+
         return [state.pieces[x+dx][y+dy]
                 for dx in [-1, 0, 1]
                 for dy in [-1, 0, 1]
