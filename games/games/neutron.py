@@ -38,12 +38,12 @@ class Neutron(Game):
 
     def on_action(self, state):
 
-        neuron = state.find_pieces(type=NeutronPiece())[0]
+        neutron = state.find_pieces(type=NeutronPiece())[0]
 
         if state.turn.stage == 0:
 
-            if neuron.pos.y in [0, self.HEIGHT - 1]:
-                return state.end_game(0 if neuron.pos.y == 0 else 1)
+            if neutron.pos.y in [0, self.HEIGHT - 1]:
+                return state.end_game(0 if neutron.pos.y == 0 else 1)
 
             elif all(BoxKernel(self.SHAPE).filled(state, piece.pos)
                     for piece in state.find_pieces(state.turn.next_id)):
@@ -53,7 +53,7 @@ class Neutron(Game):
 
         elif state.turn.stage == 1:
 
-            if BoxKernel(self.SHAPE).filled(state, neuron.pos):
+            if BoxKernel(self.SHAPE).filled(state, neutron.pos):
                 return state.end_game(state.turn.current_id)
 
             else: return state.end_turn()

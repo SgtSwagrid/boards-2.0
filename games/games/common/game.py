@@ -67,7 +67,7 @@ class Game:
 
         actions = []
         for handler in self.HANDLERS:
-            actions.extend(handler.actions(state))
+            actions += handler.actions(state)
         return actions
 
     def on_render(self, state, event):

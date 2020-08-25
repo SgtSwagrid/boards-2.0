@@ -1,6 +1,7 @@
 from games.games.common.actions import *
 from games.games.common.display import *
 from games.games.common.events import *
+from games.games.common.kernels import *
 from games.games.common.state import *
 
 
@@ -43,7 +44,8 @@ class PlaceHandler(Handler):
         if piece.type.ID == self.type.ID and\
                 self.place_valid(state, piece):
 
-            state = self.place_piece(state, piece)
+            state = self.place_piece(state, piece)\
+                .push_action(PlaceAction(piece))
             return True, state, DisplayProperties()
 
         return False, None, None
@@ -78,7 +80,6 @@ class PlaceHandler(Handler):
 
     def place_piece(self, state, piece):
 
-        state = state.push_action(PlaceAction(piece))
         return piece.type.place_piece(state, piece)
 
 
@@ -87,17 +88,18 @@ class MoveHandler(Handler):
     EVENTS = [BoardEvent]
 
     def __init__(self, types=[], hints=True, icon=ATTACK_ICON,
-            capture_self=False, capture_enemy=True):
+            capture_self=False, capture_enemy=True, allow_jumps=False):
 
         self.types = types
         self.hints = hints
         self.icon = icon
-        self.capture_self=capture_self
-        self.capture_enemy=capture_enemy
+        self.capture_self = capture_self
+        self.capture_enemy = capture_enemy
+        self.allow_jumps = allow_jumps
 
     def apply(self, state, event):
 
-        clicked = state.piece_at(event.clicked)
+        clicked = state.piece(event.clicked)
         selected = event.properties.get_piece(state, 0)
 
         if selected == clicked:
@@ -105,8 +107,8 @@ class MoveHandler(Handler):
 
         elif selected and self.move_valid(state, selected, event.clicked):
 
-            state = state.push_action(MoveAction(selected, event.clicked))
-            state = self.move_piece(state, selected, event.clicked)
+            state = self.move_piece(state, selected, event.clicked)\
+                .push_action(MoveAction(selected, event.clicked))
             return True, state, DisplayProperties()
 
         elif clicked and self.moveable(state, clicked):
@@ -117,7 +119,7 @@ class MoveHandler(Handler):
     def actions(self, state):
 
         return [MoveAction(piece, pos)
-            for piece in state.find_pieces()
+            for piece in state.piece_list()
             if piece.type in self.types
             for pos in state.game.SHAPE.positions()
             if self.move_valid(state, piece, pos)]
@@ -138,17 +140,19 @@ class MoveHandler(Handler):
 
     def move_valid(self, state, piece, pos):
 
+        kernel = PathKernel(state.game.SHAPE, piece.pos, pos)
+
         return state.game.SHAPE.in_bounds(pos) and\
             any(piece.type.ID == t.ID for t in self.types) and\
             piece.owner_id in [state.turn.current_id, -1] and\
             pos != piece.pos and\
             (self.capture_self or not state.friendly(pos)) and\
             (self.capture_enemy or not state.enemy(pos)) and\
+            (self.allow_jumps or kernel.open(state, piece.pos)) and\
             piece.type.move_valid(state, piece, pos)
 
     def move_piece(self, state, piece, pos):
 
-        state = state.push_action(MoveAction(piece, pos))
         return piece.type.move_piece(state, piece, pos)
 
     def moveable(self, state, piece):
@@ -172,12 +176,12 @@ class RemoveHandler(Handler):
 
     def apply(self, state, event):
 
-        piece = state.piece_at(event.clicked)
+        piece = state.piece(event.clicked)
 
         if piece and self.remove_valid(state, piece):
 
-            state = state.push_action(RemoveAction(piece))
-            state = self.remove_piece(state, piece)
+            state = self.remove_piece(state, piece)\
+                .push_action(RemoveAction(piece))
             return True, state, DisplayProperties()
 
         return False, None, DisplayProperties()
@@ -185,7 +189,7 @@ class RemoveHandler(Handler):
     def actions(self, state):
 
         return [RemoveAction(piece)
-            for piece in state.find_pieces()
+            for piece in state.piece_list()
             if piece.type in self.types
             if self.remove_valid(state, piece)]
 
@@ -193,7 +197,7 @@ class RemoveHandler(Handler):
 
         if self.hints and event.active:
 
-            piece = state.piece_at(pos)
+            piece = state.piece(pos)
 
             if piece and self.remove_valid(state, piece):
                 return self.icon
@@ -209,7 +213,6 @@ class RemoveHandler(Handler):
 
     def remove_piece(self, state, piece):
 
-        state = state.push_action(RemoveAction(piece))
         return piece.type.remove_piece(state, piece)
 
 
@@ -217,8 +220,8 @@ class SelectHandler(Handler):
 
     EVENTS = [SelectEvent, BoardEvent]
 
-    def __init__(self, click_to_show=False, hints=False, icon=PLACE_ICON):
-        self.click_to_show = click_to_show
+    def __init__(self, hide=False, hints=False, icon=PLACE_ICON):
+        self.hide = hide
         self.hints = hints
         self.icon = icon
 
@@ -229,7 +232,7 @@ class SelectHandler(Handler):
         options = self.options(state, pos)\
             if enabled else []
 
-        if isinstance(event, BoardEvent) and self.click_to_show:
+        if isinstance(event, BoardEvent) and self.hide:
 
             if event.properties.is_selected(pos):
                 return True, None, DisplayProperties()
@@ -240,8 +243,8 @@ class SelectHandler(Handler):
         elif isinstance(event, SelectEvent) and enabled and\
                 0 <= event.option_id < len(options):
 
-            state = state.push_action(SelectAction(event.option_id, pos))
-            state = self.select(state, options[event.option_id], pos)
+            state = self.select(state, options[event.option_id], pos)\
+                .push_action(SelectAction(event.option_id, pos))
 
             return True, state, DisplayProperties()
 
@@ -276,7 +279,7 @@ class SelectHandler(Handler):
 
         return self.enabled(state, target) and\
             any(self.options(state, target)) and\
-            (not self.click_to_show or event.properties.is_selected(target))
+            (not self.hide or event.properties.is_selected(target))
 
     def enabled(self, state, target):
         return any(self.options(state, target))
@@ -288,15 +291,15 @@ class SelectHandler(Handler):
         return Selector(options, target, state)
 
     def select(self, state, option, target):
-        return state.push_action(SelectAction(option.id, target))
+        return state
 
 
 class MultiPlaceHandler(SelectHandler, PlaceHandler):
 
     def __init__(self, types=[], hints=True, icon=PLACE_ICON,
-            capture_self=True, capture_enemy=True, click_to_show=True):
+            capture_self=True, capture_enemy=True, hide=True):
 
-        SelectHandler.__init__(self, click_to_show, icon)
+        SelectHandler.__init__(self, hide, icon)
 
         PlaceHandler.__init__(self, None, hints, icon,
             capture_self, capture_enemy)
@@ -334,5 +337,5 @@ class MultiPlaceHandler(SelectHandler, PlaceHandler):
         piece = Piece(state.game.PIECES[option.value],
             state.turn.current_id, target)
 
-        state = state.push_action(PlaceAction(piece))
-        return state.place_piece(piece)
+        return state.place_piece(piece)\
+            .push_action(PlaceAction(piece))

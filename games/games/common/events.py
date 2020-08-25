@@ -45,4 +45,4 @@ class DisplayProperties:
         if 0 <= id < len(self.selected):
             pos = self.selected[id]
             if state.game.SHAPE.in_bounds(pos):
-                return state.piece_at(pos)
+                return state.piece(pos)

@@ -17,7 +17,7 @@ class ReversiPiece(PieceType):
 
         for pos in flips:
             state = state\
-                .add_score(state.piece_at(pos).owner_id, -1)\
+                .add_score(state.piece(pos).owner_id, -1)\
                 .add_score(state.turn.current_id, 1)\
                 .place_piece(Piece(ReversiPiece(),
                     state.turn.current_id, pos))
@@ -98,7 +98,7 @@ class Reversi(Game):
 
         '''Returns true if the current state's player has a turn they can play'''
         for pos in self.SHAPE.positions():
-            if not state.piece_at(pos):
+            if not state.piece(pos):
                 if ReversiPiece().place_valid(state,
                         Piece(ReversiPiece(), state.turn.current_id, pos)):
                     return True

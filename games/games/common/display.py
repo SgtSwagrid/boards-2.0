@@ -57,6 +57,26 @@ class Display:
             for selector in display.selectors]
         return display
 
+    def flip_horz(self):
+
+        display = copy.copy(self)
+        display.rows = [row.flip_horz(self.width) for row in display.rows]
+        display.selectors = [selector.flip_horz(self.width)
+            for selector in display.selectors]
+        return display
+
+    def flip_vert(self):
+
+        display = copy.copy(self)
+        display.rows = [row.flip_vert(self.height) for row in display.rows]
+        display.selectors = [selector.flip_vert(self.height)
+            for selector in display.selectors]
+        return display
+
+    def rotate(self):
+
+        return self.flip_horz().flip_vert()
+
 
 class Row:
 
@@ -79,6 +99,19 @@ class Row:
         row.height *= sf
         row.voffset *= sf
         row.tiles = [tile.scale(sf) for tile in row.tiles]
+        return row
+
+    def flip_horz(self, width):
+
+        row = copy.deepcopy(self)
+        for tile in row.tiles:
+            tile.hoffset = width - tile.width - tile.hoffset
+        return row
+
+    def flip_vert(self, height):
+
+        row = copy.copy(self)
+        row.voffset = height - self.height - self.voffset
         return row
 
 
@@ -161,6 +194,18 @@ class Selector:
         selector.height *= sf
         selector.x *= sf
         selector.y *= sf
+        return selector
+
+    def flip_horz(self, width):
+
+        selector = copy.copy(self)
+        selector.x = width - selector.width - selector.x
+        return selector
+
+    def flip_vert(self, height):
+
+        selector = copy.copy(self)
+        selector.y = height - selector.height - selector.y
         return selector
 
 

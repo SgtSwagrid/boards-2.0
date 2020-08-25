@@ -82,7 +82,7 @@ class State:
         self.outcome = outcome
         self.previous = previous
 
-    def piece_at(self, pos):
+    def piece(self, pos):
 
         return self.pieces[pos.x][pos.y]
 
@@ -95,7 +95,7 @@ class State:
         return [piece for piece in self.piece_list()
             if (type == -1 or piece.type.ID == type.ID) and
             (player_id == -1 or piece.owner_id == player_id) and
-            (x == -1 or piece.x == x) and (y == -1 or piece.y == y) and
+            (x == -1 or piece.pos.x == x) and (y == -1 or piece.pos.y == y) and
             (mode == -1 or piece.mode == mode)]
 
     def end_stage(self, skip=1):
@@ -147,7 +147,7 @@ class State:
 
         state = copy.deepcopy(self)
         state.pieces[pos.x][pos.y] = piece
-        change = Change(pos, self.piece_at(pos), piece)
+        change = Change(pos, self.piece(pos), piece)
         return state.set_changed(change)
 
     def set_piece_mode(self, piece, mode):
@@ -195,23 +195,23 @@ class State:
 
     def exists(self, pos):
 
-        return self.game.SHAPE.in_bounds(pos) and self.piece_at(pos)
+        return self.game.SHAPE.in_bounds(pos) and self.piece(pos)
 
     def open(self, pos):
 
-        return self.game.SHAPE.in_bounds(pos) and not self.piece_at(pos)
+        return self.game.SHAPE.in_bounds(pos) and not self.piece(pos)
 
     def friendly(self, pos, player_id=-1):
 
         if player_id == -1: player_id = self.turn.current_id
-        return self.exists(pos) and\
-            self.piece_at(pos).owner_id == player_id
+        return self.exists(pos) and \
+               self.piece(pos).owner_id == player_id
 
     def enemy(self, pos, player_id=-1):
 
         if player_id == -1: player_id = self.turn.current_id
-        return self.exists(pos) and\
-            self.piece_at(pos).owner_id != player_id
+        return self.exists(pos) and \
+               self.piece(pos).owner_id != player_id
 
     def push_action(self, action):
 

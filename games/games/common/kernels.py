@@ -1,5 +1,6 @@
 from .vector import *
 
+
 class Kernel:
 
     def __init__(self, shape):
@@ -7,14 +8,14 @@ class Kernel:
 
     def positions(self, centre):
 
-        return [v for v in self.apply(centre)
-            if self.shape.in_bounds(v)]
+        return [v + centre for v in self.apply()
+            if self.shape.in_bounds(v + centre)]
 
     def pieces(self, state, centre):
 
-        return [state.piece_at(v)
-            for v in self.positions(centre)
-            if state.piece_at(v)]
+        return [state.piece(v)
+                for v in self.positions(centre)
+                if state.piece(v)]
 
     def find_pieces(self, state, centre,
             player_id=-1, type=-1, mode=-1, x=-1, y=-1):
@@ -27,40 +28,59 @@ class Kernel:
 
     def filled(self, state, centre):
 
-        return all(state.piece_at(v) for v in self.positions(centre))
+        return all(state.piece(v) for v in self.positions(centre))
 
     def open(self, state, centre):
 
-        return len(self.pieces(state, centre)) == 0
+        return not any(self.pieces(state, centre))
+
+    def sweep(self):
+
+        return [self.positions(pos) for pos in self.shape.positions()]
 
 
 class BoxKernel(Kernel):
 
-    def __init__(self, shape, r0=0, r1=1):
+    def __init__(self, shape, r1=1, r0=0):
 
         super().__init__(shape)
-        self.r0 = r0
         self.r1 = r1
+        self.r0 = r0
 
-    def apply(self, centre):
+    def apply(self):
 
-        return [centre + Vec(x, y)
+        return [Vec(x, y)
             for r in range(self.r0, self.r1 + 1)
             for x in range(-r, r + 1)
             for y in range(-r, r + 1)]
 
 
-class DiamondKernel(Kernel):
+class AreaKernel(Kernel):
 
-    def __init__(self, shape, r0=0, r1=1):
+    def __init__(self, shape, width, height):
 
         super().__init__(shape)
-        self.r0 = r0
+        self.width = width
+        self.height = height
+
+    def apply(self):
+
+        return [Vec(x, y)
+            for x in range(0, self.width)
+            for y in range(0, self.height)]
+
+
+class DiamondKernel(Kernel):
+
+    def __init__(self, shape, r1=1, r0=0):
+
+        super().__init__(shape)
         self.r1 = r1
+        self.r0 = r0
 
-    def apply(self, centre):
+    def apply(self):
 
-        return [centre + Vec(x, y)
+        return [Vec(x, y)
             for r in range(self.r0, self.r1 + 1)
             for x in range(-r, r + 1)
             for y in [r - abs(x), abs(x) - r]]
@@ -68,17 +88,18 @@ class DiamondKernel(Kernel):
 
 class RayKernel(Kernel):
 
-    def __init__(self, shape, dir, r0=1, r1=-1):
+    def __init__(self, shape, dir, max_dist=-1, min_dist=1):
 
         super().__init__(shape)
         self.dir = dir
-        self.r0 = r0
-        self.r1 = r1 if r1 != -1 else max(shape.width, shape.height)
+        self.max_dist = max_dist if max_dist != -1 else\
+            max(shape.width, shape.height)
+        self.min_dist = min_dist
 
-    def apply(self, centre):
+    def apply(self):
 
-        return [centre + Vec(r * self.dir.x, r * self.dir.y)
-            for r in range(self.r0, self.r1 + 1)]
+        return [Vec(r * self.dir.x, r * self.dir.y)
+            for r in range(self.min_dist, self.max_dist + 1)]
 
     def first(self, state, centre):
 
@@ -91,3 +112,16 @@ class RayKernel(Kernel):
             centre = centre + self.dir
 
         return centre
+
+
+class PathKernel(RayKernel):
+
+    def __init__(self, shape, start, end, inclusive=False):
+
+        dir = start.direction(end)
+        dist = start.steps(end)
+
+        max = dist if inclusive else dist - 1
+        min = 0 if inclusive else 1
+
+        super().__init__(shape, dir, max, min)

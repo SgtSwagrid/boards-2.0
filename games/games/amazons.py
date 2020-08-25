@@ -8,9 +8,9 @@ class Amazon(PieceType):
 
     def move_valid(self, state, piece, pos):
 
-        return state.turn.stage == 0 and\
-            not state.piece_at(pos) and\
-            is_queen_move(state, piece.pos, pos)
+        return state.turn.stage == 0 and \
+               not state.piece(pos) and \
+               is_queen_move(state, piece.pos, pos)
 
 
 class Arrow(PieceType):

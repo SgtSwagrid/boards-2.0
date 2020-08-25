@@ -10,7 +10,7 @@ class MoveAction:
 
     def __init__(self, piece, new_pos):
 
-        self.piece = piece
+        self.piece = piece.at(new_pos)
         self.old_pos = piece.pos
         self.new_pos = new_pos
 

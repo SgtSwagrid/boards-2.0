@@ -10,7 +10,7 @@ class EdgePiece(PieceType):
 
         return ((piece.pos.x % 2 == 0) ^ (piece.pos.y % 2 == 0)) and\
             state.game.SHAPE.in_bounds(piece.pos) and\
-            not state.piece_at(piece.pos)
+            not state.piece(piece.pos)
 
     def place_piece(self, state, piece):
 
@@ -42,7 +42,7 @@ class DotsAndBoxes(Game):
 
     def on_action(self, state):
 
-        game_finished = all([state.piece_at(pos)
+        game_finished = all([state.piece(pos)
             for pos in self.SHAPE.positions()
             if (pos.x % 2 == 1 and pos.y % 2 == 1)])
 
@@ -74,7 +74,7 @@ class DotsAndBoxes(Game):
 
     def adjacent_edges(self, state, pos):
 
-        return [state.piece_at(pos)
+        return [state.piece(pos)
                 for dx in [-1, 0, 1]
                 for dy in [-1, 0, 1]
                 if (((pos.x+dx) % 2 == 0) ^ ((pos.y+dy) % 2 == 0))

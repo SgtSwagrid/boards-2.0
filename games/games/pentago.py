@@ -101,7 +101,7 @@ class Pentago(TicTacToe):
 
     def all_captures(self, state, player_id):
 
-        captures = (self.captures(state, state.piece_at(pos))
+        captures = (self.captures(state, state.piece(pos))
             for pos in self.SHAPE.positions()
             if state.friendly(pos, player_id))
 

@@ -29,8 +29,8 @@ class Vec:
 
     def direction(self, v):
 
-        if v.x == self.x and v.y == self.y: return 0, 0
-        gcd = math.gcd(v.x - self.x, v.y - self.y)
+        if v.x == self.x and v.y == self.y: return Vec(0, 0)
+        gcd = math.gcd(abs(v.x - self.x), abs(v.y - self.y))
         return Vec((v.x - self.x) // gcd, (v.y - self.y) // gcd)
 
     def steps(self, v):
@@ -53,6 +53,10 @@ class Vec:
         return (self.y == v.y and abs(v.x - self.x) == 1) or\
             (v.y - self.y == 1 and v.x in [self.x - 1, self.x]) or\
             (v.y - self.y == -1 and v.x in [self.x, self.x + 1])
+
+    def abs(self):
+
+        return Vec(abs(self.x), abs(self.y))
 
     def __add__(self, v):
         if isinstance(v, Vec): return Vec(self.x + v.x, self.y + v.y)

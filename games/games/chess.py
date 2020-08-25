@@ -9,17 +9,40 @@ class Pawn(PieceType):
     def move_valid(self, state, piece, pos):
 
         dir = [1, -1][piece.owner_id]
-        home = piece.y == [1, 6][piece.owner_id]
+        home = piece.pos.y == [1, 6][piece.owner_id]
 
-        straight = pos.x == piece.pos.x and not state.piece_at(pos)
+        straight = pos.x == piece.pos.x and not state.piece(pos)
         normal = straight and pos.y - piece.pos.y == dir
-        double = straight and pos.y - piece.pos.y == 2 * dir and home and\
-            not state.pieces_at(piece.pos + (0, dir))
+        double = straight and pos.y - piece.pos.y == 2 * dir and home
 
-        capture = abs(pos.x - piece.x) == 1 and state.piece_at(pos) and\
-            pos.y - piece.pos.y == dir
+        capture = abs(pos.x - piece.pos.x) == 1 and\
+            pos.y - piece.pos.y == dir and state.enemy(pos)
 
-        return normal or double or capture
+        return normal or double or capture or\
+            self.en_passant(state, piece, pos)
+
+    def move_piece(self, state, piece, pos):
+
+        if en_passant := self.en_passant(state, piece, pos):
+            return en_passant
+
+        else: return state.move_piece(piece, pos)
+
+    def en_passant(self, state, piece, pos):
+
+        capture = abs(pos.x - piece.pos.x) == 1 and\
+            pos.y - piece.pos.y == [1, -1][piece.owner_id]
+
+        double = isinstance(state.action, MoveAction) and\
+            isinstance(state.action.piece.type, Pawn) and\
+            abs(state.action.new_pos.y - state.action.old_pos.y) == 2
+
+        if capture and double:
+            direction = (0, [1, -1][state.action.piece.owner_id])
+
+            if pos == state.action.old_pos + direction:
+                return state.move_piece(piece, pos)\
+                    .remove_piece(state.action.piece)
 
 
 class Rook(PieceType):
@@ -28,12 +51,7 @@ class Rook(PieceType):
     TEXTURES = ['chess/white_rook.png', 'chess/black_rook.png']
 
     def move_valid(self, state, piece, pos):
-
-        dir = piece.pos.direction(pos)
-        dist = distance(piece.x, piece.y, x_to, y_to)
-
-        return ((sx == 0) ^ (sy == 0)) and\
-            path(piece.x, piece.y, sx, sy, d, state.pieces)
+        return piece.pos.orthogonal(pos)
 
 
 class Knight(PieceType):
@@ -42,10 +60,8 @@ class Knight(PieceType):
     TEXTURES = ['chess/white_knight.png', 'chess/black_knight.png']
 
     def move_valid(self, state, piece, pos):
-
-        dx = abs(pos - piece.pos).x)
-        dx, dy = delta(piece.x, piece.y, x_to, y_to)
-        return (dx == 1 and dy == 2) or (dx == 2 and dy == 1)
+        d = (pos - piece.pos).abs()
+        return (d.x == 1 and d.y == 2) or (d.x == 2 and d.y == 1)
 
 
 class Bishop(PieceType):
@@ -54,13 +70,7 @@ class Bishop(PieceType):
     TEXTURES = ['chess/white_bishop.png', 'chess/black_bishop.png']
 
     def move_valid(self, state, piece, pos):
-
-        dx, dy = delta(piece.x, piece.y, x_to, y_to)
-        sx, sy = direction(piece.x, piece.y, x_to, y_to)
-        d = distance(piece.x, piece.y, x_to, y_to)
-
-        return (abs(dx) == abs(dy)) and\
-            path(piece.x, piece.y, sx, sy, d, state.pieces)
+        return piece.pos.diagonal(pos)
 
 
 class Queen(PieceType):
@@ -69,13 +79,7 @@ class Queen(PieceType):
     TEXTURES = ['chess/white_queen.png', 'chess/black_queen.png']
 
     def move_valid(self, state, piece, pos):
-
-        dx, dy = delta(piece.x, piece.y, x_to, y_to)
-        sx, sy = direction(piece.x, piece.y, x_to, y_to)
-        d = distance(piece.x, piece.y, x_to, y_to)
-
-        return (((sx == 0) ^ (sy == 0)) or (abs(dx) == abs(dy))) and\
-            path(piece.x, piece.y, sx, sy, d, state.pieces)
+        return piece.pos.straight(pos)
 
 
 class King(PieceType):
@@ -84,8 +88,38 @@ class King(PieceType):
     TEXTURES = ['chess/white_king.png', 'chess/black_king.png']
 
     def move_valid(self, state, piece, pos):
+        if self.castle(state, piece, pos):
+            print(pos)
+            print(state.game.check(self.move_piece(state, piece, pos)))
+        return piece.pos.diag_adjacent(pos) or self.castle(state, piece, pos)
 
-        return distance(piece.x, piece.y, x_to, y_to) == 1
+    def move_piece(self, state, piece, pos):
+
+        if castle := self.castle(state, piece, pos):
+            return castle
+
+        else: return state.move_piece(piece, pos)
+
+    def castle(self, state, king, pos):
+
+        if pos - king.pos in [(-2, 0), (2, 0)] and king.mode == 0:
+
+            dir = king.pos.direction(pos)
+            file = {-2: 0, 2: 7}[pos.x - king.pos.x]
+            rook = state.piece(Vec(file, king.pos.y))
+
+            if rook and rook.mode == 0:
+
+                path = PathKernel(state.game.SHAPE,
+                    king.pos, rook.pos).open(state, king.pos)
+
+                kernel = RayKernel(state.game.SHAPE, dir, 2, 0)
+                check = any(state.game.attacking(state, state.turn.next_id, pos)
+                    for pos in kernel.positions(king.pos))
+
+                if path and not check:
+                    return state.move_piece(king, pos)\
+                        .move_piece(rook, king.pos + dir)
 
 
 class ChessMoveHandler(MoveHandler):
@@ -99,16 +133,16 @@ class ChessMoveHandler(MoveHandler):
     def move_piece(self, state, piece, pos):
 
         state = super().move_piece(state, piece, pos)
-        return state.set_piece_mode(state.piece_at(pos), 1)
+        return state.set_piece_mode(state.piece(pos), 1)
 
 
 class PromotionHandler(MultiPlaceHandler):
 
     def enabled(self, state, pos):
 
-        return state.friendly(pos) and\
-            isinstance(state.piece_at(pos).type, Pawn) and\
-            pos.y == [7, 0][state.turn.current_id]
+        return state.friendly(pos) and \
+               isinstance(state.piece(pos).type, Pawn) and \
+               pos.y == [7, 0][state.turn.current_id]
 
     def pieces(self, state, pos):
         return [Rook(), Knight(), Bishop(), Queen()]
@@ -130,15 +164,19 @@ class Chess(Game):
     INFO = 'https://en.wikipedia.org/wiki/Chess'
 
     PIECES = [Pawn(), Rook(), Knight(), Bishop(), Queen(), King()]
-
-    HANDLERS = [
-        ChessMoveHandler(PIECES),
-        PromotionHandler(click_to_show=False)
-    ]
+    HANDLERS = [ChessMoveHandler(PIECES), PromotionHandler(hide=False)]
 
     def on_action(self, state):
 
         if PromotionHandler().promotion(state): return state
+
+        #elif self.checkmate(state.end_turn()):
+        #    return state.end_game(state.turn.current_id)
+
+        #elif self.stalemate(state.end_turn()):
+        #    print(self.HANDLERS[0].actions(state.end_turn()))
+        #    return state.end_game()
+
         else: return state.end_turn()
 
     def initial_piece(self, num_players, pos):
@@ -154,15 +192,27 @@ class Chess(Game):
 
         elif pos.y in (1, 6): return Piece(Pawn(), 0 if pos.y == 1 else 1)
 
+    def on_render(self, state, event):
+
+        display = super().on_render(state, event)
+        return display.rotate() if event.player_id == 1 else display
+
     def check(self, state):
 
         king = state.find_pieces(state.turn.current_id, King())[0]
-        next_state = state.end_turn()
-        return any(piece.type.move_valid(next_state, piece, king.pos)
-            for piece in state.find_pieces(state.turn.next_id))
+        return self.attacking(state.end_turn(), state.turn.next_id, king.pos)
 
-    #def check_mate(self, state, player):
-    #    return not any(self.move_valid(state, piece, x, y)
-    #        for x in range(0, self.width)
-    #        for y in range(0, self.height)
-    #        for piece in state.find_pieces(player_id))
+    def attacking(self, state, player_id, pos):
+
+        return any(piece.type.move_valid(state, piece, pos) and\
+            PathKernel(self.SHAPE, piece.pos, pos).open(state, piece.pos)
+            for piece in state.find_pieces(player_id))
+
+    def mate(self, state):
+        return not any(self.get_actions(state))
+
+    def checkmate(self, state):
+        return self.check(state) and self.mate(state)
+
+    def stalemate(self, state):
+        return not self.check(state) and self.mate(state)

@@ -10,7 +10,7 @@ class MillPiece(PieceType):
     def place_valid(self, state, piece):
         # if epoch is placing epoch and the selected tile is valid and there is no other piece already
         if state.turn.epoch == 0 and state.turn.stage == 0:
-            return state.game.graph.is_node(piece.pos) and not state.piece_at(piece.pos)
+            return state.game.graph.is_node(piece.pos) and not state.piece(piece.pos)
         else:
             return False
 
@@ -21,7 +21,7 @@ class MillPiece(PieceType):
         if state.turn.ply / 2 > 8:
             state = state.end_epoch()
         #print(state.turn.ply / 2)
-        piece = state.piece_at(piece.pos)
+        piece = state.piece(piece.pos)
         if state.game.graph.is_mill(state, piece):
             #print('end stage')
             return state.end_stage()
@@ -34,7 +34,7 @@ class MillPiece(PieceType):
         if state.turn.epoch == 1 and state.turn.stage == 0:
             # if in the graph from the starting node the target node is reachable and there is no other piece yet
             if state.game.graph.fetch_node(piece.x, piece.y).is_neighbour(state.game.graph.fetch_node(pos)) and not \
-                    state.piece_at(pos):
+                    state.piece(pos):
                 return True
         else:
             return False
@@ -42,7 +42,7 @@ class MillPiece(PieceType):
     # after moving a piece a NEW mill might have been formed iff that is the case remove one opponents piece
     def move_piece(self, state, piece, pos):
         state = state.move_piece(piece, pos)
-        piece = state.piece_at(pos)
+        piece = state.piece(pos)
         # print([x_to, y_to])
         # print([piece.x, piece.y])
         if not state.game.graph.is_mill(state, piece):
@@ -162,8 +162,8 @@ class Mill(Game):
             mill_y_friend = None
             for neighbour in self.fetch_node(piece=piece).neighbours:
                 # print(str(neighbour.x) + ' | ' + str(neighbour.y))
-                if state.piece_at(neighbour.pos):
-                    neighbour_piece = state.piece_at(neighbour.pos)
+                if state.piece(neighbour.pos):
+                    neighbour_piece = state.piece(neighbour.pos)
                     if neighbour_piece.owner_id == state.turn.current_id:
                         # print('True')
                         # these so called duplicates are actually not duplicates at all ...
@@ -185,8 +185,8 @@ class Mill(Game):
 
                         for more_neighbour in self.fetch_node(piece=neighbour_piece).neighbours:
                             # print(str(more_neighbour.x) + ' | ' + str(more_neighbour.y))
-                            if state.piece_at(more_neighbour.pos):
-                                neighbour_piece = state.piece_at(more_neighbour.pos)
+                            if state.piece(more_neighbour.pos):
+                                neighbour_piece = state.piece(more_neighbour.pos)
                                 if neighbour_piece.owner_id == state.turn.current_id and \
                                         (piece.pos == more_neighbour.pos) and \
                                         (neighbour_piece is not piece):

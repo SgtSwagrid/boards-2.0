@@ -20,7 +20,7 @@ class ChompPiece(PieceType):
 
         for x in range(piece.pos.x, state.game.SHAPE.width):
             for y in range(piece.pos.y, state.game.SHAPE.height):
-                if not state.piece_at(Vec(x, y)):
+                if not state.piece(Vec(x, y)):
                     state = state.place_piece(fill_piece.at(Vec(x, y)))
 
         return state

@@ -54,7 +54,7 @@ class TicTacToe(Game):
                         piece.pos.y + dir.y * sign * i)
 
                     if state.friendly(pos, piece.owner_id):
-                        run.add(state.piece_at(pos))
+                        run.add(state.piece(pos))
                     else: break
 
             if len(run) >= self.TARGET:
