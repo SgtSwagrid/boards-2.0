@@ -12,7 +12,7 @@ class Hex(Game):
     ID = 17
     NAME = 'Hex'
     BACKGROUND = HexCheckerboard(['#ffffff', '#f1f2f6', '#dfe4ea'])
-    SHAPE = Star(4)
+    SHAPE = SlantedHex(11, 11)
     PLAYER_NAMES = ['Red', 'Blue']
     INFO = 'https://en.wikipedia.org/wiki/Hex_%28board_game%29'
 

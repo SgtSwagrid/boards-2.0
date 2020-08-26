@@ -39,22 +39,6 @@ class Kernel:
         return [self.positions(pos) for pos in self.shape.positions()]
 
 
-class BoxKernel(Kernel):
-
-    def __init__(self, shape, r1=1, r0=0):
-
-        super().__init__(shape)
-        self.r1 = r1
-        self.r0 = r0
-
-    def apply(self):
-
-        return [Vec(x, y)
-            for r in range(self.r0, self.r1 + 1)
-            for x in range(-r, r + 1)
-            for y in range(-r, r + 1)]
-
-
 class AreaKernel(Kernel):
 
     def __init__(self, shape, width, height):
@@ -68,6 +52,22 @@ class AreaKernel(Kernel):
         return [Vec(x, y)
             for x in range(0, self.width)
             for y in range(0, self.height)]
+
+
+class BoxKernel(Kernel):
+
+    def __init__(self, shape, r1=1, r0=0):
+
+        super().__init__(shape)
+        self.r1 = r1
+        self.r0 = r0
+
+    def apply(self):
+
+        return [Vec(x, y)
+            for r in range(self.r0, self.r1 + 1)
+            for x in range(-r, r + 1)
+            for y in (range(-r, r + 1) if x in [-r, r] else [-r, r])]
 
 
 class DiamondKernel(Kernel):
@@ -84,6 +84,24 @@ class DiamondKernel(Kernel):
             for r in range(self.r0, self.r1 + 1)
             for x in range(-r, r + 1)
             for y in [r - abs(x), abs(x) - r]]
+
+
+class HexKernel(Kernel):
+
+    def __init__(self, shape, r1=1, r0=0):
+
+        super().__init__(shape)
+        self.r1 = r1
+        self.r0 = r0
+
+    def apply(self):
+
+        return [Vec(x, y)
+            for r in range(self.r0, self.r1 + 1)
+            for x in range(-r, r + 1)
+            for y in ([abs(r - abs(x)) * (-1 if x < 0 else 1),
+                r * (1 if x < 0 else -1)] if x not in [-r, r] else
+                range(0, r + 1) if x < 0 else range(-r, 1))]
 
 
 class RayKernel(Kernel):

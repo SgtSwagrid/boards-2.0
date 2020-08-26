@@ -399,15 +399,16 @@ class ActionModel(models.Model):
 
         if self.type == 0:
             piece = state.get_piece(Vec(self.x_to, self.y_to))
-            return PlaceAction(piece)
+            return PlaceAction(piece, Vec(self.x_to, self.y_to))
 
         elif self.type == 1:
             piece = state.previous.get_piece(Vec(self.x_from, self.y_from))
-            return MoveAction(piece, Vec(self.x_to, self.y_to))
+            return MoveAction(piece, Vec(self.x_from, self.y_from),
+                Vec(self.x_to, self.y_to))
 
         elif self.type == 2:
             piece = state.previous.get_piece(Vec(self.x_from, self.y_from))
-            return RemoveAction(piece)
+            return RemoveAction(piece, Vec(self.x_from, self.y_from))
 
         elif self.type == 3:
             return SelectAction(self.option, Vec(self.x_to, self.y_to))
