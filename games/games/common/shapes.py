@@ -287,6 +287,9 @@ class SlantedHex(Hexagonal):
 
         return 0
 
+    def logical_row_v_space(self, row):
+        return super().logical_row_vspace(row) + 0.2
+
 
 class StaggeredHex(Hexagonal):
 

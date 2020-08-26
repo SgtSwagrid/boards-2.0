@@ -45,8 +45,9 @@ class PlaceHandler(Handler):
         if piece.type.ID == self.type.ID and\
                 self.place_valid(state, piece):
 
-            state = self.place_piece(state, piece)\
-                .push_action(PlaceAction(piece, event.clicked))
+            state = self.place_piece(state, piece)
+            action = PlaceAction(state.piece(event.clicked), event.clicked)
+            state = state.push_action(action)
             return True, state, DisplayProperties()
 
         return False, None, None
@@ -112,8 +113,10 @@ class MoveHandler(Handler):
 
         elif selected and self.move_valid(state, selected, event.clicked):
 
-            state = self.move_piece(state, selected, event.clicked)\
-                .push_action(MoveAction(selected, selected.pos, event.clicked))
+            state = self.move_piece(state, selected, event.clicked)
+            action = MoveAction(state.piece(event.clicked),
+                selected.pos, event.clicked)
+            state = state.push_action(action)
             return True, state, DisplayProperties()
 
         elif clicked and self.moveable(state, clicked):
@@ -189,8 +192,9 @@ class RemoveHandler(Handler):
 
         if piece and self.remove_valid(state, piece):
 
-            state = self.remove_piece(state, piece)\
-                .push_action(RemoveAction(piece, event.clicked))
+            state = self.remove_piece(state, piece)
+            action = RemoveAction(state.piece(event.clicked), event.clicked)
+            state = state.push_action(action)
             return True, state, DisplayProperties()
 
         return False, None, DisplayProperties()

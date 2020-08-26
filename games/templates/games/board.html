@@ -3,7 +3,7 @@
 
 <div class="board z-depth-3" style="
         width: {{ display.width }}px;
-        height: {{ display.height }}px;
+        height: {{ display.height|add:4 }}px;
         background: {{ display.background }};">
 
     {% for row in display.rows %}
@@ -12,7 +12,7 @@
                 position: absolute;
                 width: {{ display.width }}px;
                 height: {{ row.height }}px;
-                bottom: {{ row.voffset|add:1 }}px;">
+                bottom: {{ row.voffset|add:2 }}px;">
 
             {% for tile in row.tiles %}
 
