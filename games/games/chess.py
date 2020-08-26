@@ -88,9 +88,6 @@ class King(PieceType):
     TEXTURES = ['chess/white_king.png', 'chess/black_king.png']
 
     def move_valid(self, state, piece, pos):
-        if self.castle(state, piece, pos):
-            print(pos)
-            print(state.game.check(self.move_piece(state, piece, pos)))
         return piece.pos.diag_adjacent(pos) or self.castle(state, piece, pos)
 
     def move_piece(self, state, piece, pos):
@@ -140,11 +137,12 @@ class PromotionHandler(MultiPlaceHandler):
 
     def enabled(self, state, pos):
 
-        return state.friendly(pos) and \
-               isinstance(state.piece(pos).type, Pawn) and \
-               pos.y == [7, 0][state.turn.current_id]
+        return state.friendly(pos) and\
+            isinstance(state.piece(pos).type, Pawn) and\
+            pos.y == [7, 0][state.turn.current_id]
 
     def pieces(self, state, pos):
+
         return [Rook(), Knight(), Bishop(), Queen()]
 
     def promotion(self, state):
@@ -164,18 +162,20 @@ class Chess(Game):
     INFO = 'https://en.wikipedia.org/wiki/Chess'
 
     PIECES = [Pawn(), Rook(), Knight(), Bishop(), Queen(), King()]
-    HANDLERS = [ChessMoveHandler(PIECES), PromotionHandler(hide=False)]
+    HANDLERS = [
+        ChessMoveHandler(allow_jumps=False),
+        PromotionHandler(hide=False)
+    ]
 
     def on_action(self, state):
 
         if PromotionHandler().promotion(state): return state
 
-        #elif self.checkmate(state.end_turn()):
-        #    return state.end_game(state.turn.current_id)
+        elif self.checkmate(state.end_turn()):
+            return state.end_game(state.turn.current_id)
 
-        #elif self.stalemate(state.end_turn()):
-        #    print(self.HANDLERS[0].actions(state.end_turn()))
-        #    return state.end_game()
+        elif self.stalemate(state.end_turn()):
+            return state.end_game()
 
         else: return state.end_turn()
 
@@ -202,12 +202,6 @@ class Chess(Game):
         king = state.find_pieces(state.turn.current_id, King())[0]
         return self.attacking(state.end_turn(), state.turn.next_id, king.pos)
 
-    def attacking(self, state, player_id, pos):
-
-        return any(piece.type.move_valid(state, piece, pos) and\
-            PathKernel(self.SHAPE, piece.pos, pos).open(state, piece.pos)
-            for piece in state.find_pieces(player_id))
-
     def mate(self, state):
         return not any(self.get_actions(state))
 
@@ -216,3 +210,9 @@ class Chess(Game):
 
     def stalemate(self, state):
         return not self.check(state) and self.mate(state)
+
+    def attacking(self, state, player_id, pos):
+
+        return any(piece.type.move_valid(state, piece, pos) and\
+            PathKernel(self.SHAPE, piece.pos, pos).open(state, piece.pos)
+            for piece in state.find_pieces(player_id))

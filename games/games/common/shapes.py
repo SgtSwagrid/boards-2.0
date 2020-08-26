@@ -271,7 +271,7 @@ class CentredHex(Hexagonal):
     def logical_row_start(self, row):
 
         start = max(range(0, self.height),
-            key=lambda r: self.row_width(r) - r)
+            key=lambda r: self.row_width(r) + r)
 
         dw = self.logical_row_width(row) - self.logical_row_width(start)
         return ((start - row) - dw) // 2

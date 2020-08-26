@@ -75,15 +75,18 @@ def board_view(request, board_code):
 
     clicked = None
     if 'cx' in request.POST:
-        clicked = Vec(int(request.POST['cx']), int(request.POST['cy']))
+        pos = Vec(int(request.POST['cx']), int(request.POST['cy']))
+        if game.SHAPE.in_bounds(pos): clicked = pos
 
     selected = None
     if 'sx' in request.POST:
-        selected = Vec(int(request.POST['sx']), int(request.POST['sy']))
+        pos = Vec(int(request.POST['sx']), int(request.POST['sy']))
+        if game.SHAPE.in_bounds(pos): selected = pos
 
     target = None
     if 'tx' in request.POST:
-        target = Vec(int(request.POST['tx']), int(request.POST['ty']))
+        pos = Vec(int(request.POST['tx']), int(request.POST['ty']))
+        if game.SHAPE.in_bounds(pos): target = pos
 
     active = board.status == 1 and board.is_current(player)\
         and state_model == board.state

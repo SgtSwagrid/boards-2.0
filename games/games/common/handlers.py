@@ -28,12 +28,13 @@ class PlaceHandler(Handler):
 
     EVENTS = [BoardEvent]
 
-    def __init__(self, type, hints=True, icon=PLACE_ICON,
+    def __init__(self, type, hints=True, icon=PLACE_ICON, stage=-1,
             capture_self=False, capture_enemy=False):
 
         self.type = type
         self.hints = hints
         self.icon = icon
+        self.stage = stage
         self.capture_self = capture_self
         self.capture_enemy = capture_enemy
 
@@ -74,6 +75,7 @@ class PlaceHandler(Handler):
 
         return state.game.SHAPE.in_bounds(piece.pos) and\
             piece.owner_id == state.turn.current_id and\
+            (self.stage in [-1, state.turn.stage]) and\
             (self.capture_self or not state.friendly(piece.pos)) and\
             (self.capture_enemy or not state.enemy(piece.pos)) and\
             piece.type.place_valid(state, piece)
@@ -87,14 +89,17 @@ class MoveHandler(Handler):
 
     EVENTS = [BoardEvent]
 
-    def __init__(self, types=[], hints=True, icon=ATTACK_ICON,
-            capture_self=False, capture_enemy=True, allow_jumps=False):
+    def __init__(self, types=[], hints=True, icon=ATTACK_ICON, stage=-1,
+            capture_self=False, capture_enemy=True,
+            move_enemy=False, allow_jumps=True):
 
         self.types = types
         self.hints = hints
         self.icon = icon
+        self.stage = stage
         self.capture_self = capture_self
         self.capture_enemy = capture_enemy
+        self.move_enemy = move_enemy
         self.allow_jumps = allow_jumps
 
     def apply(self, state, event):
@@ -120,7 +125,7 @@ class MoveHandler(Handler):
 
         return [MoveAction(piece, pos)
             for piece in state.piece_list()
-            if piece.type in self.types
+            if not any(self.types) or piece.type in self.types
             for pos in state.game.SHAPE.positions()
             if self.move_valid(state, piece, pos)]
 
@@ -143,12 +148,15 @@ class MoveHandler(Handler):
         kernel = PathKernel(state.game.SHAPE, piece.pos, pos)
 
         return state.game.SHAPE.in_bounds(pos) and\
-            any(piece.type.ID == t.ID for t in self.types) and\
-            piece.owner_id in [state.turn.current_id, -1] and\
+            (not any(self.types) or any(piece.type.ID == t.ID
+                for t in self.types)) and\
             pos != piece.pos and\
+            (self.stage in [-1, state.turn.stage]) and\
             (self.capture_self or not state.friendly(pos)) and\
             (self.capture_enemy or not state.enemy(pos)) and\
-            (self.allow_jumps or kernel.open(state, piece.pos)) and\
+            (self.allow_jumps or kernel.open(state, piece.pos)) and \
+            (self.move_enemy or piece.owner_id in
+                [state.turn.current_id, -1]) and\
             piece.type.move_valid(state, piece, pos)
 
     def move_piece(self, state, piece, pos):
@@ -165,12 +173,13 @@ class RemoveHandler(Handler):
 
     EVENTS = [BoardEvent]
 
-    def __init__(self, types=[], hints=True, icon=ATTACK_ICON,
+    def __init__(self, types=[], hints=True, icon=ATTACK_ICON, stage=-1,
             capture_self=True, capture_enemy=True):
 
         self.types = types
         self.hints = hints
         self.icon = icon
+        self.stage = stage
         self.capture_self = capture_self
         self.capture_enemy = capture_enemy
 
@@ -206,7 +215,9 @@ class RemoveHandler(Handler):
 
     def remove_valid(self, state, piece):
 
-        return any(piece.type.ID == t.ID for t in self.types) and\
+        return (not any(self.types) or any(piece.type.ID == t.ID
+                for t in self.types)) and\
+            (self.stage in [-1, state.turn.stage]) and\
             (self.capture_self or piece.ownerId != state.turn.current) and\
             (self.capture_enemy or piece.ownerId == state.turn.current) and\
             piece.type.remove_valid(state, piece)
@@ -220,19 +231,21 @@ class SelectHandler(Handler):
 
     EVENTS = [SelectEvent, BoardEvent]
 
-    def __init__(self, hide=False, hints=False, icon=PLACE_ICON):
+    def __init__(self, hide=False, hints=False, icon=PLACE_ICON, stage=-1):
+
         self.hide = hide
         self.hints = hints
         self.icon = icon
+        self.stage = stage
 
     def apply(self, state, event):
 
         pos = event.clicked if isinstance(event, BoardEvent) else event.target
-        enabled = self.enabled(state, pos)
-        options = self.options(state, pos)\
-            if enabled else []
+        enabled = self.enabled(state, pos) and\
+            (self.stage in [-1, state.turn.stage])
+        options = self.options(state, pos) if enabled else []
 
-        if isinstance(event, BoardEvent) and self.hide:
+        if isinstance(event, BoardEvent) and self.hide and enabled:
 
             if event.properties.is_selected(pos):
                 return True, None, DisplayProperties()
@@ -270,6 +283,7 @@ class SelectHandler(Handler):
     def texture(self, state, event, pos):
 
         if self.hints and event.active and self.enabled(state, pos) and\
+                self.stage in [-1, state.turn.stage] and\
                 not self.visible(state, event, pos):
             return self.icon
 
@@ -279,7 +293,8 @@ class SelectHandler(Handler):
 
         return self.enabled(state, target) and\
             any(self.options(state, target)) and\
-            (not self.hide or event.properties.is_selected(target))
+            (not self.hide or event.properties.is_selected(target)) and\
+            self.stage in [-1, state.turn.stage]
 
     def enabled(self, state, target):
         return any(self.options(state, target))
@@ -296,12 +311,12 @@ class SelectHandler(Handler):
 
 class MultiPlaceHandler(SelectHandler, PlaceHandler):
 
-    def __init__(self, types=[], hints=True, icon=PLACE_ICON,
+    def __init__(self, types=[], hints=True, icon=PLACE_ICON, stage=-1,
             capture_self=True, capture_enemy=True, hide=True):
 
-        SelectHandler.__init__(self, hide, icon)
+        SelectHandler.__init__(self, hide, hints, icon, stage)
 
-        PlaceHandler.__init__(self, None, hints, icon,
+        PlaceHandler.__init__(self, None, False, icon, stage,
             capture_self, capture_enemy)
 
         self.types = types
