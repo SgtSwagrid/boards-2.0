@@ -22,13 +22,6 @@ $.ajaxSetup({
     }
 });
 
-var updateSocket = new WebSocket(LOC + 'updater/');
-updateSocket.onmessage = event => {
-    $('#board').load(PATH + 'board/');
-    $('#sidebar').load(PATH + 'sidebar/');
-};
-updateSocket.onclose = event => location.reload(true);
-
 function board(cx, cy, sx, sy) {
     $('#board').load(PATH + 'board/',
         {'cx': cx, 'cy': cy, 'sx': sx, 'sy': sy});
@@ -55,31 +48,36 @@ function redirect(path) {
 $(() => {
 
     $('#board').load(PATH + 'board/' + STATE + '/');
+    $('#sidebar').load(PATH + 'sidebar/' + STATE + '/');
 
-    $('#sidebar').load(PATH + 'sidebar/' + STATE + '/', () => {
+    var updateSocket = new WebSocket(LOC + 'updater/');
+    updateSocket.onmessage = event => {
+        $('#board').load(PATH + 'board/');
+        $('#sidebar').load(PATH + 'sidebar/');
+    };
+    updateSocket.onclose = event => location.reload(true);
 
-        var messageSocket = new WebSocket(LOC + 'messages/');
+    var messageSocket = new WebSocket(LOC + 'messages/');
 
-        messageSocket.onmessage = event => {
-            message = JSON.parse(event.data);
-            html = '<h6><span class=teal-text>[' + message.user
-                + ']</span> ' + message.message + '</h6>';
-            $('#messages').append(html);
-            var messages = $('#messages')[0];
-            messages.scrollTop = messages.scrollHeight - messages.clientHeight;
-        };
+    messageSocket.onmessage = event => {
+        message = JSON.parse(event.data);
+        html = '<h6><span class=teal-text>[' + message.user
+            + ']</span> ' + message.message + '</h6>';
+        $('#messages').append(html);
+        var messages = $('#messages')[0];
+        messages.scrollTop = messages.scrollHeight - messages.clientHeight;
+    };
 
-        $('#message').select();
-        $('#message').on('keyup', event => {
-            var message = $('#message').val();
-            if(event.keyCode == 13 && message != '') {
-                messageSocket.send(JSON.stringify({
-                    'user': USER,
-                    'message': message
-                }));
-                $('#message').val('');
-            }
-        });
+    $('#message').select();
+    $('#message').on('keyup', event => {
+        var message = $('#message').val();
+        if(event.keyCode == 13 && message != '') {
+            messageSocket.send(JSON.stringify({
+                'user': USER,
+                'message': message
+            }));
+            $('#message').val('');
+        }
     });
 
     $('#copy_code').click(() => {
