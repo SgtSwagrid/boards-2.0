@@ -26,6 +26,10 @@ h6 p a {
     font-family: Verdana, sans-serif;
 }
 
+a {
+    cursor: pointer;
+}
+
 .flexbox {
     display: flex;
     flex-wrap: wrap;

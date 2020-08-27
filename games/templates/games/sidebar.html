@@ -1,7 +1,3 @@
-<script type="text/javascript">
-    $('[id^=options]').hide();
-</script>
-
 <div class="sidebar-subheader teal darken-1">
     <h6 class="medium-text white-text center">{{ status }}</h6>
 </div>
@@ -9,8 +5,7 @@
 <div class="sidebar-content">
 
     {% for player in players %}
-        <div onmouseenter="$('#options-{{ player.player.order }}').show()"
-                onmouseleave="$('#options-{{ player.player.order }}').hide()">
+        <div style="position: relative;">
             {% if player.player == this_player %}
                 <h6 class="medium-text yellow-text text-lighten-1">
             {% else %}
@@ -41,30 +36,36 @@
                 {% endif %}
             </h6>
             {% if this_player and this_player.leader and board.status == 0 %}
-                <div id="options-{{ player.player.order }}" class="right-align">
-                    {% if not player.player == board.players.first %}
-                        <a onclick="sidebar({'promote': true, 'user': '{{ player.user.id }}'})"
-                                class="btn-floating btn-small indigo lighten-2 waves-effect">
-                            <i class="material-icons small white-text">keyboard_arrow_up</i>
-                        </a>
-                    {% endif %}
-                    {% if not player.player == board.players.last %}
-                        <a onclick="sidebar({'demote': true, 'user': '{{ player.user.id }}'})"
-                                class="btn-floating btn-small indigo lighten-2 waves-effect">
-                            <i class="material-icons small white-text">keyboard_arrow_down</i>
-                        </a>
-                    {% endif %}
-                    <a onclick="sidebar({'leave': true, 'user': '{{ player.user.id }}'})"
-                            class="btn-floating btn-small red lighten-2 waves-effect">
-                        <i class="material-icons small white-text">close</i>
+                {% if not player.player == board.players.first %}
+                    <a onclick="sidebar({'promote': true, 'user': '{{ player.user.id }}'})"
+                            style="position: absolute; top: 0; right: 0;">
+                        <i class="material-icons small white-text">keyboard_arrow_up</i>
                     </a>
-                    {% if not player.player.leader %}
-                        <a onclick="sidebar({'transfer': true, 'user': '{{ player.user.id }}'})"
-                                class="btn-floating btn-small orange lighten-3 waves-effect">
-                            <i class="material-icons small white-text">star</i>
-                        </a>
-                    {% endif %}
-                </div>
+                {% else %}
+                    <a style="position: absolute; top: 0; right: 0;">
+                        <i class="material-icons small grey-text">keyboard_arrow_up</i>
+                    </a>
+                {% endif %}
+                {% if not player.player == board.players.last %}
+                    <a onclick="sidebar({'demote': true, 'user': '{{ player.user.id }}'})"
+                            style="position: absolute; bottom: 0; right: 0;">
+                        <i class="material-icons small white-text">keyboard_arrow_down</i>
+                    </a>
+                {% else %}
+                    <a style="position: absolute; bottom: 0; right: 0;">
+                        <i class="material-icons small grey-text">keyboard_arrow_down</i>
+                    </a>
+                {% endif %}
+                <a onclick="sidebar({'leave': true, 'user': '{{ player.user.id }}'})"
+                        style="position: absolute; top: 0; right: 30px;">
+                    <i class="material-icons small red-text">close</i>
+                </a>
+                {% if not player.player.leader %}
+                    <a onclick="sidebar({'transfer': true, 'user': '{{ player.user.id }}'})"
+                            style="position: absolute; bottom: 0; right: 30px;">
+                        <i class="material-icons small yellow-text">star</i>
+                    </a>
+                {% endif %}
             {% endif %}
             <hr>
         </div>
