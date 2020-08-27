@@ -91,3 +91,12 @@ def directions():
 
     return [Vec(1, 0), Vec(1, 1), Vec(0, 1), Vec(-1, 1),
         Vec(-1, 0), Vec(-1, -1), Vec(0, -1), Vec(1, -1)]
+
+def positive_directions():
+    
+    return [Vec(1, 0), Vec(1, 1), Vec(0, 1), Vec(-1, 1)]
+
+def hex_directions():
+
+    return [Vec(1, 0), Vec(0, 1), Vec(-1, 1),
+        Vec(-1, 0), Vec(0, -1), Vec(1, -1)]
