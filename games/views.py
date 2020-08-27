@@ -181,7 +181,6 @@ def rematch_view(request, board_code):
 
     board = BoardModel.boards.get(code=board_code)
     rematch = board.join_rematch(request.user)
-    notify_board(board)
     notify_board(rematch)
     return redirect('/games/' + rematch.code)
 
@@ -190,6 +189,7 @@ def fork_view(request, board_code, state_id):
     board = BoardModel.boards.get(code=board_code)
     state = StateModel.states.get(id=state_id)
     fork = BoardModel.boards.fork(board, state, request.user)
+    notify_board(fork)
     return redirect('/games/' + fork.code)
 
 def setup(request, board):

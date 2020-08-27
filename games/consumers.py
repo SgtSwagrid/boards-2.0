@@ -26,8 +26,12 @@ class BoardUpdateConsumer(WebsocketConsumer):
 
 def notify_board(board):
 
-    async_to_sync(get_channel_layer().group_send)(
-        'board_' + board.code, {'type': 'update_board'})
+    dependents = [board for board in
+        [board, board.predecessor(), board.root_board] if board]
+
+    for board in dependents:
+        async_to_sync(get_channel_layer().group_send)(
+            'board_' + board.code, {'type': 'update_board'})
 
 class MessageConsumer(WebsocketConsumer):
 

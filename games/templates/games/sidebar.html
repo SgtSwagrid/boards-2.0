@@ -34,6 +34,8 @@
                     &#x2022 Winner
                 {% elif board.outcome == player.player.order and state_model.id == board.state.id %}
                     &#x2022 Winner
+                {% elif player.player.resigned and state_model.id == board.state.id %}
+                    &#x2022 Resigned
                 {% elif not state.outcome.finished and player.state.order == state.turn.current_id %}
                     &#x2022 Playing
                 {% endif %}
@@ -122,7 +124,7 @@
         {% if board.status >= 1 and not state.outcome.finished %}
             <a onclick="redirect('fork/{{ state_model.id }}/')"
                     class="btn block indigo waves-effect">
-                Fork State
+                Fork Game
                 <i class="material-icons small white-text right">timeline</i>
             </a>
         {% endif %}
@@ -192,7 +194,7 @@
 
             {% if this_player and not board.rematch_board %}
                 <a onclick="redirect('rematch/')" class="btn block indigo waves-effect">
-                    Create Rematch
+                    Offer Rematch
                     <i class="material-icons small white-text right">refresh</i>
                 </a>
             {% elif this_player and board.rematch_board.status == 0 %}
