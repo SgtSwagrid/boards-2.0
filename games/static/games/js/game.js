@@ -24,8 +24,8 @@ $.ajaxSetup({
 
 var updateSocket = new WebSocket(LOC + 'updater/');
 updateSocket.onmessage = event => {
-    $('#board').load('board');
-    $('#sidebar').load('sidebar');
+    $('#board').load(PATH + 'board/');
+    $('#sidebar').load(PATH + 'sidebar/');
 };
 updateSocket.onclose = event => location.reload(true);
 

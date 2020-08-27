@@ -19,6 +19,10 @@ class Vec:
 
         return self.orthogonal(v) or self.diagonal(v)
 
+    def hex_straight(self, v):
+
+        return self.ortogonal(v) or (v.x - self.x) == -(v.y - self.y)
+
     def taxicab_dist(self, v):
 
         return abs(v.x - self.x) + abs(v.y - self.y)
