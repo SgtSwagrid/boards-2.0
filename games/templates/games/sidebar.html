@@ -1,15 +1,20 @@
-{% for player in players %}
-    {% if player.player == this_player %}
-        <h6 class="medium-text yellow-text text-lighten-1">
-    {% else %}
-        <h6 class="medium-text white-text">
-    {% endif %}
-        {% if player.player.leader %}
-            <i class="material-icons small left">person_add</i>
+<div class="sidebar-subheader teal darken-1">
+    <h6 class="medium-text white-text center">{{ status }}</h6>
+</div>
+
+<div class="sidebar-content">
+    {% for player in players %}
+        {% if player.player == this_player %}
+            <h6 class="medium-text yellow-text text-lighten-1">
         {% else %}
-            <i class="material-icons small left">person</i>
+            <h6 class="medium-text white-text">
         {% endif %}
-        {{ player.user }}
+            {% if player.player.leader %}
+                <i class="material-icons small left">person_add</i>
+            {% else %}
+                <i class="material-icons small left">person</i>
+            {% endif %}
+            {{ player.user }}
         </h6>
         <h6 class="small-text white-text">
             {{ player.name }}  &#x2022
@@ -18,175 +23,204 @@
             {% else %}
                 {{ player.state.score }} pts
             {% endif %}
-            {% if not state.outcome.finished and player.state.order == state.turn.current_id %}
-                &#x2022 Playing
-            {% elif state.outcome.winner == player.player.order %}
+            {% if state.outcome.winner == player.player.order %}
                 &#x2022 Winner
+            {% elif board.outcome == player.player.order and state_model.id == board.state.id %}
+                &#x2022 Winner
+            {% elif not state.outcome.finished and player.state.order == state.turn.current_id %}
+                &#x2022 Playing
             {% endif %}
         </h6>
-    {% if this_player and this_player.leader and board.status == 0 %}
-        <div class="right-align">
-            {% if not player.player == board.players.first %}
-                <a class="btn-floating btn-small indigo lighten-2 waves-effect"
-                        onclick="promote('{{ player.user.id }}')">
-                    <i class="material-icons small white-text">keyboard_arrow_up</i>
+        {% if this_player and this_player.leader and board.status == 0 %}
+            <div class="right-align">
+                {% if not player.player == board.players.first %}
+                    <a onclick="sidebar({'promote': true, 'user': '{{ user.id }}'})"
+                            class="btn-floating btn-small indigo lighten-2 waves-effect">
+                        <i class="material-icons small white-text">keyboard_arrow_up</i>
+                    </a>
+                {% endif %}
+                {% if not player.player == board.players.last %}
+                    <a onclick="sidebar({'demote': true, 'user': '{{ user.id }}'})"
+                            class="btn-floating btn-small indigo lighten-2 waves-effect">
+                        <i class="material-icons small white-text">keyboard_arrow_down</i>
+                    </a>
+                {% endif %}
+                <a onclick="sidebar({'leave': true, 'user': '{{ user.id }}'})"
+                        class="btn-floating btn-small red lighten-2 waves-effect">
+                    <i class="material-icons small white-text">close</i>
                 </a>
-            {% endif %}
-            {% if not player.player == board.players.last %}
-                <a class="btn-floating btn-small indigo lighten-2 waves-effect"
-                        onclick="demote('{{ player.user.id }}')">
-                    <i class="material-icons small white-text">keyboard_arrow_down</i>
-                </a>
-            {% endif %}
-            <a class="btn-floating btn-small red lighten-2 waves-effect"
-                    onclick="leave('{{ player.user.id }}')">
-                <i class="material-icons small white-text">close</i>
-            </a>
-            {% if not player.player.leader %}
-                <a class="btn-floating btn-small orange lighten-3 waves-effect"
-                        onclick="transfer('{{ player.user.id }}')">
-                    <i class="material-icons small white-text">star</i>
-                </a>
-            {% endif %}
-        </div>
-    {% endif %}
-    <hr>
-{% endfor %}
+                {% if not player.player.leader %}
+                    <a onclick="sidebar({'transfer': true, 'user': '{{ user.id }}'})"
+                            class="btn-floating btn-small orange lighten-3 waves-effect">
+                        <i class="material-icons small white-text">star</i>
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+        <hr>
+    {% endfor %}
 
-{% if board.status >= 1 %}
+    <h6 class="small-text white-text">
+        <i class="material-icons left">flag</i>
+        Turn {{ state.turn.ply }}
+    </h6>
     <br>
-    <div class="center">
-        {% if previous %}
-            <a class="btn-small waves-effect"
-                    onclick="setState({{ first.id }})">
-                <i class="material-icons">first_page</i>
-            </a>
-        {% else %}
-            <a class="btn-small grey">
-                <i class="material-icons">first_page</i>
-            </a>
-        {% endif %}
-        {% if previous %}
-            <a class="btn-small waves-effect"
-                    onclick="setState({{ previous.id }})">
-                <i class="material-icons">skip_previous</i>
-            </a>
-        {% else %}
-            <a class="btn-small grey">
-                <i class="material-icons">skip_previous</i>
-            </a>
-        {% endif %}
-        {% if next %}
-            <a class="btn-small waves-effect"
-                    onclick="setState({{ next.id }})">
-                <i class="material-icons">skip_next</i>
-            </a>
-        {% else %}
-            <a class="btn-small grey">
-                <i class="material-icons">skip_next</i>
-            </a>
-        {% endif %}
-        {% if next %}
-            <a class="btn-small waves-effect"
-                    onclick="setState({{ current.id }})">
-                <i class="material-icons">last_page</i>
-            </a>
-        {% else %}
-            <a class="btn-small grey">
-                <i class="material-icons">last_page</i>
-            </a>
-        {% endif %}
-    </div>
-{% endif %}
-<br><br>
-<div class="center-align">
-    {% if board.status == 0 %}
-        {% if this_player %}
-            <a class="btn waves-effect" onclick="leave('{{ user.id }}')">
-                Leave Game
-                <i class="material-icons small white-text right">close</i>
-            </a>
-        {% else %}
-            {% if players|length < board.game.MAX_PLAYERS %}
-                <a class="btn waves-effect" onclick="join('{{ user.id }}')">
-                    Join Game
-                    <i class="material-icons small white-text right">done</i>
+
+    <div class="center-align">
+        {% if board.status >= 1 %}
+            {% if previous %}
+                <a onclick="state({{ first.id }})"
+                        class="btn-small waves-effect">
+                    <i class="material-icons">first_page</i>
                 </a>
             {% else %}
-                <a class="btn grey">
-                    Join Game
-                    <i class="material-icons small white-text right">done</i>
+                <a class="btn-small grey">
+                    <i class="material-icons">first_page</i>
                 </a>
-                <h6 class="small-text white-text center">Game Full</h6>
             {% endif %}
-        {% endif %}
-        <br><br>
-        {% if this_player and this_player.leader %}
-            <a class="btn waves-effect red lighten-2" onclick="cancel()">
-                Cancel Game
-                <i class="material-icons small white-text right">close</i>
-            </a>
-            <br><br>
-            {% if players|length >= board.game.MIN_PLAYERS %}
-                <a class="btn btn-large green lighten-2 waves-effect" onclick="start()">
-                    Start Game
-                    <i class="material-icons medium white-text right">play_arrow</i>
+            {% if previous %}
+                <a onclick="state({{ previous.id }})"
+                        class="btn-small waves-effect">
+                    <i class="material-icons">skip_previous</i>
                 </a>
             {% else %}
-                <a class="btn btn-large grey">
-                    Start Game
-                    <i class="material-icons medium white-text right">play_arrow</i>
+                <a class="btn-small grey">
+                    <i class="material-icons">skip_previous</i>
                 </a>
-                <h6 class="small-text white-text center">
-                    {{ players|length }} / {{ board.game.MIN_PLAYERS }} Players Ready
-                </h6>
+            {% endif %}
+            {% if next %}
+                <a onclick="state({{ next.id }})"
+                        class="btn-small waves-effect">
+                    <i class="material-icons">skip_next</i>
+                </a>
+            {% else %}
+                <a class="btn-small grey">
+                    <i class="material-icons">skip_next</i>
+                </a>
+            {% endif %}
+            {% if next %}
+                <a onclick="state({{ current.id }})"
+                        class="btn-small waves-effect">
+                    <i class="material-icons">last_page</i>
+                </a>
+            {% else %}
+                <a class="btn-small grey">
+                    <i class="material-icons">last_page</i>
+                </a>
             {% endif %}
             <br><br>
         {% endif %}
 
-    {% elif board.status == 1 %}
-        {% if this_player %}
-            {% if not this_player.resigned %}
-                <a class="btn red lighten-2 waves-effect" onclick="resign()">
-                    Resign
-                    <i class="material-icons small white-text right">close</i>
-                </a>
-            {% else %}
-                <a class="btn grey">
-                    Resign
-                    <i class="material-icons small white-text right">close</i>
-                </a>
-            {% endif %}
-        <br><br>
+        {% if board.status >= 1 and not state.outcome.finished %}
+            <a onclick="redirect('fork/{{ state_model.id }}/')"
+                    class="btn block indigo waves-effect">
+                Fork State
+                <i class="material-icons small white-text right">timeline</i>
+            </a>
         {% endif %}
 
-    {% elif board.status == 2 %}
-        {% if this_player %}
-            {% if this_player.leader %}
-                <a class="btn red lighten-2 waves-effect" onclick="cancel()">
+        {% if board.status == 0 %}
+            {% if this_player %}
+                <a onclick="sidebar({'leave': true, 'user': '{{ user.id }}'})"
+                        class="btn block waves-effect">
+                    Leave Game
+                    <i class="material-icons small white-text right">keyboard_return</i>
+                </a>
+            {% else %}
+                {% if players|length < board.game.MAX_PLAYERS %}
+                    <a onclick="sidebar({'join': true, 'user': '{{ user.id }}'})"
+                            class="btn block waves-effect">
+                        Join Game
+                        <i class="material-icons small white-text right">done</i>
+                    </a>
+                {% else %}
+                    <a class="btn block grey">
+                        Join Game
+                        <i class="material-icons small white-text right">done</i>
+                    </a>
+                    <h6 class="small-text white-text center">Game Full</h6>
+                {% endif %}
+            {% endif %}
+            {% if this_player and this_player.leader %}
+                <a onclick="sidebar({'cancel': true})"
+                        class="btn block red lighten-2 waves-effect">
+                    Cancel Game
+                    <i class="material-icons small white-text right">cancel</i>
+                </a>
+                {% if players|length >= board.game.MIN_PLAYERS %}
+                    <a onclick="sidebar({'start': true})"
+                            class="btn block btn-large green lighten-2 waves-effect">
+                        Start Game
+                        <i class="material-icons white-text right">play_arrow</i>
+                    </a>
+                {% else %}
+                    <a class="btn block btn-large grey">
+                        Start Game
+                        <i class="material-icons medium white-text right">play_arrow</i>
+                    </a>
+                    <h6 class="small-text white-text center">
+                        {{ players|length }} / {{ board.min_players }} Players Ready
+                    </h6>
+                {% endif %}
+            {% endif %}
+
+        {% elif board.status == 1 %}
+            {% if this_player %}
+                {% if not this_player.resigned %}
+                    <a onclick="sidebar({'resign': true})"
+                            class="btn block red lighten-2 waves-effect">
+                        Resign
+                        <i class="material-icons small white-text right">thumbs_up_down</i>
+                    </a>
+                {% else %}
+                    <a class="btn block grey">
+                        Resign
+                        <i class="material-icons small white-text right">thumbs_up_down</i>
+                    </a>
+                {% endif %}
+            {% endif %}
+
+        {% elif board.status == 2 %}
+
+            {% if this_player and not board.rematch_board %}
+                <a onclick="redirect('rematch/')" class="btn block indigo waves-effect">
+                    Create Rematch
+                    <i class="material-icons small white-text right">refresh</i>
+                </a>
+            {% elif this_player and board.rematch_board.status == 0 %}
+                <a onclick="redirect('rematch/')" class="btn block indigo waves-effect">
+                    Join Rematch
+                    <i class="material-icons small white-text right">refresh</i>
+                </a>
+            {% elif board.rematch_board %}
+                <a href="/games/{{ board.rematch_board.code }}/"
+                        class="btn block indigo waves-effect">
+                    View Rematch
+                    <i class="material-icons small white-text right">refresh</i>
+                </a>
+            {% endif %}
+
+            {% if this_player and this_player.leader %}
+                <a onclick="sidebar({'cancel': true})"
+                        class="btn block red lighten-2 waves-effect">
                     Delete Board
                     <i class="material-icons small white-text right">close</i>
                 </a>
-                <br><br>
             {% endif %}
-            <a class="btn indigo waves-effect" href="rematch">
-                Rematch
-                <i class="material-icons small white-text right">refresh</i>
-            </a>
-            {% if board.rematch %}
-                <h6 class="small-text indigo-text text-darken-3">
-                    {{ board.rematch.players.0.user }}
-                    {% for player in board.rematch.players|slice:"1:" %}
-                        &#x2022 {{ player.user }}
-                    {% endfor %}
-                </h6>
-            {% else %}
-                <br>
-            {% endif %}
-            <br>
         {% endif %}
-    {% endif %}
+        <br><br>
 
-    <h6 class="medium-text white-text">{{ status }}</h6>
-    <br>
+        {% if board.forks %}
+            <h6 class="small-text white-text">
+                Forks
+            </h6>
+            {% for fork in board.forks %}
+                <a href="/games/{{ fork.code }}"
+                        class="btn btn-small block small-text white-text">
+                    <i class="material-icons small right">timeline</i>
+                    {{ fork.code }} &#x2022 Turn {{ fork.root_state.ply }}
+                </a>
+            {% endfor %}
+        {% endif %}
+    </div>
 </div>

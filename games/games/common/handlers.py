@@ -57,7 +57,7 @@ class PlaceHandler(Handler):
         pieces = [Piece(self.type, state.turn.current_id, pos)
             for pos in state.game.SHAPE.positions()]
 
-        return [PlaceAction(piece) for piece in pieces
+        return [PlaceAction(piece, piece.pos) for piece in pieces
             if self.place_valid(state, piece)]
 
     def texture(self, state, event, pos):
@@ -126,7 +126,7 @@ class MoveHandler(Handler):
 
     def actions(self, state):
 
-        return [MoveAction(piece, pos)
+        return [MoveAction(piece, piece.pos, pos)
             for piece in state.piece_list()
             if not any(self.types) or piece.type in self.types
             for pos in state.game.SHAPE.positions()
@@ -201,7 +201,7 @@ class RemoveHandler(Handler):
 
     def actions(self, state):
 
-        return [RemoveAction(piece)
+        return [RemoveAction(piece, piece.pos)
             for piece in state.piece_list()
             if piece.type in self.types
             if self.remove_valid(state, piece)]
@@ -332,7 +332,7 @@ class MultiPlaceHandler(SelectHandler, PlaceHandler):
             if self.enabled(state, pos)
             for type in self.pieces(state, pos)]
 
-        return [PlaceAction(piece) for piece in pieces
+        return [PlaceAction(piece, piece.pos) for piece in pieces
             if self.place_valid(state, piece)]
 
     def options(self, state, target):

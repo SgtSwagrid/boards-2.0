@@ -122,6 +122,11 @@ class State:
         state.turn.new = True
         return state
 
+    def end_stage_or_turn(self, stages):
+
+        if self.turn.stage < stages - 1: return self.end_stage()
+        else: return self.end_turn()
+
     def end_epoch(self, skip=1):
 
         state = copy.deepcopy(self)
@@ -130,7 +135,7 @@ class State:
 
     def end_game(self, winner_id=-2):
 
-        state = copy.deepcopy(self)
+        state = self.end_turn()
         if winner_id == -2: winner_id = self.highest_scorer()
         state.outcome.finished = True
         state.outcome.winner_id = winner_id

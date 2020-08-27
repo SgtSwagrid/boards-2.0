@@ -11,11 +11,21 @@ class BoardManager(models.Manager):
 
     def create(self, game):
 
-        code = hex(random.randint(0, 1048575))[2:].zfill(5).upper()
+        code = self.code()
         state = game.on_setup(game.MAX_PLAYERS)
         state_model = StateModel.states.create(state, previous=None)
-        board = super().create(game_id=game.ID, code=code, state=state_model)
-        return board
+        return super().create(game_id=game.ID, code=code, state=state_model)
+
+    def fork(self, board, state, user):
+
+        code = self.code()
+        branch = super().create(game_id=board.game().ID, code=code,
+            state=state, root_board=board, root_state=state)
+        branch.join(user)
+        return branch
+
+    def code(self):
+        return hex(random.randint(0, 1048575))[2:].zfill(5).upper()
 
 class BoardModel(models.Model):
 
@@ -25,13 +35,21 @@ class BoardModel(models.Model):
 
     code = models.CharField(max_length=5)
 
-    state = models.ForeignKey('StateModel',
-        on_delete=models.SET_NULL, null=True, blank=True)
-
     status = models.IntegerField(default=0)
 
-    rematch = models.ForeignKey('BoardModel',
-        on_delete=models.SET_NULL, null=True)
+    outcome = models.IntegerField(default=-2)
+
+    state = models.ForeignKey('StateModel', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='state')
+
+    root_board = models.ForeignKey('BoardModel', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='root')
+
+    root_state = models.ForeignKey('StateModel', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='root')
+
+    rematch_board = models.ForeignKey('BoardModel', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='rematch')
 
     time = models.DateTimeField(auto_now_add=True)
 
@@ -40,8 +58,10 @@ class BoardModel(models.Model):
     def __str__(self): return self.code + " " + self.game().NAME
 
     def set_state(self, state):
+
         self.state = StateModel.states.create(state, previous=self.state)
-        if self.state.outcome != -2: self.status = 2
+        self.outcome = self.state.outcome
+        if self.outcome != -2: self.status = 2
         self.save()
 
     def is_current(self, player):
@@ -57,40 +77,86 @@ class BoardModel(models.Model):
     def game(self):
         return games[self.game_id]
 
+    def min_players(self):
+
+        if not self.root_board: return self.game().MIN_PLAYERS
+        else: return len(self.root_board.players())
+
+    def max_players(self):
+
+        if not self.root_board: return self.game().MAX_PLAYERS
+        else: return len(self.root_board.players())
+
     def current(self):
-        return self.players()[self.state.current]\
-            if self.state.outcome == -2 else None
+
+        if self.state.current < self.players().count()\
+                and self.outcome == -2:
+            return self.players()[self.state.current]
 
     def winner(self):
-        return self.players()[self.state.outcome]\
-            if self.state.outcome > -1 else None
+
+        if self.state.current < self.players().count()\
+                and self.outcome > -1:
+            return self.players()[self.outcome]
 
     def join(self, user):
-        if len(self.players()) < self.game().MAX_PLAYERS\
+
+        if len(self.players()) < self.max_players()\
                 and not any(self.players().filter(user=user)):
             order = self.players().count()
             PlayerModel.objects.create(user=user, board=self,
                 order=order, leader=order == 0)
 
     def start(self):
-        self.status = 1
-        self.state.delete()
-        state = self.game().on_setup(len(self.players()))
-        self.state = StateModel.states.create(state, previous=None)
-        self.save()
+
+        if len(self.players()) >= self.min_players():
+            self.status = 1
+            if not self.root_board:
+                self.state.delete()
+                state = self.game().on_setup(len(self.players()))
+                self.state = StateModel.states.create(state, previous=None)
+            self.save()
 
     def join_rematch(self, user):
-        if not self.rematch:
-            self.rematch = BoardModel.boards.create(self.game())
-        self.save()
-        self.rematch.join(user)
-        return self.rematch
 
-    def first(self):
+        if not self.rematch_board:
+            self.rematch_board = BoardModel.boards.create(self.game())
+        self.save()
+        self.rematch_board.join(user)
+        return self.rematch_board
+
+    def first_state(self):
+
         first = self.state
         while first.previous:
             first = first.previous
         return first
+
+    def next_state(self, state):
+
+        next = self.state
+        while next.previous:
+            if next.previous == state: return next
+            next = next.previous
+
+    def forks(self):
+        return BoardModel.boards.filter(root_board=self)
+
+    def predecessor(self):
+        return BoardModel.boards.filter(rematch_board=self).first()
+
+    def delete(self):
+
+        state = self.state
+        super().delete()
+
+        while not BoardModel.boards.filter(state=state).exists() and\
+                not StateModel.states.filter(previous=state).exists():
+
+            previous = state.previous
+            state.delete()
+            state = previous
+
 
 class PlayerModel(models.Model):
 
@@ -158,10 +224,10 @@ class PlayerModel(models.Model):
         self.save()
         remaining = self.board.players().filter(resigned=False)
         if len(remaining) == 1:
-            self.board.state.outcome = remaining.get().order
-            self.board.state.save()
+            self.board.outcome = remaining.get().order
             self.board.status = 2
             self.board.save()
+
 
 class StateManager(models.Manager):
 
@@ -194,6 +260,7 @@ class StateManager(models.Manager):
             ChangeModel.changes.create(change, state_model)
 
         return state_model
+
 
 class StateModel(models.Model):
 
@@ -281,6 +348,10 @@ class StateModel(models.Model):
     def get_previous_state(self):
         return self.previous.get_state() if self.previous else None
 
+    def __str__(self):
+        return games[self.game_id].NAME + ' State (' + str(self.id) + ')'
+
+
 class PlayerStateManager(models.Manager):
 
     def create(self, player, state):
@@ -290,6 +361,7 @@ class PlayerStateManager(models.Manager):
             order=player.order,
             score=player.score,
             mode=player.mode)
+
 
 class PlayerStateModel(models.Model):
 
@@ -312,6 +384,7 @@ class PlayerStateModel(models.Model):
             score=self.score,
             mode=self.mode)
 
+
 class PieceManager(models.Manager):
 
     def create(self, piece, state):
@@ -323,6 +396,7 @@ class PieceManager(models.Manager):
             x=piece.pos.x,
             y=piece.pos.y,
             mode=piece.mode)
+
 
 class PieceModel(models.Model):
 
@@ -349,6 +423,7 @@ class PieceModel(models.Model):
             owner_id=self.owner,
             pos=Vec(self.x, self.y),
             mode=self.mode)
+
 
 class ActionManager(models.Manager):
 
@@ -378,6 +453,7 @@ class ActionManager(models.Manager):
                 y_to=action.target.y)
 
         return action_model
+
 
 class ActionModel(models.Model):
 

@@ -38,22 +38,6 @@ h6 p a {
     margin: auto;
 }
 
-.row {
-    border: 0px;
-}
-
-.board-row {
-    border: 0px;
-}
-
-.board-row:after {
-    display: none;
-}
-
-.tile {
-    padding: 0px;
-}
-
 [style*="--aspect-ratio"] > :first-child {
     width: 100%;
 }

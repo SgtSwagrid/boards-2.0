@@ -4,26 +4,30 @@
     top: 0;
     width: 275px;
     height: 100%;
-    padding: 10px;
-    z-index: -1000;
+    padding: 0;
 }
 
 .sidebar-header {
-    position: absolute;
+    position: relative;
     left: 0;
     right: 0;
     top: 0;
-    height: 150px;
-    padding: 10px 10px 10px 25px;
+    padding: 10px 20px 20px 20px;
+    z-index: 1000;
+}
+
+.sidebar-subheader {
+    position: relative;
+    left: 0;
+    right: 0;
+    top: 0;
+    padding: 5px;
+    z-index: 1000;
 }
 
 .sidebar-content {
-    position: absolute;
-    left: 15px;
-    right: 15px;
-    top: 150px;
-    padding-top: 15px;
-    z-index: -900;
+    position: relative;
+    padding: 10px 20px 20px 20px;
 }
 
 .sidebar-footer {
@@ -32,7 +36,7 @@
     right: 0;
     bottom: 0;
     padding: 10px;
-    z-index: -800;
+    z-index: 900;
 }
 
 .message-history {

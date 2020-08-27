@@ -45,7 +45,7 @@ def create_view(request):
         'games': games.values()
     })
 
-def game_view(request, board_code):
+def game_view(request, board_code, state_id):
 
     if not request.user.is_authenticated:
         return redirect('/users/login?next=/games/' + board_code)
@@ -55,19 +55,22 @@ def game_view(request, board_code):
 
     board = BoardModel.boards.get(code=board_code)
 
+    if state_id == -1: state_id = board.state.id
+    state_model = StateModel.states.get(id=state_id)
+
     return render(request, 'games/game.html', {
-        'board': board
+        'board': board,
+        'state': state_model
     })
 
-def board_view(request, board_code):
+def board_view(request, board_code, state_id):
 
     if not BoardModel.boards.filter(code=board_code).exists():
         return render(request, 'games/board_deleted.html')
 
     board = BoardModel.boards.get(code=board_code)
-    state_model = StateModel.states.filter(
-        id=int(request.GET['state'])).first()\
-        if 'state' in request.GET else board.state
+    if state_id == -1: state_id = board.state.id
+    state_model = StateModel.states.get(id=state_id)
     state = state_model.get_state()
 
     game = board.game()
@@ -122,21 +125,19 @@ def board_view(request, board_code):
         'event': event
     })
 
-def sidebar_view(request, board_code):
+def sidebar_view(request, board_code, state_id):
 
     if not BoardModel.boards.filter(code=board_code).exists():
         return HttpResponse('')
 
     board = BoardModel.boards.filter(code=board_code).get()
     game = board.game()
+    if state_id == -1: state_id = board.state.id
+    state_model = StateModel.states.get(id=state_id)
+    player = board.player(request.user)
 
     if board.status == 0: setup(request, board)
 
-    state_model = StateModel.states.filter(
-        id=int(request.GET['state'])).first() \
-        if 'state' in request.GET else board.state
-
-    player = board.player(request.user)
     if board.status == 1 and 'resign' in request.POST and player:
         player.resign()
         notify_board(board)
@@ -155,6 +156,7 @@ def sidebar_view(request, board_code):
 
     return render(request, 'games/sidebar.html', {
         'board': board,
+        'state_model': state_model,
         'state': state_model.get_state(),
         'players': [
             {
@@ -165,24 +167,30 @@ def sidebar_view(request, board_code):
             }
             for player, state in
                 zip(board.players(), state_model.get_player_states())],
-        'turn': board.players()[board.state.current],
-        'winner': board.players()[board.state.outcome]\
-            if board.state.outcome > -1 else None,
+        'turn': board.current(),
+        'winner': board.winner(),
         'this_player': board.player(request.user),
-        'first': board.first(),
+        'first': board.first_state(),
         'previous': state_model.previous,
-        'next': StateModel.states.filter(previous=state_model).first(),
+        'next': board.next_state(state_model),
         'current': board.state,
         'status': status(board, request.user)
     })
 
 def rematch_view(request, board_code):
 
-    board = BoardModel.boards.filter(code=board_code).get()
+    board = BoardModel.boards.get(code=board_code)
     rematch = board.join_rematch(request.user)
     notify_board(board)
     notify_board(rematch)
     return redirect('/games/' + rematch.code)
+
+def fork_view(request, board_code, state_id):
+
+    board = BoardModel.boards.get(code=board_code)
+    state = StateModel.states.get(id=state_id)
+    fork = BoardModel.boards.fork(board, state, request.user)
+    return redirect('/games/' + fork.code)
 
 def setup(request, board):
 
@@ -190,8 +198,7 @@ def setup(request, board):
     this_player = board.player(this_user)
     leader = this_player and this_player.leader
 
-    if 'start' in request.POST and leader and\
-            len(board.players()) >= board.game().MIN_PLAYERS:
+    if 'start' in request.POST and leader:
         board.start()
         notify_board(board)
 
@@ -225,7 +232,6 @@ def setup(request, board):
 
 def status(board, user):
 
-    game = board.game()
     player = board.player(user)
     num_players = len(board.players())
     current = board.current()
@@ -233,26 +239,26 @@ def status(board, user):
 
     if board.status == 0:
 
-        if num_players < game.MIN_PLAYERS:
+        if num_players < board.min_players():
             return 'Awaiting Players'
-
-        elif player and player.leader:
-            return ''
 
         elif player:
             return 'Ready'
 
-        elif num_players >= game.MAX_PLAYERS:
+        elif num_players >= board.max_players():
             return 'Game Full'
 
-        else: return 'Pending'
+        else: return 'Waiting'
 
     elif board.status == 1:
 
         if player == current:
             return 'Your Turn'
 
-        else: return current.user.username + '\'s Turn'
+        elif current:
+            return current.user.username + '\'s Turn'
+
+        else: return '???\'s Turn'
 
     elif board.status == 2:
 

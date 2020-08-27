@@ -3,7 +3,7 @@
 
 <div class="board z-depth-3" style="
         width: {{ display.width }}px;
-        height: {{ display.height|add:4 }}px;
+        height: {{ display.height|add:1 }}px;
         background: {{ display.background }};">
 
     {% for row in display.rows %}
@@ -12,12 +12,12 @@
                 position: absolute;
                 width: {{ display.width }}px;
                 height: {{ row.height }}px;
-                bottom: {{ row.voffset|add:2 }}px;">
+                bottom: {{ row.voffset|add:1 }}px;">
 
             {% for tile in row.tiles %}
 
                 <div {% if event.active %}
-                        onclick="clickBoard({{ tile.x }}, {{ row.y }},
+                        onclick="board({{ tile.x }}, {{ row.y }},
                             {{ event.properties.selection.x }},
                             {{ event.properties.selection.y }})"
                         {% endif %}>
@@ -87,7 +87,7 @@
                 border-radius: 15px;">
 
             {% for option in selector.options %}
-                <div onclick="clickSelector({{ option.id }},
+                <div onclick="selector({{ option.id }},
                             {{ selector.target.x }},
                             {{ selector.target.y }})" style="
                         position: absolute;
